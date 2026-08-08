@@ -43,6 +43,7 @@ On Home Assistant:
 - Home Assistant OS
 - **Model Context Protocol Server** integration
 - official **Terminal & SSH** app
+- `rsync` installed inside the Terminal & SSH app container
 - an administrator account able to create a Long-Lived Access Token
 
 ## 1. Install the Home Assistant MCP Server integration
@@ -113,26 +114,56 @@ The non-secret local configuration is stored in:
 
 This file is ignored by Git.
 
-## 4. Add the SSH key to Home Assistant
+## 4. Configure Terminal & SSH
 
-Copy the public key printed by bootstrap into the Terminal & SSH app configuration:
+Copy the public key printed by bootstrap into the Terminal & SSH app configuration.
+
+Also install `rsync` inside the app container. The repository uses `rsync` over SSH to synchronize `/config`, so `rsync` must exist on **both** the Mac and the Home Assistant SSH side.
+
+Use:
 
 ```yaml
 authorized_keys:
   - "ecdsa-sha2-nistp521 AAAA... claude-homeassistant"
 
 password: ""
-apks: []
+
+apks:
+  - rsync
 
 server:
   tcp_forwarding: false
 ```
 
-Configure a host SSH port in the app's **Network** section, restart the app, then test:
+Then configure a host SSH port in the app's **Network** section and restart the Terminal & SSH app.
+
+First test SSH:
 
 ```bash
 ./bin/ha ssh-test
 ```
+
+Then verify that remote `rsync` is available:
+
+```bash
+./bin/ha ssh-shell 'which rsync && rsync --version'
+```
+
+Expected output should include a path such as:
+
+```text
+/usr/bin/rsync
+```
+
+followed by the installed `rsync` version.
+
+If you see:
+
+```text
+bash: rsync: command not found
+```
+
+check that `apks` contains `rsync`, save the Terminal & SSH configuration, and restart the app.
 
 ## 5. Verify the Home Assistant token
 
@@ -356,13 +387,46 @@ This verifies the REST API, WebSocket API, SSH, Home Assistant CLI, Supervisor a
 
 ## 12. Pull the Home Assistant configuration
 
-Once SSH works:
+Before the first pull, verify both SSH and remote `rsync`:
+
+```bash
+./bin/ha ssh-test
+./bin/ha ssh-shell 'which rsync && rsync --version'
+```
+
+Then:
 
 ```bash
 ./bin/ha pull
 ```
 
-This copies normal editable configuration from `/config` into `config/`.
+The sync path is:
+
+```text
+Mac rsync
+    ↓ SSH
+Terminal & SSH app
+    ↓ remote rsync
+/config
+```
+
+Because `rsync` runs at both ends, the Terminal & SSH app must have `rsync` installed through:
+
+```yaml
+apks:
+  - rsync
+```
+
+If the remote side does not have it, `./bin/ha pull` typically fails with:
+
+```text
+bash: line 1: rsync: command not found
+rsync: error: unexpected end of file
+```
+
+The second error is only a consequence of the remote `rsync` process failing to start.
+
+A successful pull copies normal editable configuration from `/config` into `config/`.
 
 Sensitive and runtime data is excluded, including:
 
@@ -495,6 +559,41 @@ reinstall with:
 
 ```bash
 uv tool install mcp-proxy --with "mcp<2.0.0" --force
+```
+
+### `./bin/ha pull` says `rsync: command not found`
+
+The error is usually from the Home Assistant side, not the Mac.
+
+The Terminal & SSH app container does not necessarily include `rsync` by default.
+
+Configure:
+
+```yaml
+apks:
+  - rsync
+```
+
+in:
+
+```text
+Home Assistant
+→ Settings
+→ Apps
+→ Terminal & SSH
+→ Configuration
+```
+
+Save, restart the app, then verify:
+
+```bash
+./bin/ha ssh-shell 'which rsync && rsync --version'
+```
+
+Retry:
+
+```bash
+./bin/ha pull
 ```
 
 ### Keychain token cannot be found
