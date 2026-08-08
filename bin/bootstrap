@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CONFIG="$ROOT/.ha-local.json"
+KEYCHAIN_SERVICE="claude-homeassistant-api-token"
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "This bootstrap currently targets macOS because it stores the HA API token in Keychain." >&2
+  echo "The control scripts can be adapted to another secret store." >&2
+  exit 1
+fi
+
+echo "Home Assistant × Claude Code bootstrap"
+echo
+
+read -r -p "Home Assistant base URL [http://homeassistant.local:8123]: " HA_URL
+HA_URL="${HA_URL:-http://homeassistant.local:8123}"
+HA_URL="${HA_URL%/}"
+
+read -r -p "SSH host/IP [homeassistant.local]: " SSH_HOST
+SSH_HOST="${SSH_HOST:-homeassistant.local}"
+
+read -r -p "Terminal & SSH app host port [22]: " SSH_PORT
+SSH_PORT="${SSH_PORT:-22}"
+
+DEFAULT_KEY="$HOME/.ssh/claude_homeassistant_ecdsa"
+read -r -p "Dedicated SSH private-key path [$DEFAULT_KEY]: " SSH_KEY
+SSH_KEY="${SSH_KEY:-$DEFAULT_KEY}"
+
+if [[ ! -f "$SSH_KEY" ]]; then
+  echo
+  echo "Generating dedicated SSH key..."
+  mkdir -p "$(dirname "$SSH_KEY")"
+  ssh-keygen -q -t ecdsa -b 521 -N "" -C "claude-homeassistant" -f "$SSH_KEY"
+fi
+
+cat > "$CONFIG" <<EOF
+{
+  "baseUrl": "$HA_URL",
+  "sshHost": "$SSH_HOST",
+  "sshPort": $SSH_PORT,
+  "sshUser": "root",
+  "sshKey": "$SSH_KEY",
+  "keychainService": "$KEYCHAIN_SERVICE"
+}
+EOF
+
+chmod 600 "$CONFIG"
+
+echo
+echo "Create a Home Assistant Long-Lived Access Token:"
+echo "  Home Assistant profile → Security → Long-lived access tokens"
+echo
+read -r -s -p "Paste token (input hidden): " HA_TOKEN
+echo
+
+if [[ -z "$HA_TOKEN" ]]; then
+  echo "No token supplied; API commands will not work until one is stored." >&2
+else
+  security add-generic-password \
+    -a "$USER" \
+    -s "$KEYCHAIN_SERVICE" \
+    -w "$HA_TOKEN" \
+    -U >/dev/null
+  unset HA_TOKEN
+  echo "Stored API token in macOS Keychain service: $KEYCHAIN_SERVICE"
+fi
+
+echo
+echo "Add this PUBLIC key to Home Assistant Terminal & SSH → Configuration → authorized_keys:"
+echo
+cat "${SSH_KEY}.pub"
+echo
+echo "Then configure the app Network port to: $SSH_PORT"
+echo "Restart Terminal & SSH and run:"
+echo
+echo "  ./bin/ha ssh-test"
+echo "  ./bin/ha status"
+echo
+echo "When SSH works, capture the first config baseline:"
+echo
+echo "  ./bin/ha pull"

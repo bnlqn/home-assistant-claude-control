@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "HA": {
+      "type": "http",
+      "url": "https://YOUR_HOME_ASSISTANT/api/mcp",
+      "oauth": {
+        "clientId": "http://localhost:12345",
+        "callbackPort": 12345
+      }
+    }
+  }
+}

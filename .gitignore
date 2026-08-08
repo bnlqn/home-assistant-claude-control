@@ -1,0 +1,33 @@
+# Machine-local HA settings
+.ha-local.json
+
+# Home Assistant secrets/runtime
+config/secrets.yaml
+config/.storage/
+config/home-assistant_v2.db*
+config/*.db
+config/*.db-shm
+config/*.db-wal
+config/home-assistant.log*
+config/*.log
+config/backups/
+config/backup/
+config/tts/
+config/deps/
+config/.cloud/
+config/.HA_VERSION
+config/.uuid
+
+# Working state
+.state/
+*.tmp
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+
+# Editors
+.idea/
+.vscode/

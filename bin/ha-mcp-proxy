@@ -1,0 +1,30 @@
+#!/bin/bash
+set -eo pipefail
+
+LOG="/tmp/ha-mcp-proxy.$(/usr/bin/id -u).log"
+
+{
+  echo
+  echo "=== HA MCP proxy starting: $(date) ==="
+  echo "Account: $(/usr/bin/id -un)"
+  echo "Proxy: /Users/ben/.local/bin/mcp-proxy"
+} >> "$LOG"
+
+ACCOUNT="$(/usr/bin/id -un)"
+
+TOKEN="$(
+  /usr/bin/security find-generic-password     -a "$ACCOUNT"     -s "claude-homeassistant-api-token"     -w     2>>"$LOG"
+)" || {
+  echo "ERROR: Could not retrieve Home Assistant token from Keychain" >> "$LOG"
+  exit 1
+}
+
+if [ -z "$TOKEN" ]; then
+  echo "ERROR: Home Assistant token is empty" >> "$LOG"
+  exit 1
+fi
+
+export API_ACCESS_TOKEN="$TOKEN"
+unset TOKEN
+
+exec "/Users/ben/.local/bin/mcp-proxy"   --transport=streamablehttp   --stateless   "http://homeassistant.local:8123/api/mcp"   2>>"$LOG"
