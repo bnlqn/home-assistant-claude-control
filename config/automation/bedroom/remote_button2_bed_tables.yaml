@@ -1,0 +1,16 @@
+- id: bedroom_remote_button2_bed_tables
+  alias: "Bedroom Remote: Button 2 -> Bed Tables"
+  description: >
+    Physical Hue remote in the Bedroom (4-button), button 2. Activates
+    the Bed Tables scene.
+  triggers:
+    - trigger: state
+      entity_id: event.bedroom_switch_button_2
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'initial_press' }}"
+  actions:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.bedroom_bedroom_bed_tables
+  mode: single

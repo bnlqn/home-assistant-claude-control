@@ -1,0 +1,18 @@
+- id: office_remote_low_battery_alert
+  alias: "Office Remote: Low Battery Alert"
+  description: >
+    Notifies Ben's phone when the office desk remote's battery drops
+    below 20%, so it doesn't die silently.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.bens_office_tv_switch_battery
+      below: 20
+  actions:
+    - action: notify.iphone_16_pro
+      data:
+        title: "Office remote battery low"
+        message: >
+          The desk remote in Ben's Office is at
+          {{ states('sensor.bens_office_tv_switch_battery') }}%. Time for a
+          battery swap.
+  mode: single

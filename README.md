@@ -88,11 +88,23 @@ The **HAOS host SSH port 22222 is deliberately not part of the normal setup**.
 ├── tools/
 │   └── ha.mjs
 ├── config/
-│   └── .gitkeep
+│   ├── configuration.yaml
+│   ├── automation/          # one file per automation, grouped by room
+│   ├── scripts.yaml
+│   ├── scenes.yaml
+│   ├── packages/
+│   ├── themes/
+│   ├── blueprints/
+│   ├── dashboards/          # storage-mode dashboard working copies
+│   ├── www/kohbo/           # hand-authored frontend assets (tracked)
+│   ├── www/community/       # HACS frontend cards (gitignored)
+│   └── custom_components/   # HACS integrations (gitignored)
 └── docs/
     ├── ACCESS-MODEL.md
     ├── OPERATIONS.md
-    └── SECURITY.md
+    ├── SECURITY.md
+    ├── HOUSE.md             # rooms, automations, packages, themes
+    └── HACS.md              # HACS-managed resources & reinstall list
 ```
 
 ---

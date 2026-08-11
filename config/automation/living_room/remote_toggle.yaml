@@ -1,0 +1,16 @@
+- id: living_room_remote_toggle
+  alias: "Living Room Remote: Toggle Lights"
+  description: >
+    Physical Hue remote in the Living Room, single button. Toggles all
+    Living Room lights.
+  triggers:
+    - trigger: state
+      entity_id: event.living_room_living_room_switch_button_1
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'initial_press' }}"
+  actions:
+    - action: light.toggle
+      target:
+        entity_id: light.living_room_living_room
+  mode: single

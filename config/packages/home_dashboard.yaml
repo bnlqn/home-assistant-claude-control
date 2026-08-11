@@ -1,0 +1,57 @@
+# =====================================================================
+#  Home dashboard helpers  (design system v3)
+#  Enable packages ONCE in configuration.yaml:
+#      homeassistant:
+#        packages: !include_dir_named packages
+#  Then place this file at: /config/packages/home_dashboard.yaml
+# =====================================================================
+
+template:
+  # ---- Dynamic status line: drives the header colour + message ----
+  - binary_sensor:
+      - name: Home Attention
+        unique_id: home_attention
+        # true = something needs you (header turns red).
+        # GoodWe legitimately drops offline overnight (no PV power to run
+        # its wifi/monitoring) so only flag it unavailable during daylight,
+        # with a few degrees of elevation buffer for its startup lag.
+        state: >
+          {{ is_state('vacuum.roborock_s8_pro_ultra', 'error')
+             or (is_state('sensor.goodwe_total_power', 'unavailable')
+                 and state_attr('sun.sun', 'elevation') | float(0) > 5) }}
+
+  - sensor:
+      - name: Home Status Message
+        unique_id: home_status_message
+        state: >
+          {% set m = [] %}
+          {% if is_state('vacuum.roborock_s8_pro_ultra', 'error') %}
+            {% set m = m + ['Roborock is stuck'] %}
+          {% endif %}
+          {% if is_state('sensor.goodwe_total_power', 'unavailable') and state_attr('sun.sun', 'elevation') | float(0) > 5 %}
+            {% set m = m + ['Solar monitoring is offline'] %}
+          {% endif %}
+          {% if m %}{{ m | join(' · ') }}{% else %}Everything looks good at home.{% endif %}
+
+  # ---- Today's high / low (weather 'forecast' attribute was removed) ----
+  - triggers:
+      - trigger: homeassistant
+        event: start
+      - trigger: time_pattern
+        hours: "/1"
+    actions:
+      - action: weather.get_forecasts
+        data:
+          type: daily
+        target:
+          entity_id: weather.forecast_home
+        response_variable: fc
+    sensor:
+      - name: Today High
+        unique_id: today_high
+        unit_of_measurement: "°C"
+        state: "{{ fc['weather.forecast_home'].forecast[0].temperature }}"
+      - name: Today Low
+        unique_id: today_low
+        unit_of_measurement: "°C"
+        state: "{{ fc['weather.forecast_home'].forecast[0].templow }}"

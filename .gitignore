@@ -17,6 +17,13 @@ config/deps/
 config/.cloud/
 config/.HA_VERSION
 config/.uuid
+config/.cache/
+config/.ha_run.lock
+
+# HACS-managed vendor code (reinstall via HACS; see docs/HACS.md)
+config/custom_components/*
+!config/custom_components/.gitkeep
+config/www/community/
 
 # Working state
 .state/

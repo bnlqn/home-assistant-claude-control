@@ -1,0 +1,56 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include_dir_merge_list automation
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+homeassistant:
+    packages: !include_dir_named packages
+
+waste_collection_schedule:
+  sources:
+    - name: recycleapp_be
+      args:
+        postcode: 1435
+        street: Boucle Jean-François Breuer
+        house_number: 8
+  fetch_time: "04:00"
+
+sensor:
+  # Catch-all: what's next, and how many days away
+  - platform: waste_collection_schedule
+    name: Next collection
+    details_format: upcoming
+    value_template: "{{ value.types | join(', ') }} in {{ value.daysTo }}d"
+
+  # One per fraction
+  # These strings are confirmed against your own feed — don't "correct" them.
+  - platform: waste_collection_schedule
+    name: PMC
+    types:
+      - PMD
+    value_template: "{{ value.daysTo }}"
+
+  - platform: waste_collection_schedule
+    name: Paper
+    types:
+      - Paper-cardboard
+    value_template: "{{ value.daysTo }}"
+
+  - platform: waste_collection_schedule
+    name: Residual waste
+    types:
+      - Déchets ménagers résiduels
+    value_template: "{{ value.daysTo }}"
+
+  - platform: waste_collection_schedule
+    name: Organic waste
+    types:
+      - Déchets organiques
+    value_template: "{{ value.daysTo }}"

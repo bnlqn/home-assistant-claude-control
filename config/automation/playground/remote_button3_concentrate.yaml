@@ -1,0 +1,16 @@
+- id: playground_remote_button3_concentrate
+  alias: "Playground Remote: Button 3 -> Concentrate"
+  description: >
+    Physical Hue remote in the Playground (4-button), button 3.
+    Activates the Concentrate scene.
+  triggers:
+    - trigger: state
+      entity_id: event.playground_office_switch_button_3
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'initial_press' }}"
+  actions:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.playground_playground_concentrate
+  mode: single

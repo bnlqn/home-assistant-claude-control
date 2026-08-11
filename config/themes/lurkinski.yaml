@@ -1,0 +1,67 @@
+# =====================================================================
+#  Lurkinski Dark — HA theme  (design system v3)
+#  Place at: /config/themes/lurkinski.yaml
+#  In configuration.yaml (once):
+#      frontend:
+#        themes: !include_dir_merge_named themes
+#  Restart, then pick "Lurkinski Dark" in Profile → Theme
+#  (the Home view also forces it via `theme:` so this is optional).
+# =====================================================================
+Lurkinski Dark:
+  # --- Brand / accent (amber) ---
+  primary-color: "#F1AA44"
+  accent-color: "#F1AA44"
+  light-primary-color: "#F1AA44"
+  dark-primary-color: "#F1AA44"
+
+  # --- Backgrounds ---
+  primary-background-color: "#090B0F"
+  secondary-background-color: "#0A0E13"
+  card-background-color: "#171B21"
+  ha-card-background: "#171B21"
+  app-header-background-color: "#090B0F"
+  app-header-text-color: "#F4F5F7"
+
+  # --- Text ---
+  primary-text-color: "#F4F5F7"
+  secondary-text-color: "#8B9098"
+  disabled-text-color: "#565B63"
+  text-primary-color: "#0E0F13" # glyph/text on amber controls
+
+  # --- Cards: the border rule + radius + no shadow ---
+  ha-card-border-radius: "16px"
+  ha-card-border-width: "1px"
+  ha-card-border-color: "#242A31"
+  ha-card-box-shadow: "none"
+  divider-color: "#20242B"
+
+  # --- State / icons / switches ---
+  state-icon-color: "#8B9098"
+  paper-item-icon-color: "#8B9098"
+  paper-item-icon-active-color: "#F1AA44"
+  switch-checked-color: "#F1AA44"
+  switch-unchecked-color: "#565B63"
+
+  # --- Sidebar ---
+  sidebar-background-color: "#0A0E13"
+  sidebar-icon-color: "#8B9098"
+  sidebar-selected-icon-color: "#F1AA44"
+  sidebar-selected-text-color: "#F1AA44"
+
+  # --- Mushroom state colours mapped to the sampled palette ---
+  rgb-amber: "241,170,68"
+  rgb-green: "95,183,104"
+  rgb-blue: "78,134,229"
+  rgb-purple: "138,109,224"
+  rgb-red: "229,73,60"
+  rgb-primary-color: "241,170,68"
+  rgb-state-vacuum: "139,144,152"
+
+  # --- Kohbo-pattern room/button-card templates expect these tokens ---
+  # (card-background-color / secondary-background-color already cover the
+  # "dark/darker surface" role Kohbo's templates ask for, so those are
+  # referenced directly in ported card_mod rather than aliased here to
+  # avoid overriding dark-primary-color, which HA itself uses for accents)
+  light-grey-color: "#8B9098"
+  success-color: "#5FB768"
+  error-color: "#E5493C"

@@ -1,0 +1,16 @@
+- id: bedroom_master_remote_toggle
+  alias: "Bedroom Remote (Master): Toggle Lights"
+  description: >
+    Second physical Hue remote in the Bedroom, single button
+    (the other nightstand). Toggles all Bedroom lights.
+  triggers:
+    - trigger: state
+      entity_id: event.bedroom_master_bedroom_switch_button_1
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'initial_press' }}"
+  actions:
+    - action: light.toggle
+      target:
+        entity_id: light.bedroom_bedroom
+  mode: single

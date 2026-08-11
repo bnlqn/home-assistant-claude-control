@@ -1,0 +1,16 @@
+- id: bedroom_remote_button3_read
+  alias: "Bedroom Remote: Button 3 -> Read"
+  description: >
+    Physical Hue remote in the Bedroom (4-button), button 3. Activates
+    the Read scene.
+  triggers:
+    - trigger: state
+      entity_id: event.bedroom_switch_button_3
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'initial_press' }}"
+  actions:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.bedroom_bedroom_read
+  mode: single

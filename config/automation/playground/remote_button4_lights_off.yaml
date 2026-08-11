@@ -1,0 +1,16 @@
+- id: playground_remote_button4_lights_off
+  alias: "Playground Remote: Button 4 -> All Lights Off"
+  description: >
+    Physical Hue remote in the Playground (4-button), button 4. Turns
+    off every light in the Playground.
+  triggers:
+    - trigger: state
+      entity_id: event.playground_office_switch_button_4
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'initial_press' }}"
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id: light.playground_playground
+  mode: single

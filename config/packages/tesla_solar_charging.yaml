@@ -1,0 +1,200 @@
+# Tesla Model 3 solar-only charging.
+#
+# Charges the car only from excess solar (dynamic amp-matching / solar
+# diverter style), using sensor.p1_meter_power (signed: negative = grid
+# export/surplus, positive = grid import) as the surplus signal and the
+# tesla_fleet integration's vehicle-side entities for control.
+#
+# input_boolean.tesla_solar_charging_active is a persistent user-controlled
+# mode switch ("solar-only charging enabled"), not a per-session flag - it
+# is only ever changed by the user (e.g. the dashboard pill), never by
+# these automations. While it's on, the system takes over charging control
+# entirely across as many plug-in/unplug cycles as it takes; turn it off
+# manually (e.g. before a road trip) to charge at full power outside solar
+# control.
+
+input_number:
+  tesla_solar_min_charge_current:
+    name: Tesla Solar Min Charge Current
+    icon: mdi:ev-station
+    min: 5
+    max: 10
+    step: 1
+    initial: 5
+    unit_of_measurement: A
+  tesla_solar_deadband_current_a:
+    name: Tesla Solar Charge Current Deadband
+    icon: mdi:tune-variant
+    min: 1
+    max: 5
+    step: 1
+    initial: 1
+    unit_of_measurement: A
+  tesla_solar_grid_start_threshold_w:
+    name: Tesla Solar Start Export Threshold
+    icon: mdi:transmission-tower-export
+    min: -5000
+    max: -500
+    step: 50
+    initial: -1300
+    unit_of_measurement: W
+  tesla_solar_grid_stop_threshold_w:
+    name: Tesla Solar Stop Import Threshold
+    icon: mdi:transmission-tower-import
+    min: 0
+    max: 2000
+    step: 50
+    initial: 200
+    unit_of_measurement: W
+
+input_boolean:
+  tesla_solar_charging_active:
+    name: Tesla Solar Charging Active
+    icon: mdi:solar-power-variant
+
+automation:
+- id: tesla_solar_start_charging
+  alias: "Tesla/Solar: Start Solar Charging"
+  description: >
+    Starts charging the Tesla Model 3 once net grid power
+    (sensor.p1_meter_power) shows sustained export past the threshold
+    needed to sustain at least the minimum viable charge current
+    (5A / ~1150W). Only acts while solar-only mode is enabled
+    (input_boolean.tesla_solar_charging_active, toggled manually by the
+    user, e.g. via the dashboard pill) and the charge switch is
+    currently off.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.p1_meter_power
+      below: input_number.tesla_solar_grid_start_threshold_w
+      for:
+        minutes: 5
+  conditions:
+    - condition: state
+      entity_id: input_boolean.tesla_solar_charging_active
+      state: "on"
+    - condition: state
+      entity_id: switch.other_tesla_model_3_charge
+      state: "off"
+    - condition: state
+      entity_id: binary_sensor.other_tesla_model_3_charge_cable
+      state: "on"
+    - condition: state
+      entity_id: device_tracker.other_tesla_model_3_location
+      state: "home"
+    - condition: state
+      entity_id: binary_sensor.other_tesla_model_3_status
+      state: "on"
+    - condition: numeric_state
+      entity_id: sensor.other_tesla_model_3_battery_level
+      below: number.other_tesla_model_3_charge_limit
+  actions:
+    - action: number.set_value
+      target:
+        entity_id: number.other_tesla_model_3_charge_current
+      data:
+        value: "{{ states('input_number.tesla_solar_min_charge_current') }}"
+    - action: switch.turn_on
+      target:
+        entity_id: switch.other_tesla_model_3_charge
+    - action: notify.iphone_16_pro
+      data:
+        title: "Tesla: Solar charging started"
+        message: >-
+          Started charging the Model 3 from solar surplus. Exporting
+          {{ (states('sensor.p1_meter_power') | float(0) | abs) | round(0) }} W
+          to the grid; starting at
+          {{ states('input_number.tesla_solar_min_charge_current') }}A and will
+          ramp up with available sun.
+  mode: single
+
+- id: tesla_solar_stop_charging
+  alias: "Tesla/Solar: Stop Solar Charging"
+  description: >
+    Stops a solar-driven charge session when sustained grid import shows
+    there's no longer enough surplus to sustain the minimum charge
+    current, or when the vehicle itself reports the session finished,
+    disconnected, or unavailable. Only acts while solar-only mode is
+    enabled (input_boolean.tesla_solar_charging_active) - it turns the
+    charge switch off but leaves the mode switch itself untouched, so the
+    next plug-in still starts under solar control without the user
+    having to re-enable anything.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.p1_meter_power
+      above: input_number.tesla_solar_grid_stop_threshold_w
+      for:
+        minutes: 10
+      id: no_surplus
+    - trigger: state
+      entity_id: sensor.other_tesla_model_3_charging
+      to:
+        - complete
+        - disconnected
+        - no_power
+      id: vehicle_state
+  conditions:
+    - condition: state
+      entity_id: input_boolean.tesla_solar_charging_active
+      state: "on"
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.other_tesla_model_3_charge
+    - action: notify.iphone_16_pro
+      data:
+        title: "Tesla: Solar charging stopped"
+        message: >-
+          {% if trigger.id == 'no_surplus' -%}
+          Stopped charging - not enough solar surplus to sustain the
+          minimum charge current for the last 10 minutes.
+          {%- else -%}
+          Stopped charging - vehicle reports
+          "{{ states('sensor.other_tesla_model_3_charging') }}"
+          (battery at {{ states('sensor.other_tesla_model_3_battery_level') }}%).
+          {%- endif %}
+  mode: single
+
+- id: tesla_solar_adjust_current
+  alias: "Tesla/Solar: Adjust Solar Charge Current"
+  description: >
+    Every 5 minutes while a solar charging session is active, nudges the
+    car's charge current so total household grid flow tracks toward
+    zero (dynamic amp-matching / solar-diverter behaviour). Only calls
+    the Fleet API when the computed change is at least the configured
+    deadband, to stay well under Tesla's cloud API rate limits and avoid
+    keeping a sleeping car awake.
+  triggers:
+    - trigger: time_pattern
+      minutes: "/5"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.tesla_solar_charging_active
+      state: "on"
+    - condition: state
+      entity_id: sensor.other_tesla_model_3_charging
+      state: "charging"
+    - condition: state
+      entity_id: binary_sensor.other_tesla_model_3_status
+      state: "on"
+  actions:
+    - variables:
+        car_power_w: "{{ (states('sensor.other_tesla_model_3_charger_power') | float(0)) * 1000 }}"
+        grid_power_w: "{{ states('sensor.p1_meter_power') | float(0) }}"
+        charger_voltage: "{{ states('sensor.other_tesla_model_3_charger_voltage') | float(0) }}"
+        effective_voltage: "{{ charger_voltage if charger_voltage > 50 else 230 }}"
+        min_amps: "{{ states('input_number.tesla_solar_min_charge_current') | float(5) }}"
+        max_amps: 32
+        ideal_power_w: "{{ car_power_w - grid_power_w }}"
+        ideal_amps_raw: "{{ (ideal_power_w / effective_voltage) | round(0) }}"
+        target_amps: "{{ [[ideal_amps_raw | float, min_amps] | max, max_amps] | min }}"
+        current_amps: "{{ states('number.other_tesla_model_3_charge_current') | float(0) }}"
+        deadband: "{{ states('input_number.tesla_solar_deadband_current_a') | float(1) }}"
+    - condition: template
+      value_template: "{{ (target_amps - current_amps) | abs >= deadband }}"
+    - action: number.set_value
+      target:
+        entity_id: number.other_tesla_model_3_charge_current
+      data:
+        value: "{{ target_amps }}"
+  mode: single

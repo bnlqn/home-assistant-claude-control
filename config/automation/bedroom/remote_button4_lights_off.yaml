@@ -1,0 +1,16 @@
+- id: bedroom_remote_button4_lights_off
+  alias: "Bedroom Remote: Button 4 -> All Lights Off"
+  description: >
+    Physical Hue remote in the Bedroom (4-button), button 4. Turns off
+    every light in the Bedroom.
+  triggers:
+    - trigger: state
+      entity_id: event.bedroom_switch_button_4
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.to_state.attributes.event_type == 'initial_press' }}"
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id: light.bedroom_bedroom
+  mode: single

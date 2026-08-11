@@ -1,0 +1,2669 @@
+[
+  {
+    "title": "Living Room",
+    "path": "living-room",
+    "icon": "kohbo:kohbo-chair",
+    "theme": "Kohbo",
+    "subview": true,
+    "cards": [
+      {
+        "type": "vertical-stack",
+        "cards": [
+          {
+            "type": "horizontal-stack",
+            "card_mod": {
+              "style": "ha-card, #root { align-items: center; }"
+            },
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:arrow-left",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-test/rooms",
+                  "haptic": "light"
+                }
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_page_title",
+                "name": "Living Room"
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "kohbo:kohbo-light-2",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "#living_room_scenes",
+                  "haptic": "light"
+                }
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Lights"
+          },
+          {
+            "type": "tile",
+            "entity": "light.living_room_living_room",
+            "name": "All Living Room Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-chair"
+          },
+          {
+            "type": "tile",
+            "entity": "light.kitchen",
+            "name": "Kitchen",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-fridge"
+          },
+          {
+            "type": "tile",
+            "entity": "light.dining",
+            "name": "Dining",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-dining"
+          },
+          {
+            "type": "tile",
+            "entity": "light.living_room_perifo_cylinder_spot_1",
+            "name": "Cylinder Spot 1",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.living_room_perifo_cylinder_spot_2",
+            "name": "Cylinder Spot 2",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.living_room_perifo_cylinder_spot_3",
+            "name": "Cylinder Spot 3",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.living_room_perifo_cylinder_spot_4",
+            "name": "Cylinder Spot 4",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.living_room_perifo_linear_light_bar_1",
+            "name": "Linear Light Bar",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.living_room_floor_lamp_living_room",
+            "name": "Floor Lamp",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.living_room_living_room_table_lamp",
+            "name": "Table Lamp",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Devices"
+          },
+          {
+            "type": "grid",
+            "columns": 2,
+            "square": false,
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "entity": "vacuum.roborock_s8_pro_ultra",
+                "name": "Roborock",
+                "template": "kohbo_device_entity",
+                "icon": "mdi:robot-vacuum"
+              },
+              {
+                "type": "custom:button-card",
+                "entity": "media_player.tv_tv",
+                "name": "Apple TV",
+                "template": "kohbo_device_entity",
+                "icon": "mdi:television"
+              },
+              {
+                "type": "custom:button-card",
+                "entity": "media_player.ht_a9_2",
+                "name": "Soundbar",
+                "template": "kohbo_device_entity",
+                "icon": "kohbo:kohbo-device-speaker"
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Quick Settings"
+          },
+          {
+            "type": "entities",
+            "entities": [
+              {
+                "entity": "switch.living_room_adaptive_lighting_living_room",
+                "name": "Adaptive Lighting",
+                "icon": "mdi:theme-light-dark",
+                "secondary_info": "last-changed",
+                "state_color": true,
+                "card_mod": {
+                  "style": "hui-generic-entity-row { padding: 4px 0px !important; }\nhui-generic-entity-row:first-child { padding-top: 0px !important; }\nhui-generic-entity-row:last-child { padding-bottom: 0px !important; }\nha-icon { fill: white !important; }\n"
+                }
+              }
+            ]
+          },
+          {
+            "type": "markdown",
+            "content": " ",
+            "card_mod": {
+              "style": "ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }"
+            }
+          }
+        ]
+      },
+      {
+        "type": "custom:bubble-card",
+        "card_type": "pop-up",
+        "hash": "#living_room_scenes",
+        "close_by_clicking_outside": true,
+        "styles": ".bubble-pop-up-background { background: #212529 !important; }\n.bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }\n.bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }\n.bubble-close-button { background: transparent !important; }\n",
+        "cards": [
+          {
+            "type": "custom:button-card",
+            "template": "kohbo_popup_page_title",
+            "name": "Living Room Scenes"
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_sleepy"
+                  },
+                  {
+                    "scene_name": "Sleepy"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_shine"
+                  },
+                  {
+                    "scene_name": "Shine"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_read"
+                  },
+                  {
+                    "scene_name": "Read"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_nightlight"
+                  },
+                  {
+                    "scene_name": "Nightlight"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_energize"
+                  },
+                  {
+                    "scene_name": "Energize"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_unwind"
+                  },
+                  {
+                    "scene_name": "Unwind"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_night_time"
+                  },
+                  {
+                    "scene_name": "Night Time"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_concentrate"
+                  },
+                  {
+                    "scene_name": "Concentrate"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_arise"
+                  },
+                  {
+                    "scene_name": "Arise"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_movie"
+                  },
+                  {
+                    "scene_name": "Movie"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_storybook"
+                  },
+                  {
+                    "scene_name": "Storybook"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_dreamy_dusk"
+                  },
+                  {
+                    "scene_name": "Dreamy Dusk"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_relax"
+                  },
+                  {
+                    "scene_name": "Relax"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_rest"
+                  },
+                  {
+                    "scene_name": "Rest"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_golden_hours"
+                  },
+                  {
+                    "scene_name": "Golden Hours"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.living_room_living_room_natural_light_4"
+                  },
+                  {
+                    "scene_name": "Natural Light 4"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "custom:navbar-card",
+        "routes": [
+          {
+            "url": "/dashboard-test/home",
+            "icon": "kohbo:kohbo-dashboard",
+            "label": "Home"
+          },
+          {
+            "url": "/dashboard-test/rooms",
+            "icon": "kohbo:kohbo-rooms",
+            "label": "Rooms"
+          },
+          {
+            "url": "/dashboard-test/scenes",
+            "icon": "kohbo:kohbo-light-2",
+            "label": "Scenes"
+          },
+          {
+            "url": "/dashboard-test/energy",
+            "icon": "mdi:lightning-bolt",
+            "label": "Energy"
+          },
+          {
+            "url": "/dashboard-test/more",
+            "icon": "mdi:dots-horizontal",
+            "label": "More"
+          }
+        ],
+        "haptic": {
+          "url": true,
+          "tap_action": true,
+          "hold_action": true,
+          "double_tap_action": true
+        },
+        "mobile": {
+          "show_labels": true,
+          "show_popup_label_backgrounds": true
+        },
+        "styles": ".navbar-card {\n  border: none;\n  background: rgba(33, 37, 41, 0.9);\n  backdrop-filter: blur(4px);\n  width: 100%;\n  max-width: 500px;\n  bottom: 0;\n}\n.button.active { background: transparent; }\n.icon { fill: #ADB5BD !important; }\n.icon.active { fill: #FFFFFF !important; }\nha-ripple { display: none !important; }\n"
+      }
+    ]
+  },
+  {
+    "title": "Bedroom",
+    "path": "bedroom",
+    "icon": "kohbo:kohbo-bed-king",
+    "theme": "Kohbo",
+    "subview": true,
+    "cards": [
+      {
+        "type": "vertical-stack",
+        "cards": [
+          {
+            "type": "horizontal-stack",
+            "card_mod": {
+              "style": "ha-card, #root { align-items: center; }"
+            },
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:arrow-left",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-test/rooms",
+                  "haptic": "light"
+                }
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_page_title",
+                "name": "Bedroom"
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "kohbo:kohbo-light-2",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "#bedroom_scenes",
+                  "haptic": "light"
+                }
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Lights"
+          },
+          {
+            "type": "tile",
+            "entity": "light.bedroom_bedroom",
+            "name": "All Bedroom Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-bed-king"
+          },
+          {
+            "type": "tile",
+            "entity": "light.bedroom",
+            "name": "Bed Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-lamp"
+          },
+          {
+            "type": "tile",
+            "entity": "light.bedroom_hue_ambiance_spot_1",
+            "name": "Ceiling Spot 1",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bedroom_hue_ambiance_spot_2",
+            "name": "Ceiling Spot 2",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bedroom_hue_ambiance_spot_3",
+            "name": "Ceiling Spot 3",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bedroom_ilonas_bed_table",
+            "name": "Ilona's Bed Table",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bedroom_bens_bed_table",
+            "name": "Ben's Bed Table",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Quick Settings"
+          },
+          {
+            "type": "entities",
+            "entities": [
+              {
+                "entity": "switch.bedroom_adaptive_lighting_bedroom",
+                "name": "Adaptive Lighting",
+                "icon": "mdi:theme-light-dark",
+                "secondary_info": "last-changed",
+                "state_color": true,
+                "card_mod": {
+                  "style": "hui-generic-entity-row { padding: 4px 0px !important; }\nhui-generic-entity-row:first-child { padding-top: 0px !important; }\nhui-generic-entity-row:last-child { padding-bottom: 0px !important; }\nha-icon { fill: white !important; }\n"
+                }
+              }
+            ]
+          },
+          {
+            "type": "markdown",
+            "content": " ",
+            "card_mod": {
+              "style": "ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }"
+            }
+          }
+        ]
+      },
+      {
+        "type": "custom:bubble-card",
+        "card_type": "pop-up",
+        "hash": "#bedroom_scenes",
+        "close_by_clicking_outside": true,
+        "styles": ".bubble-pop-up-background { background: #212529 !important; }\n.bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }\n.bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }\n.bubble-close-button { background: transparent !important; }\n",
+        "cards": [
+          {
+            "type": "custom:button-card",
+            "template": "kohbo_popup_page_title",
+            "name": "Bedroom Scenes"
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bedroom_bedroom_dimmed"
+                  },
+                  {
+                    "scene_name": "Dimmed"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bedroom_bedroom_bed_tables"
+                  },
+                  {
+                    "scene_name": "Bed Tables"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bedroom_bedroom_nightlight"
+                  },
+                  {
+                    "scene_name": "Nightlight"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bedroom_bedroom_read"
+                  },
+                  {
+                    "scene_name": "Read"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bedroom_bedroom_concentrate"
+                  },
+                  {
+                    "scene_name": "Concentrate"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bedroom_bedroom_relax"
+                  },
+                  {
+                    "scene_name": "Relax"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "custom:navbar-card",
+        "routes": [
+          {
+            "url": "/dashboard-test/home",
+            "icon": "kohbo:kohbo-dashboard",
+            "label": "Home"
+          },
+          {
+            "url": "/dashboard-test/rooms",
+            "icon": "kohbo:kohbo-rooms",
+            "label": "Rooms"
+          },
+          {
+            "url": "/dashboard-test/scenes",
+            "icon": "kohbo:kohbo-light-2",
+            "label": "Scenes"
+          },
+          {
+            "url": "/dashboard-test/energy",
+            "icon": "mdi:lightning-bolt",
+            "label": "Energy"
+          },
+          {
+            "url": "/dashboard-test/more",
+            "icon": "mdi:dots-horizontal",
+            "label": "More"
+          }
+        ],
+        "haptic": {
+          "url": true,
+          "tap_action": true,
+          "hold_action": true,
+          "double_tap_action": true
+        },
+        "mobile": {
+          "show_labels": true,
+          "show_popup_label_backgrounds": true
+        },
+        "styles": ".navbar-card {\n  border: none;\n  background: rgba(33, 37, 41, 0.9);\n  backdrop-filter: blur(4px);\n  width: 100%;\n  max-width: 500px;\n  bottom: 0;\n}\n.button.active { background: transparent; }\n.icon { fill: #ADB5BD !important; }\n.icon.active { fill: #FFFFFF !important; }\nha-ripple { display: none !important; }\n"
+      }
+    ]
+  },
+  {
+    "title": "Ben's Office",
+    "path": "bens-office",
+    "icon": "kohbo:kohbo-laptop",
+    "theme": "Kohbo",
+    "subview": true,
+    "cards": [
+      {
+        "type": "vertical-stack",
+        "cards": [
+          {
+            "type": "horizontal-stack",
+            "card_mod": {
+              "style": "ha-card, #root { align-items: center; }"
+            },
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:arrow-left",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-test/rooms",
+                  "haptic": "light"
+                }
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_page_title",
+                "name": "Ben's Office"
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "kohbo:kohbo-light-2",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "#bens_office_scenes",
+                  "haptic": "light"
+                }
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Lights"
+          },
+          {
+            "type": "tile",
+            "entity": "light.bens_office_bens_office",
+            "name": "All Ben's Office Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-laptop"
+          },
+          {
+            "type": "tile",
+            "entity": "light.bens_office_bens_screen",
+            "name": "Screen Light",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bens_office_hue_centris_ceiling_1",
+            "name": "Ceiling Light",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bens_office_hue_centris_spot_1",
+            "name": "Spot 1",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bens_office_hue_centris_spot_2",
+            "name": "Spot 2",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bens_office_hue_centris_spot_3",
+            "name": "Spot 3",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.bens_office_hue_centris_spot_6",
+            "name": "Spot 6",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Devices"
+          },
+          {
+            "type": "grid",
+            "columns": 2,
+            "square": false,
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "entity": "climate.ec3a56bc6527",
+                "name": "Airco",
+                "template": "kohbo_thermostat_entity"
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Quick Settings"
+          },
+          {
+            "type": "entities",
+            "entities": [
+              {
+                "entity": "switch.ben_s_office_adaptive_lighting_ben_s_office",
+                "name": "Adaptive Lighting",
+                "icon": "mdi:theme-light-dark",
+                "secondary_info": "last-changed",
+                "state_color": true,
+                "card_mod": {
+                  "style": "hui-generic-entity-row { padding: 4px 0px !important; }\nhui-generic-entity-row:first-child { padding-top: 0px !important; }\nhui-generic-entity-row:last-child { padding-bottom: 0px !important; }\nha-icon { fill: white !important; }\n"
+                }
+              }
+            ]
+          },
+          {
+            "type": "markdown",
+            "content": " ",
+            "card_mod": {
+              "style": "ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }"
+            }
+          }
+        ]
+      },
+      {
+        "type": "custom:bubble-card",
+        "card_type": "pop-up",
+        "hash": "#bens_office_scenes",
+        "close_by_clicking_outside": true,
+        "styles": ".bubble-pop-up-background { background: #212529 !important; }\n.bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }\n.bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }\n.bubble-close-button { background: transparent !important; }\n",
+        "cards": [
+          {
+            "type": "custom:button-card",
+            "template": "kohbo_popup_page_title",
+            "name": "Ben's Office Scenes"
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bens_office_bens_office_relax"
+                  },
+                  {
+                    "scene_name": "Relax"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bens_office_bens_office_energize"
+                  },
+                  {
+                    "scene_name": "Energize"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bens_office_bens_office_concentrate"
+                  },
+                  {
+                    "scene_name": "Concentrate"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bens_office_bens_office_read"
+                  },
+                  {
+                    "scene_name": "Read"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.bens_office_bens_office_nightlight"
+                  },
+                  {
+                    "scene_name": "Nightlight"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "custom:navbar-card",
+        "routes": [
+          {
+            "url": "/dashboard-test/home",
+            "icon": "kohbo:kohbo-dashboard",
+            "label": "Home"
+          },
+          {
+            "url": "/dashboard-test/rooms",
+            "icon": "kohbo:kohbo-rooms",
+            "label": "Rooms"
+          },
+          {
+            "url": "/dashboard-test/scenes",
+            "icon": "kohbo:kohbo-light-2",
+            "label": "Scenes"
+          },
+          {
+            "url": "/dashboard-test/energy",
+            "icon": "mdi:lightning-bolt",
+            "label": "Energy"
+          },
+          {
+            "url": "/dashboard-test/more",
+            "icon": "mdi:dots-horizontal",
+            "label": "More"
+          }
+        ],
+        "haptic": {
+          "url": true,
+          "tap_action": true,
+          "hold_action": true,
+          "double_tap_action": true
+        },
+        "mobile": {
+          "show_labels": true,
+          "show_popup_label_backgrounds": true
+        },
+        "styles": ".navbar-card {\n  border: none;\n  background: rgba(33, 37, 41, 0.9);\n  backdrop-filter: blur(4px);\n  width: 100%;\n  max-width: 500px;\n  bottom: 0;\n}\n.button.active { background: transparent; }\n.icon { fill: #ADB5BD !important; }\n.icon.active { fill: #FFFFFF !important; }\nha-ripple { display: none !important; }\n"
+      }
+    ]
+  },
+  {
+    "title": "Julien's Bedroom",
+    "path": "juliens-bedroom",
+    "icon": "kohbo:kohbo-bed-single",
+    "theme": "Kohbo",
+    "subview": true,
+    "cards": [
+      {
+        "type": "vertical-stack",
+        "cards": [
+          {
+            "type": "horizontal-stack",
+            "card_mod": {
+              "style": "ha-card, #root { align-items: center; }"
+            },
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:arrow-left",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-test/rooms",
+                  "haptic": "light"
+                }
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_page_title",
+                "name": "Julien's Bedroom"
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "kohbo:kohbo-light-2",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "#juliens_bedroom_scenes",
+                  "haptic": "light"
+                }
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Lights"
+          },
+          {
+            "type": "tile",
+            "entity": "light.juliens_bedroom_juliens_bedroom",
+            "name": "All Julien's Bedroom Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-bed-single"
+          },
+          {
+            "type": "tile",
+            "entity": "light.juliens_bedroom_hue_color_spot_3",
+            "name": "Spot 3",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.juliens_bedroom_hue_color_spot_4",
+            "name": "Spot 4",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.juliens_bedroom_hue_color_spot_5",
+            "name": "Spot 5",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.juliens_bedroom_hue_go_julien",
+            "name": "Hue Go",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Quick Settings"
+          },
+          {
+            "type": "entities",
+            "entities": [
+              {
+                "entity": "switch.julien_s_bedroom_adaptive_lighting_julien_s_bedroom",
+                "name": "Adaptive Lighting",
+                "icon": "mdi:theme-light-dark",
+                "secondary_info": "last-changed",
+                "state_color": true,
+                "card_mod": {
+                  "style": "hui-generic-entity-row { padding: 4px 0px !important; }\nhui-generic-entity-row:first-child { padding-top: 0px !important; }\nhui-generic-entity-row:last-child { padding-bottom: 0px !important; }\nha-icon { fill: white !important; }\n"
+                }
+              }
+            ]
+          },
+          {
+            "type": "markdown",
+            "content": " ",
+            "card_mod": {
+              "style": "ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }"
+            }
+          }
+        ]
+      },
+      {
+        "type": "custom:bubble-card",
+        "card_type": "pop-up",
+        "hash": "#juliens_bedroom_scenes",
+        "close_by_clicking_outside": true,
+        "styles": ".bubble-pop-up-background { background: #212529 !important; }\n.bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }\n.bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }\n.bubble-close-button { background: transparent !important; }\n",
+        "cards": [
+          {
+            "type": "custom:button-card",
+            "template": "kohbo_popup_page_title",
+            "name": "Julien's Bedroom Scenes"
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_relax"
+                  },
+                  {
+                    "scene_name": "Relax"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_storybook"
+                  },
+                  {
+                    "scene_name": "Storybook"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_rest"
+                  },
+                  {
+                    "scene_name": "Rest"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_unwind"
+                  },
+                  {
+                    "scene_name": "Unwind"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_energize"
+                  },
+                  {
+                    "scene_name": "Energize"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_sleepy"
+                  },
+                  {
+                    "scene_name": "Sleepy"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_nighttime"
+                  },
+                  {
+                    "scene_name": "Nighttime"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_concentrate"
+                  },
+                  {
+                    "scene_name": "Concentrate"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_arise"
+                  },
+                  {
+                    "scene_name": "Arise"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_natural_light_3"
+                  },
+                  {
+                    "scene_name": "Natural Light 3"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_golden_hours_6"
+                  },
+                  {
+                    "scene_name": "Golden Hours 6"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_read_2"
+                  },
+                  {
+                    "scene_name": "Read 2"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_pensive"
+                  },
+                  {
+                    "scene_name": "Pensive"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_nightlight"
+                  },
+                  {
+                    "scene_name": "Nightlight"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_shine"
+                  },
+                  {
+                    "scene_name": "Shine"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_read"
+                  },
+                  {
+                    "scene_name": "Read"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_concentrate_2"
+                  },
+                  {
+                    "scene_name": "Concentrate 2"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.juliens_bedroom_juliens_bedroom_diaper_at_night"
+                  },
+                  {
+                    "scene_name": "Diaper At Night"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "custom:navbar-card",
+        "routes": [
+          {
+            "url": "/dashboard-test/home",
+            "icon": "kohbo:kohbo-dashboard",
+            "label": "Home"
+          },
+          {
+            "url": "/dashboard-test/rooms",
+            "icon": "kohbo:kohbo-rooms",
+            "label": "Rooms"
+          },
+          {
+            "url": "/dashboard-test/scenes",
+            "icon": "kohbo:kohbo-light-2",
+            "label": "Scenes"
+          },
+          {
+            "url": "/dashboard-test/energy",
+            "icon": "mdi:lightning-bolt",
+            "label": "Energy"
+          },
+          {
+            "url": "/dashboard-test/more",
+            "icon": "mdi:dots-horizontal",
+            "label": "More"
+          }
+        ],
+        "haptic": {
+          "url": true,
+          "tap_action": true,
+          "hold_action": true,
+          "double_tap_action": true
+        },
+        "mobile": {
+          "show_labels": true,
+          "show_popup_label_backgrounds": true
+        },
+        "styles": ".navbar-card {\n  border: none;\n  background: rgba(33, 37, 41, 0.9);\n  backdrop-filter: blur(4px);\n  width: 100%;\n  max-width: 500px;\n  bottom: 0;\n}\n.button.active { background: transparent; }\n.icon { fill: #ADB5BD !important; }\n.icon.active { fill: #FFFFFF !important; }\nha-ripple { display: none !important; }\n"
+      }
+    ]
+  },
+  {
+    "title": "Mia's Bedroom",
+    "path": "mias-bedroom",
+    "icon": "kohbo:kohbo-bed-single",
+    "theme": "Kohbo",
+    "subview": true,
+    "cards": [
+      {
+        "type": "vertical-stack",
+        "cards": [
+          {
+            "type": "horizontal-stack",
+            "card_mod": {
+              "style": "ha-card, #root { align-items: center; }"
+            },
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:arrow-left",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-test/rooms",
+                  "haptic": "light"
+                }
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_page_title",
+                "name": "Mia's Bedroom"
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "kohbo:kohbo-light-2",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "#mias_bedroom_scenes",
+                  "haptic": "light"
+                }
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Lights"
+          },
+          {
+            "type": "tile",
+            "entity": "light.mias_bedroom_mias_bedroom",
+            "name": "All Mia's Bedroom Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-bed-single"
+          },
+          {
+            "type": "tile",
+            "entity": "light.mias_bedroom_marci_spot_1",
+            "name": "Spot 1",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.mias_bedroom_marci_spot_2",
+            "name": "Spot 2",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.mias_bedroom_marci_spot_3",
+            "name": "Spot 3",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Quick Settings"
+          },
+          {
+            "type": "entities",
+            "entities": [
+              {
+                "entity": "switch.mia_s_bedroom_adaptive_lighting_mia_s_bedroom",
+                "name": "Adaptive Lighting",
+                "icon": "mdi:theme-light-dark",
+                "secondary_info": "last-changed",
+                "state_color": true,
+                "card_mod": {
+                  "style": "hui-generic-entity-row { padding: 4px 0px !important; }\nhui-generic-entity-row:first-child { padding-top: 0px !important; }\nhui-generic-entity-row:last-child { padding-bottom: 0px !important; }\nha-icon { fill: white !important; }\n"
+                }
+              }
+            ]
+          },
+          {
+            "type": "markdown",
+            "content": " ",
+            "card_mod": {
+              "style": "ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }"
+            }
+          }
+        ]
+      },
+      {
+        "type": "custom:bubble-card",
+        "card_type": "pop-up",
+        "hash": "#mias_bedroom_scenes",
+        "close_by_clicking_outside": true,
+        "styles": ".bubble-pop-up-background { background: #212529 !important; }\n.bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }\n.bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }\n.bubble-close-button { background: transparent !important; }\n",
+        "cards": [
+          {
+            "type": "custom:button-card",
+            "template": "kohbo_popup_page_title",
+            "name": "Mia's Bedroom Scenes"
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.mias_bedroom_mias_bedroom_energize"
+                  },
+                  {
+                    "scene_name": "Energize"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.mias_bedroom_mias_bedroom_nightlight"
+                  },
+                  {
+                    "scene_name": "Nightlight"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.mias_bedroom_mias_bedroom_concentrate"
+                  },
+                  {
+                    "scene_name": "Concentrate"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.mias_bedroom_mias_bedroom_read"
+                  },
+                  {
+                    "scene_name": "Read"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.mias_bedroom_mias_bedroom_relax"
+                  },
+                  {
+                    "scene_name": "Relax"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "custom:navbar-card",
+        "routes": [
+          {
+            "url": "/dashboard-test/home",
+            "icon": "kohbo:kohbo-dashboard",
+            "label": "Home"
+          },
+          {
+            "url": "/dashboard-test/rooms",
+            "icon": "kohbo:kohbo-rooms",
+            "label": "Rooms"
+          },
+          {
+            "url": "/dashboard-test/scenes",
+            "icon": "kohbo:kohbo-light-2",
+            "label": "Scenes"
+          },
+          {
+            "url": "/dashboard-test/energy",
+            "icon": "mdi:lightning-bolt",
+            "label": "Energy"
+          },
+          {
+            "url": "/dashboard-test/more",
+            "icon": "mdi:dots-horizontal",
+            "label": "More"
+          }
+        ],
+        "haptic": {
+          "url": true,
+          "tap_action": true,
+          "hold_action": true,
+          "double_tap_action": true
+        },
+        "mobile": {
+          "show_labels": true,
+          "show_popup_label_backgrounds": true
+        },
+        "styles": ".navbar-card {\n  border: none;\n  background: rgba(33, 37, 41, 0.9);\n  backdrop-filter: blur(4px);\n  width: 100%;\n  max-width: 500px;\n  bottom: 0;\n}\n.button.active { background: transparent; }\n.icon { fill: #ADB5BD !important; }\n.icon.active { fill: #FFFFFF !important; }\nha-ripple { display: none !important; }\n"
+      }
+    ]
+  },
+  {
+    "title": "Playground",
+    "path": "playground",
+    "icon": "kohbo:kohbo-lego",
+    "theme": "Kohbo",
+    "subview": true,
+    "cards": [
+      {
+        "type": "vertical-stack",
+        "cards": [
+          {
+            "type": "horizontal-stack",
+            "card_mod": {
+              "style": "ha-card, #root { align-items: center; }"
+            },
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:arrow-left",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-test/rooms",
+                  "haptic": "light"
+                }
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_page_title",
+                "name": "Playground"
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "kohbo:kohbo-light-2",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "#playground_scenes",
+                  "haptic": "light"
+                }
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Lights"
+          },
+          {
+            "type": "tile",
+            "entity": "light.playground_playground",
+            "name": "All Playground Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-lego"
+          },
+          {
+            "type": "tile",
+            "entity": "light.ilonas_computer",
+            "name": "Ilona's Computer",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-lamp"
+          },
+          {
+            "type": "tile",
+            "entity": "light.playground_hue_centris_spot_office_1",
+            "name": "Spot 1",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.playground_hue_centris_spot_office_2",
+            "name": "Spot 2",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.playground_hue_centris_ceiling_office",
+            "name": "Ceiling Light",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Quick Settings"
+          },
+          {
+            "type": "entities",
+            "entities": [
+              {
+                "entity": "switch.playground_adaptive_lighting_playground",
+                "name": "Adaptive Lighting",
+                "icon": "mdi:theme-light-dark",
+                "secondary_info": "last-changed",
+                "state_color": true,
+                "card_mod": {
+                  "style": "hui-generic-entity-row { padding: 4px 0px !important; }\nhui-generic-entity-row:first-child { padding-top: 0px !important; }\nhui-generic-entity-row:last-child { padding-bottom: 0px !important; }\nha-icon { fill: white !important; }\n"
+                }
+              }
+            ]
+          },
+          {
+            "type": "markdown",
+            "content": " ",
+            "card_mod": {
+              "style": "ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }"
+            }
+          }
+        ]
+      },
+      {
+        "type": "custom:bubble-card",
+        "card_type": "pop-up",
+        "hash": "#playground_scenes",
+        "close_by_clicking_outside": true,
+        "styles": ".bubble-pop-up-background { background: #212529 !important; }\n.bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }\n.bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }\n.bubble-close-button { background: transparent !important; }\n",
+        "cards": [
+          {
+            "type": "custom:button-card",
+            "template": "kohbo_popup_page_title",
+            "name": "Playground Scenes"
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.playground_playground_energize"
+                  },
+                  {
+                    "scene_name": "Energize"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.playground_playground_nightlight"
+                  },
+                  {
+                    "scene_name": "Nightlight"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.playground_playground_relax"
+                  },
+                  {
+                    "scene_name": "Relax"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.playground_playground_concentrate"
+                  },
+                  {
+                    "scene_name": "Concentrate"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              },
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.playground_playground_read"
+                  },
+                  {
+                    "scene_name": "Read"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "custom:navbar-card",
+        "routes": [
+          {
+            "url": "/dashboard-test/home",
+            "icon": "kohbo:kohbo-dashboard",
+            "label": "Home"
+          },
+          {
+            "url": "/dashboard-test/rooms",
+            "icon": "kohbo:kohbo-rooms",
+            "label": "Rooms"
+          },
+          {
+            "url": "/dashboard-test/scenes",
+            "icon": "kohbo:kohbo-light-2",
+            "label": "Scenes"
+          },
+          {
+            "url": "/dashboard-test/energy",
+            "icon": "mdi:lightning-bolt",
+            "label": "Energy"
+          },
+          {
+            "url": "/dashboard-test/more",
+            "icon": "mdi:dots-horizontal",
+            "label": "More"
+          }
+        ],
+        "haptic": {
+          "url": true,
+          "tap_action": true,
+          "hold_action": true,
+          "double_tap_action": true
+        },
+        "mobile": {
+          "show_labels": true,
+          "show_popup_label_backgrounds": true
+        },
+        "styles": ".navbar-card {\n  border: none;\n  background: rgba(33, 37, 41, 0.9);\n  backdrop-filter: blur(4px);\n  width: 100%;\n  max-width: 500px;\n  bottom: 0;\n}\n.button.active { background: transparent; }\n.icon { fill: #ADB5BD !important; }\n.icon.active { fill: #FFFFFF !important; }\nha-ripple { display: none !important; }\n"
+      }
+    ]
+  },
+  {
+    "title": "Hallway",
+    "path": "hallway",
+    "icon": "kohbo:kohbo-double-door",
+    "theme": "Kohbo",
+    "subview": true,
+    "cards": [
+      {
+        "type": "vertical-stack",
+        "cards": [
+          {
+            "type": "horizontal-stack",
+            "card_mod": {
+              "style": "ha-card, #root { align-items: center; }"
+            },
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:arrow-left",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-test/rooms",
+                  "haptic": "light"
+                }
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_page_title",
+                "name": "Hallway"
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:blank",
+                "styles": {
+                  "card": [
+                    {
+                      "opacity": 0
+                    },
+                    {
+                      "pointer-events": "none"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Lights"
+          },
+          {
+            "type": "tile",
+            "entity": "light.hallway_hallway",
+            "name": "All Hallway Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-double-door"
+          },
+          {
+            "type": "tile",
+            "entity": "light.hallway_hue_enrave_ceiling_1",
+            "name": "Ceiling 1",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.hallway_hue_enrave_ceiling_2",
+            "name": "Ceiling 2",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Quick Settings"
+          },
+          {
+            "type": "entities",
+            "entities": [
+              {
+                "entity": "switch.hallway_adaptive_lighting_hallway",
+                "name": "Adaptive Lighting",
+                "icon": "mdi:theme-light-dark",
+                "secondary_info": "last-changed",
+                "state_color": true,
+                "card_mod": {
+                  "style": "hui-generic-entity-row { padding: 4px 0px !important; }\nhui-generic-entity-row:first-child { padding-top: 0px !important; }\nhui-generic-entity-row:last-child { padding-bottom: 0px !important; }\nha-icon { fill: white !important; }\n"
+                }
+              }
+            ]
+          },
+          {
+            "type": "markdown",
+            "content": " ",
+            "card_mod": {
+              "style": "ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }"
+            }
+          }
+        ]
+      },
+      {
+        "type": "custom:navbar-card",
+        "routes": [
+          {
+            "url": "/dashboard-test/home",
+            "icon": "kohbo:kohbo-dashboard",
+            "label": "Home"
+          },
+          {
+            "url": "/dashboard-test/rooms",
+            "icon": "kohbo:kohbo-rooms",
+            "label": "Rooms"
+          },
+          {
+            "url": "/dashboard-test/scenes",
+            "icon": "kohbo:kohbo-light-2",
+            "label": "Scenes"
+          },
+          {
+            "url": "/dashboard-test/energy",
+            "icon": "mdi:lightning-bolt",
+            "label": "Energy"
+          },
+          {
+            "url": "/dashboard-test/more",
+            "icon": "mdi:dots-horizontal",
+            "label": "More"
+          }
+        ],
+        "haptic": {
+          "url": true,
+          "tap_action": true,
+          "hold_action": true,
+          "double_tap_action": true
+        },
+        "mobile": {
+          "show_labels": true,
+          "show_popup_label_backgrounds": true
+        },
+        "styles": ".navbar-card {\n  border: none;\n  background: rgba(33, 37, 41, 0.9);\n  backdrop-filter: blur(4px);\n  width: 100%;\n  max-width: 500px;\n  bottom: 0;\n}\n.button.active { background: transparent; }\n.icon { fill: #ADB5BD !important; }\n.icon.active { fill: #FFFFFF !important; }\nha-ripple { display: none !important; }\n"
+      }
+    ]
+  },
+  {
+    "title": "Corridor",
+    "path": "corridor",
+    "icon": "kohbo:kohbo-location",
+    "theme": "Kohbo",
+    "subview": true,
+    "cards": [
+      {
+        "type": "vertical-stack",
+        "cards": [
+          {
+            "type": "horizontal-stack",
+            "card_mod": {
+              "style": "ha-card, #root { align-items: center; }"
+            },
+            "cards": [
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "mdi:arrow-left",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-test/rooms",
+                  "haptic": "light"
+                }
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_page_title",
+                "name": "Corridor"
+              },
+              {
+                "type": "custom:button-card",
+                "template": "kohbo_header_chip_card",
+                "icon": "kohbo:kohbo-light-2",
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "#corridor_scenes",
+                  "haptic": "light"
+                }
+              }
+            ]
+          },
+          {
+            "type": "custom:button-card",
+            "template": "section_title",
+            "name": "Lights"
+          },
+          {
+            "type": "tile",
+            "entity": "light.corridor_corridor",
+            "name": "All Corridor Lights",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false,
+            "icon": "kohbo:kohbo-location"
+          },
+          {
+            "type": "tile",
+            "entity": "light.corridor_hue_color_spot_1",
+            "name": "Spot 1",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "tile",
+            "entity": "light.corridor_hue_color_spot_2",
+            "name": "Spot 2",
+            "show_entity_picture": false,
+            "hide_state": false,
+            "features": [
+              {
+                "type": "light-brightness"
+              }
+            ],
+            "features_position": "inline",
+            "vertical": false
+          },
+          {
+            "type": "markdown",
+            "content": " ",
+            "card_mod": {
+              "style": "ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }"
+            }
+          }
+        ]
+      },
+      {
+        "type": "custom:bubble-card",
+        "card_type": "pop-up",
+        "hash": "#corridor_scenes",
+        "close_by_clicking_outside": true,
+        "styles": ".bubble-pop-up-background { background: #212529 !important; }\n.bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }\n.bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }\n.bubble-close-button { background: transparent !important; }\n",
+        "cards": [
+          {
+            "type": "custom:button-card",
+            "template": "kohbo_popup_page_title",
+            "name": "Corridor Scenes"
+          },
+          {
+            "type": "horizontal-stack",
+            "cards": [
+              {
+                "type": "custom:decluttering-card",
+                "template": "scene_button",
+                "variables": [
+                  {
+                    "scene_entity": "scene.corridor_corridor_nightlight"
+                  },
+                  {
+                    "scene_name": "Nightlight"
+                  },
+                  {
+                    "icon": "mdi:palette"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "custom:navbar-card",
+        "routes": [
+          {
+            "url": "/dashboard-test/home",
+            "icon": "kohbo:kohbo-dashboard",
+            "label": "Home"
+          },
+          {
+            "url": "/dashboard-test/rooms",
+            "icon": "kohbo:kohbo-rooms",
+            "label": "Rooms"
+          },
+          {
+            "url": "/dashboard-test/scenes",
+            "icon": "kohbo:kohbo-light-2",
+            "label": "Scenes"
+          },
+          {
+            "url": "/dashboard-test/energy",
+            "icon": "mdi:lightning-bolt",
+            "label": "Energy"
+          },
+          {
+            "url": "/dashboard-test/more",
+            "icon": "mdi:dots-horizontal",
+            "label": "More"
+          }
+        ],
+        "haptic": {
+          "url": true,
+          "tap_action": true,
+          "hold_action": true,
+          "double_tap_action": true
+        },
+        "mobile": {
+          "show_labels": true,
+          "show_popup_label_backgrounds": true
+        },
+        "styles": ".navbar-card {\n  border: none;\n  background: rgba(33, 37, 41, 0.9);\n  backdrop-filter: blur(4px);\n  width: 100%;\n  max-width: 500px;\n  bottom: 0;\n}\n.button.active { background: transparent; }\n.icon { fill: #ADB5BD !important; }\n.icon.active { fill: #FFFFFF !important; }\nha-ripple { display: none !important; }\n"
+      }
+    ]
+  }
+]
