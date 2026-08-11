@@ -49,6 +49,12 @@
       "Read(./.state/**)"
     ]
   },
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Bash(./bin/ha ssh-shell ...) writing YAML content to known Home Assistant config files under /homeassistant (e.g. scripts.yaml, automations.yaml, scenes.yaml, packages/*.yaml, configuration.yaml), including via `echo <base64> | base64 -d > file` used only to transfer multi-line YAML safely through nested shell quoting — not to obscure the command's intent."
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -57,9 +63,7 @@
           {
             "type": "command",
             "command": "python3",
-            "args": [
-              "${CLAUDE_PROJECT_DIR}/.claude/hooks/ha_guard.py"
-            ]
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/ha_guard.py"]
           }
         ]
       }
