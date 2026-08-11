@@ -97,7 +97,9 @@ automation:
     - action: switch.turn_on
       target:
         entity_id: switch.other_tesla_model_3_charge
-    - action: notify.iphone_16_pro
+    - action: notify.send_message
+      target:
+        entity_id: notify.iphone_16_pro
       data:
         title: "Tesla: Solar charging started"
         message: >-
@@ -141,7 +143,9 @@ automation:
     - action: switch.turn_off
       target:
         entity_id: switch.other_tesla_model_3_charge
-    - action: notify.iphone_16_pro
+    - action: notify.send_message
+      target:
+        entity_id: notify.iphone_16_pro
       data:
         title: "Tesla: Solar charging stopped"
         message: >-
