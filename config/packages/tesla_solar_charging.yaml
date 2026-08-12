@@ -197,6 +197,19 @@ automation:
     the Fleet API when the computed change is at least the configured
     deadband, to stay well under Tesla's cloud API rate limits and avoid
     keeping a sleeping car awake.
+
+    Assumes the car is drawing power proportional to the last commanded
+    setpoint (number.other_tesla_model_3_charge_current) rather than
+    reading sensor.other_tesla_model_3_charger_power. That telemetry
+    sensor lags the vehicle's actual draw by much more than the 5-minute
+    cycle (observed frozen at a single value for 20+ minutes while real
+    draw swung between the 5A and 14A it was set to), which turned this
+    into a bang-bang oscillator: each tick alternately way over- and
+    under-estimated headroom and slammed the setpoint between the 5A
+    floor and whatever ceiling the export supported. The setpoint we
+    ourselves last commanded is accurate in real time, so basing the
+    estimate on it instead keeps the control loop fed only with
+    fresh signals.
   triggers:
     - trigger: time_pattern
       minutes: "/5"
@@ -212,16 +225,16 @@ automation:
       state: "on"
   actions:
     - variables:
-        car_power_w: "{{ (states('sensor.other_tesla_model_3_charger_power') | float(0)) * 1000 }}"
         grid_power_w: "{{ states('sensor.p1_meter_power') | float(0) }}"
         charger_voltage: "{{ states('sensor.other_tesla_model_3_charger_voltage') | float(0) }}"
         effective_voltage: "{{ charger_voltage if charger_voltage > 50 else 230 }}"
         min_amps: "{{ states('input_number.tesla_solar_min_charge_current') | float(5) }}"
         max_amps: 32
-        ideal_power_w: "{{ car_power_w - grid_power_w }}"
+        current_amps: "{{ states('number.other_tesla_model_3_charge_current') | float(0) }}"
+        assumed_car_power_w: "{{ current_amps * effective_voltage }}"
+        ideal_power_w: "{{ assumed_car_power_w - grid_power_w }}"
         ideal_amps_raw: "{{ (ideal_power_w / effective_voltage) | round(0) }}"
         target_amps: "{{ [[ideal_amps_raw | float, min_amps] | max, max_amps] | min }}"
-        current_amps: "{{ states('number.other_tesla_model_3_charge_current') | float(0) }}"
         deadband: "{{ states('input_number.tesla_solar_deadband_current_a') | float(1) }}"
     - condition: template
       value_template: "{{ (target_amps - current_amps) | abs >= deadband }}"
