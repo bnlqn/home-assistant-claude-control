@@ -1,0 +1,15 @@
+- id: living_room_apple_tv_movie_mode_end
+  alias: "Living Room Apple TV: Movie Mode End"
+  description: >
+    When the Apple TV turns off, restores adaptive lighting for the
+    Living Room (turned off by "Movie Mode Start" so it wouldn't fight
+    the movie scene).
+  triggers:
+    - trigger: state
+      entity_id: media_player.tv_tv
+      to: "off"
+  actions:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.living_room_adaptive_lighting_living_room
+  mode: single
