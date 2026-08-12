@@ -10,13 +10,13 @@
       to: "playing"
     - trigger: state
       entity_id: media_player.tv_tv
-      attribute: source
+      attribute: app_name
   conditions:
     - condition: state
       entity_id: media_player.tv_tv
       state: "playing"
     - condition: template
-      value_template: "{{ trigger.to_state.attributes.source in ['Netflix', 'Infuse', 'TV'] }}"
+      value_template: "{{ trigger.to_state.attributes.app_name in ['Netflix', 'Infuse', 'TV'] }}"
   actions:
     - action: switch.turn_off
       target:
