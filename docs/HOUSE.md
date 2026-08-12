@@ -61,6 +61,19 @@ edits to its room views live at `config/dashboards/dashboard_test/` — see
 that directory's README before applying anything from it. Use the
 `ha-dashboard` skill for dashboard work.
 
+## UniFi Network
+
+UI-managed config entry (`unifi`, title "Default") — no YAML. Exposes
+firewall-rule switches (e.g. `switch.unifi_network_allow_trusted_to_iot`)
+and firmware `update.*` entities for network gear (Dream Machine, U6 Pro,
+U6 Mesh, chambre AP, two PoE switches), plus device trackers for clients.
+
+For direct visibility into and action on the controller itself (client/
+device inspection beyond what the HA integration exposes; write actions
+like blocking a client or restarting a device), use `./bin/unifi` — see
+`docs/ACCESS-MODEL.md` §7. Setup: `./bin/bootstrap-unifi`. Write commands
+always prompt for approval.
+
 ## HACS-managed integrations & frontend cards
 
 See `docs/HACS.md` — not tracked in Git, reinstall via HACS.

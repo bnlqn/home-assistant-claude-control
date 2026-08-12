@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Claude Code PreToolUse guard for Home Assistant operations.
+Claude Code PreToolUse guard for Home Assistant and UniFi Controller operations.
 
 This is a second line of defense. Claude Code permission rules are the first.
 The hook intentionally blocks patterns that should never be silently normalized
@@ -50,7 +50,26 @@ blocked = [
 
     # Backup restore is explicitly outside the normal autonomous workflow.
     (r"\bha\s+backups?\b.*\brestore\b",
-     "Backup restore requires an explicit recovery procedure outside the normal workflow.")
+     "Backup restore requires an explicit recovery procedure outside the normal workflow."),
+
+    # UniFi Controller access goes through ./bin/unifi. Block raw HTTP
+    # tooling that would bypass its certificate pinning, redaction, and the
+    # per-command "ask" permission gating on write commands.
+    (r"(?:^|[;&|]\s*|\s)(?:curl|wget|http|httpie)\b.*(?:/proxy/network/|/api/s/[^\s]*)",
+     "Direct HTTP access to the UniFi console is blocked. Use ./bin/unifi."),
+
+    # Protect the local UniFi API key credential from obvious extraction.
+    (r"\bsecurity\s+find-generic-password\b.*claude-unifi-api-token",
+     "Direct extraction of the UniFi API key from macOS Keychain is blocked. Use ./bin/unifi."),
+
+    # The UniFi API key carries full admin permission. ./bin/unifi's `raw`
+    # escape hatch has no allowlist of endpoints, so block the obviously
+    # catastrophic shapes even though `raw` already requires "ask" approval.
+    (r"\./bin/unifi\s+raw\s+DELETE\b",
+     "DELETE via the UniFi raw escape hatch is blocked. Delete objects (sites, networks, devices) from the UniFi UI where it's a deliberate, visible action."),
+
+    (r"\./bin/unifi\s+raw\b.*(?:FACTORY_RESET|RESTORE_DEFAULT|\bWIPE\b)",
+     "Factory-reset/restore-shaped UniFi action blocked."),
 ]
 
 for pattern, reason in blocked:

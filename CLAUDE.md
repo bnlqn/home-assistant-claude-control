@@ -45,6 +45,33 @@ Different parts of Home Assistant have different authoritative sources.
    - useful as a read-side diagnostic source
    - not a normal source-editing surface
 
+## UniFi Network Controller
+
+The UniFi Controller (Dream Machine) is a **separate system from Home
+Assistant**, with its own access boundary — not part of the hierarchy above.
+
+`./bin/unifi` reaches the official UniFi Network Integration API v1 for
+client/device/network inspection and action (endpoint list verified against
+the console's own bundled docs, v10.5.67 — includes networks/VLANs, WiFi
+broadcasts, firewall zones/policies, ACL rules, not just clients/devices).
+Its API key is generated from the main admin account and carries full
+read/write permission at the credential level — mutation safety comes from
+command scoping and Claude Code's permission tiers, not the key. Read
+commands are pre-approved; every write command
+(`client-authorize-guest`/`client-unauthorize-guest`, `device-restart`, and
+the `raw` escape hatch for VLAN/WLAN/firewall-policy create/update/delete)
+requires explicit per-call approval and should be treated with the same
+care as `./bin/ha deploy`/`restart` — surface what a write call
+will do before running it, especially anything touching VLANs, WLANs, or
+firewall policy, since a bad call there can disconnect or misconfigure
+devices across the house.
+
+Home Assistant's `unifi` config entry (client presence, a few pre-existing
+firewall-rule switches, firmware `update.*` entities) remains the correct
+source for anything that needs to interact with HA automations/dashboards.
+Use `./bin/unifi` for direct controller inspection/action HA doesn't expose.
+See `docs/ACCESS-MODEL.md` and `docs/SECURITY.md`.
+
 ## Always inspect live state before assuming
 
 `config/` is a Git-controlled working mirror and may be stale.

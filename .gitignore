@@ -1,6 +1,9 @@
 # Machine-local HA settings
 .ha-local.json
 
+# Machine-local UniFi Controller settings
+.unifi-local.json
+
 # Home Assistant secrets/runtime
 config/secrets.yaml
 config/.storage/

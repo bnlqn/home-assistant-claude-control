@@ -99,3 +99,67 @@ Raw access:
 ```
 
 should be rare.
+
+## 7. UniFi Network Controller
+
+The UniFi Network Controller (Dream Machine) is a separate system from Home
+Assistant. `./bin/unifi` authenticates using a Network Application API key
+generated from the **main admin account**, stored in macOS Keychain
+(`claude-unifi-api-token`, distinct from the HA token). The key therefore
+carries full read/write permission at the credential level — safety comes
+from command scoping and permission gating, not from the key itself being
+restricted. See `docs/SECURITY.md`.
+
+It talks only to the official, documented UniFi Network Integration API v1
+(`https://<console>/proxy/network/integration/v1/...`). Endpoint coverage
+below is verified against this console's own bundled docs (Settings →
+Integrations, v10.5.67) — not just public/third-party sources.
+
+Read (pre-approved, `.claude/settings.json` `allow` tier):
+
+```bash
+./bin/unifi sites
+./bin/unifi devices
+./bin/unifi device <id>
+./bin/unifi clients
+./bin/unifi client <id>
+./bin/unifi networks                # VLANs
+./bin/unifi network <id>
+./bin/unifi wifi-broadcasts          # WiFi networks / SSIDs
+./bin/unifi wifi-broadcast <id>
+./bin/unifi firewall-zones
+./bin/unifi firewall-zone <id>
+./bin/unifi firewall-policies
+./bin/unifi firewall-policy <id>
+./bin/unifi acl-rules
+```
+
+Write (every call requires explicit approval — `.claude/settings.json` `ask`
+tier, never `allow`):
+
+```bash
+./bin/unifi client-authorize-guest <id> [timeLimitMinutes] [dataUsageLimitMBytes] [rxRateLimitKbps] [txRateLimitKbps]
+./bin/unifi client-unauthorize-guest <id>
+./bin/unifi device-restart <id>
+./bin/unifi raw <METHOD> <path> [json-body]
+```
+
+`AUTHORIZE_GUEST_ACCESS`/`UNAUTHORIZE_GUEST_ACCESS` are the *only* client
+actions v1 exposes — there is no block/unblock/forget/reconnect endpoint,
+despite that being a reasonable guess; it was checked against the console's
+own docs and doesn't exist. Don't add it back without re-verifying.
+
+`raw` is the escape hatch for anything not covered by a named command —
+notably create/update/delete for networks (VLANs), WiFi broadcasts,
+firewall zones/policies, and ACL rules. Those endpoints exist in v1 and take
+multi-field request bodies (e.g. a network's `management`/`vlanId`/
+`dhcpGuarding`, a WiFi broadcast's `securityConfiguration`/
+`radiusConfiguration`/`multicastFilteringPolicy`) not worth hand-wrapping
+into narrow commands — review the exact body against the console's docs
+before approving a `raw` call that changes network design. `raw DELETE` and
+factory-reset/restore-shaped action bodies are blocked outright by the
+`ha_guard.py` PreToolUse hook regardless of permission tier.
+
+The console's TLS certificate is pinned by fingerprint at setup time
+(`./bin/bootstrap-unifi`) rather than trusted via a blanket
+`rejectUnauthorized: false`; see `docs/SECURITY.md`.

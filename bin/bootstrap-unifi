@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CONFIG="$ROOT/.unifi-local.json"
+KEYCHAIN_SERVICE="claude-unifi-api-token"
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "This bootstrap currently targets macOS because it stores the UniFi API key in Keychain." >&2
+  echo "The control scripts can be adapted to another secret store." >&2
+  exit 1
+fi
+
+echo "UniFi Network Controller × Claude Code bootstrap"
+echo
+echo "Before continuing, on the UniFi Network Application:"
+echo "  Settings -> Integrations -> Create API Key. Copy it now -- it will not be shown again."
+echo
+echo "This key is generated from your main admin account, so it carries full"
+echo "read/write permission at the credential level. Safety here comes from"
+echo "./bin/unifi's write commands being gated behind per-call confirmation"
+echo "(the 'ask' permission tier in .claude/settings.json), not from the key"
+echo "itself being restricted -- see docs/SECURITY.md."
+echo
+
+read -r -p "Console host/IP (e.g. 192.168.1.1): " UNIFI_HOST
+if [[ -z "$UNIFI_HOST" ]]; then
+  echo "Console host is required." >&2
+  exit 1
+fi
+
+read -r -p "Site id [default]: " SITE_ID
+SITE_ID="${SITE_ID:-default}"
+
+echo
+echo "Fetching the console's TLS certificate fingerprint for pinning..."
+FINGERPRINT_RAW="$(echo | openssl s_client -connect "${UNIFI_HOST}:443" -servername "$UNIFI_HOST" 2>/dev/null \
+  | openssl x509 -fingerprint -sha256 -noout 2>/dev/null || true)"
+
+if [[ -z "$FINGERPRINT_RAW" ]]; then
+  echo "Could not retrieve a certificate from ${UNIFI_HOST}:443. Check the host/IP and that the console is reachable." >&2
+  exit 1
+fi
+
+FINGERPRINT="${FINGERPRINT_RAW#*=}"
+echo
+echo "Console TLS certificate SHA-256 fingerprint:"
+echo "  $FINGERPRINT"
+echo
+echo "Confirm this matches what the console itself shows (Settings -> System -> Console,"
+echo "or the browser's certificate viewer when visiting https://${UNIFI_HOST})."
+read -r -p "Pin this fingerprint? [y/N]: " CONFIRM
+if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+  echo "Aborted; nothing was written." >&2
+  exit 1
+fi
+
+cat > "$CONFIG" <<EOF
+{
+  "host": "$UNIFI_HOST",
+  "siteId": "$SITE_ID",
+  "certFingerprint256": "$FINGERPRINT",
+  "keychainService": "$KEYCHAIN_SERVICE"
+}
+EOF
+
+chmod 600 "$CONFIG"
+
+echo
+read -r -s -p "Paste the API key (input hidden): " UNIFI_KEY
+echo
+
+if [[ -z "$UNIFI_KEY" ]]; then
+  echo "No key supplied; API commands will not work until one is stored." >&2
+else
+  security add-generic-password \
+    -a "$USER" \
+    -s "$KEYCHAIN_SERVICE" \
+    -w "$UNIFI_KEY" \
+    -U >/dev/null
+  unset UNIFI_KEY
+  echo "Stored API key in macOS Keychain service: $KEYCHAIN_SERVICE"
+fi
+
+echo
+echo "Verify with:"
+echo
+echo "  ./bin/unifi sites"
+echo "  ./bin/unifi devices"
+echo
+echo "Write commands (client-block, device-restart, raw, ...) will prompt for"
+echo "approval each time -- see ./bin/unifi help."
