@@ -33,6 +33,28 @@ template:
           {% endif %}
           {% if m %}{{ m | join(' · ') }}{% else %}Everything looks good at home.{% endif %}
 
+  # ---- True house consumption ----
+  # sensor.goodwe_house_consumption is NOT a real measurement: the GoodWe's
+  # own grid CT (sensor.goodwe_meter_active_power) is stuck/unwired, so the
+  # inverter's internal "house consumption" calc just echoes PV output
+  # (house == pv + 1W at all times, day and night, verified against 24h of
+  # history). The real house load has to be derived from energy balance:
+  # PV production + net grid import = house consumption (p1_meter_power is
+  # positive on import, negative on export).
+  - sensor:
+      - name: House Power Consumption
+        unique_id: house_power_consumption
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+        icon: mdi:home-lightning-bolt-outline
+        availability: >
+          {{ states('sensor.goodwe_pv_power') not in ['unknown', 'unavailable']
+             and states('sensor.p1_meter_power') not in ['unknown', 'unavailable'] }}
+        state: >
+          {{ (states('sensor.goodwe_pv_power') | float(0))
+             + (states('sensor.p1_meter_power') | float(0)) }}
+
   # ---- Today's high / low (weather 'forecast' attribute was removed) ----
   - triggers:
       - trigger: homeassistant
