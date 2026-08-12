@@ -57,18 +57,35 @@ automation:
   alias: "Tesla/Solar: Start Solar Charging"
   description: >
     Starts charging the Tesla Model 3 once net grid power
-    (sensor.p1_meter_power) shows sustained export past the threshold
-    needed to sustain at least the minimum viable charge current
-    (5A / ~1150W). Only acts while solar-only mode is enabled
+    (sensor.p1_meter_power) shows export past the threshold needed to
+    sustain at least the minimum viable charge current (5A / ~1150W).
+    Only acts while solar-only mode is enabled
     (input_boolean.tesla_solar_charging_active, toggled manually by the
     user, e.g. via the dashboard pill) and the charge switch is
     currently off.
+
+    Two triggers: the numeric_state "for 5 minutes" trigger catches the
+    clean case quickly, but it's edge-triggered - it fires once per
+    crossing and won't retry on its own. Since the vehicle sleeps most
+    of the time and Fleet API commands need it awake, relying on that
+    trigger alone meant a surplus window was silently missed whenever
+    the car happened to be asleep at the exact moment it fired (seen
+    repeatedly in automation traces - condition failed on vehicle
+    status, never retried because grid power never rose back above the
+    threshold to re-arm it). The added time_pattern trigger makes the
+    check level-triggered: every 5 minutes it re-evaluates and, if
+    everything else still qualifies, actively wakes the car instead of
+    just checking whether it happened to already be awake.
   triggers:
     - trigger: numeric_state
       entity_id: sensor.p1_meter_power
       below: input_number.tesla_solar_grid_start_threshold_w
       for:
         minutes: 5
+      id: sustained_crossing
+    - trigger: time_pattern
+      minutes: "/5"
+      id: periodic_retry
   conditions:
     - condition: state
       entity_id: input_boolean.tesla_solar_charging_active
@@ -82,32 +99,44 @@ automation:
     - condition: state
       entity_id: device_tracker.other_tesla_model_3_location
       state: "home"
-    - condition: state
-      entity_id: binary_sensor.other_tesla_model_3_status
-      state: "on"
     - condition: numeric_state
       entity_id: sensor.other_tesla_model_3_battery_level
       below: number.other_tesla_model_3_charge_limit
+    - condition: numeric_state
+      entity_id: sensor.p1_meter_power
+      below: input_number.tesla_solar_grid_start_threshold_w
   actions:
-    - action: number.set_value
+    - action: button.press
       target:
-        entity_id: number.other_tesla_model_3_charge_current
-      data:
-        value: "{{ states('input_number.tesla_solar_min_charge_current') }}"
-    - action: switch.turn_on
-      target:
-        entity_id: switch.other_tesla_model_3_charge
-    - action: notify.send_message
-      target:
-        entity_id: notify.iphone_16_pro
-      data:
-        title: "Tesla: Solar charging started"
-        message: >-
-          Started charging the Model 3 from solar surplus. Exporting
-          {{ (states('sensor.p1_meter_power') | float(0) | abs) | round(0) }} W
-          to the grid; starting at
-          {{ states('input_number.tesla_solar_min_charge_current') }}A and will
-          ramp up with available sun.
+        entity_id: button.other_tesla_model_3_wake
+    - wait_template: "{{ is_state('binary_sensor.other_tesla_model_3_status', 'on') }}"
+      timeout:
+        seconds: 30
+      continue_on_timeout: true
+    - if:
+        - condition: state
+          entity_id: binary_sensor.other_tesla_model_3_status
+          state: "on"
+      then:
+        - action: number.set_value
+          target:
+            entity_id: number.other_tesla_model_3_charge_current
+          data:
+            value: "{{ states('input_number.tesla_solar_min_charge_current') }}"
+        - action: switch.turn_on
+          target:
+            entity_id: switch.other_tesla_model_3_charge
+        - action: notify.send_message
+          target:
+            entity_id: notify.iphone_16_pro
+          data:
+            title: "Tesla: Solar charging started"
+            message: >-
+              Started charging the Model 3 from solar surplus. Exporting
+              {{ (states('sensor.p1_meter_power') | float(0) | abs) | round(0) }} W
+              to the grid; starting at
+              {{ states('input_number.tesla_solar_min_charge_current') }}A and will
+              ramp up with available sun.
   mode: single
 
 - id: tesla_solar_stop_charging
