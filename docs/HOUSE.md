@@ -96,6 +96,22 @@ a blanket VLAN opening). If other Automation→Home needs come up (e.g.
 another NAS share, a different port), extend that policy or add a new
 narrowly-scoped one rather than widening it to the whole zone/subnet.
 
+The same catch-all block also broke the `apple_tv` (Apple TV, `192.168.20.217`)
+and `songpal` (Sony HT-A9, `192.168.20.241`) integrations, both on the Secure
+Zone — HA's outbound connection attempts hit Automation→Home block and the
+`media_player` entities went `unavailable`. Fixed the same way, with two more
+narrowly-scoped policies (Automation Zone → Secure Zone, destination IP only,
+no port restriction since both protocols use multiple/dynamic ports):
+"Allow Automation to Home (Apple TV control)" → `192.168.20.217` TCP+UDP, and
+"Allow Automation to Home (Sony HT-A9 control)" → `192.168.20.241` TCP+UDP.
+
+Note: general SSDP/UPnP multicast discovery (M-SEARCH to `239.255.255.250`)
+still fails across the zone boundary (`async_upnp_client.ssdp` logs periodic
+`Network unreachable`) — multicast doesn't traverse zones like unicast does.
+This doesn't affect control of already-configured devices like the two above;
+it would only matter for discovering *new* UPnP devices from HA, which would
+need multicast/mDNS reflection across zones, not attempted here.
+
 ## HACS-managed integrations & frontend cards
 
 See `docs/HACS.md` — not tracked in Git, reinstall via HACS.
