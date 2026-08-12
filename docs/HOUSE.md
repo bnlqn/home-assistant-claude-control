@@ -74,6 +74,28 @@ like blocking a client or restarting a device), use `./bin/unifi` — see
 `docs/ACCESS-MODEL.md` §7. Setup: `./bin/bootstrap-unifi`. Write commands
 always prompt for approval.
 
+### VLAN segmentation
+
+Four networks/zones: Default (VLAN 1), Home Network (VLAN 20, zone
+"Secure Zone"), IOT Network (VLAN 30, zone "Unsecure Zone"), Automation
+Network (VLAN 40, zone "Automation Zone", `192.168.40.0/24`) — HA itself
+lives here at `192.168.40.10`. Inter-zone traffic is default-deny; each
+allowed path is an explicit firewall policy plus its auto-generated
+return-traffic rule.
+
+As of 2026-08-12, Home → Automation is allowed only for DNS/HA-UI/SSH
+(ports 53, 22, 8123 — policy "Allow Home to Automation (DNS + HA UI +
+SSH)"). The reverse direction (HA-initiated traffic into Home) has no
+default allowance, which broke the HA backup CIFS mount to the NAS
+(UNAS-2, `192.168.20.253`, share `homeassistant_backups`) after HA moved
+onto the Automation VLAN — HA's outbound connections to the NAS, including
+plain ICMP, hit the Automation→Home catch-all block. Fixed by adding
+policy "Allow Automation to Home (SMB backup mount)": Automation Zone →
+Secure Zone, destination restricted to `192.168.20.253` TCP/445 only (not
+a blanket VLAN opening). If other Automation→Home needs come up (e.g.
+another NAS share, a different port), extend that policy or add a new
+narrowly-scoped one rather than widening it to the whole zone/subnet.
+
 ## HACS-managed integrations & frontend cards
 
 See `docs/HACS.md` — not tracked in Git, reinstall via HACS.
