@@ -8,7 +8,9 @@
       entity_id: sensor.bens_office_tv_switch_battery
       below: 20
   actions:
-    - action: notify.iphone_16_pro
+    - action: notify.send_message
+      target:
+        entity_id: notify.iphone_16_pro
       data:
         title: "Office remote battery low"
         message: >
