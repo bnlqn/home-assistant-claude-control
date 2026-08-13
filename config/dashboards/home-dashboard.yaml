@@ -712,7 +712,7 @@ views:
           entity: sensor.p1_meter_power
           tap_action:
             action: navigate
-            navigation_path: /dashboard-test/energy
+            navigation_path: /home-dashboard/energy
             haptic: light
           show_state: true
           styles:
@@ -779,7 +779,7 @@ views:
         card_mod:
           style: |-
             ha-card { border-radius: 0; background: var(--card-background-color); box-shadow: var(--ha-card-box-shadow, none); margin-top: -1px; padding: 0 12px 12px; }
-            #root { gap: 8px !important; }
+            #root { gap: 8px !important; justify-content: center !important; }
         cards:
         - type: custom:button-card
           template: kohbo_chip_card
@@ -843,7 +843,7 @@ views:
           color: var(--accent-color)
         - entity: calendar.ben_personal
           color: var(--success-color)
-        - entity: calendar.recycle
+        - entity: calendar.recycle_2
           color: var(--orange-color)
         background_color: var(--card-background-color)
         event_color: var(--primary-text-color)
@@ -853,7 +853,49 @@ views:
         weekday_font_size: 12px
         day_font_size: 26px
         card_mod:
-          style: 'ha-card { border-radius: 0 0 16px 16px; box-shadow: none; margin-top: -1px; }'
+          style: 'ha-card { border-radius: 0; box-shadow: none; margin-top: -1px; }'
+      - type: horizontal-stack
+        card_mod:
+          style: |-
+            ha-card { border-radius: 0 0 16px 16px; background: var(--card-background-color); box-shadow: var(--ha-card-box-shadow, none); margin-top: -1px; padding: 0 12px 12px; }
+            #root { gap: 8px !important; justify-content: center !important; }
+        cards:
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: sensor.residual_waste
+          icon: mdi:trash-can-outline
+          show_state: true
+          state_display: '[[[ const d = parseInt(entity.state); if (isNaN(d)) return ''--''; if (d === 0) return ''Today''; if (d === 1) return ''Tomorrow''; return d + ''d''; ]]]'
+          styles:
+            card:
+            - width: 100%
+            - justify-content: center
+            icon:
+            - color: var(--secondary-text-color)
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: sensor.pmc
+          icon: mdi:recycle
+          show_state: true
+          state_display: '[[[ const d = parseInt(entity.state); if (isNaN(d)) return ''--''; if (d === 0) return ''Today''; if (d === 1) return ''Tomorrow''; return d + ''d''; ]]]'
+          styles:
+            card:
+            - width: 100%
+            - justify-content: center
+            icon:
+            - color: 'var(--info-color, #59A5D8)'
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: sensor.paper
+          icon: mdi:newspaper-variant-outline
+          show_state: true
+          state_display: '[[[ const d = parseInt(entity.state); if (isNaN(d)) return ''--''; if (d === 0) return ''Today''; if (d === 1) return ''Tomorrow''; return d + ''d''; ]]]'
+          styles:
+            card:
+            - width: 100%
+            - justify-content: center
+            icon:
+            - color: var(--warning-color)
     - type: custom:button-card
       template: section_title
       name: Rooms
@@ -877,7 +919,7 @@ views:
         state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/living-room
+          navigation_path: /home-dashboard/living-room
           haptic: light
         variables:
           badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
@@ -902,7 +944,7 @@ views:
         state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/bedroom
+          navigation_path: /home-dashboard/bedroom
           haptic: light
         variables:
           badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
@@ -927,7 +969,7 @@ views:
         state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/bens-office
+          navigation_path: /home-dashboard/bens-office
           haptic: light
         variables:
           badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
@@ -952,7 +994,7 @@ views:
         state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/juliens-bedroom
+          navigation_path: /home-dashboard/juliens-bedroom
           haptic: light
         variables:
           badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
@@ -977,7 +1019,7 @@ views:
         state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/mias-bedroom
+          navigation_path: /home-dashboard/mias-bedroom
           haptic: light
         variables:
           badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
@@ -1002,7 +1044,7 @@ views:
         state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/playground
+          navigation_path: /home-dashboard/playground
           haptic: light
         variables:
           badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
@@ -1027,7 +1069,7 @@ views:
         state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/hallway
+          navigation_path: /home-dashboard/hallway
           haptic: light
         variables:
           badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
@@ -1052,7 +1094,7 @@ views:
         state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/corridor
+          navigation_path: /home-dashboard/corridor
           haptic: light
         variables:
           badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
@@ -1101,7 +1143,7 @@ views:
           - color: '[[[ return variables.badge_color; ]]]'
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/more
+          navigation_path: /home-dashboard/more
           haptic: light
     - type: custom:button-card
       template: section_title
@@ -1146,19 +1188,19 @@ views:
         style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -1199,7 +1241,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/home
+          navigation_path: /home-dashboard/home
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -1217,7 +1259,7 @@ views:
       - light_entity: light.living_room_living_room
       - room_name: Living Room
       - icon: kohbo:kohbo-chair
-      - navigation_path: /dashboard-test/living-room
+      - navigation_path: /home-dashboard/living-room
       - temperature: ''
       - room_devices:
         - type: custom:button-card
@@ -1257,7 +1299,7 @@ views:
       - light_entity: light.bedroom_bedroom
       - room_name: Bedroom
       - icon: kohbo:kohbo-bed-king
-      - navigation_path: /dashboard-test/bedroom
+      - navigation_path: /home-dashboard/bedroom
       - temperature: ''
       - room_devices:
         - type: custom:button-card
@@ -1281,7 +1323,7 @@ views:
       - light_entity: light.bens_office_bens_office
       - room_name: Ben's Office
       - icon: kohbo:kohbo-laptop
-      - navigation_path: /dashboard-test/bens-office
+      - navigation_path: /home-dashboard/bens-office
       - temperature: '[[[ return states[''climate.ec3a56bc6527''].attributes.current_temperature ]]]'
       - room_devices:
         - type: custom:button-card
@@ -1308,7 +1350,7 @@ views:
       - light_entity: light.juliens_bedroom_juliens_bedroom
       - room_name: Julien's Bedroom
       - icon: kohbo:kohbo-bed-single
-      - navigation_path: /dashboard-test/juliens-bedroom
+      - navigation_path: /home-dashboard/juliens-bedroom
       - temperature: ''
       - room_devices:
         - type: custom:button-card
@@ -1327,7 +1369,7 @@ views:
       - light_entity: light.mias_bedroom_mias_bedroom
       - room_name: Mia's Bedroom
       - icon: kohbo:kohbo-bed-single
-      - navigation_path: /dashboard-test/mias-bedroom
+      - navigation_path: /home-dashboard/mias-bedroom
       - temperature: ''
       - room_devices:
         - type: custom:button-card
@@ -1346,7 +1388,7 @@ views:
       - light_entity: light.playground_playground
       - room_name: Playground
       - icon: kohbo:kohbo-lego
-      - navigation_path: /dashboard-test/playground
+      - navigation_path: /home-dashboard/playground
       - temperature: ''
       - room_devices:
         - type: custom:button-card
@@ -1370,7 +1412,7 @@ views:
       - light_entity: light.hallway_hallway
       - room_name: Hallway
       - icon: kohbo:kohbo-double-door
-      - navigation_path: /dashboard-test/hallway
+      - navigation_path: /home-dashboard/hallway
       - temperature: ''
       - room_devices:
         - type: custom:button-card
@@ -1389,7 +1431,7 @@ views:
       - light_entity: light.corridor_corridor
       - room_name: Corridor
       - icon: kohbo:kohbo-location
-      - navigation_path: /dashboard-test/corridor
+      - navigation_path: /home-dashboard/corridor
       - temperature: ''
       - room_devices:
         - type: custom:button-card
@@ -1403,19 +1445,19 @@ views:
         style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -1456,7 +1498,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/rooms
+          navigation_path: /home-dashboard/rooms
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -1786,19 +1828,19 @@ views:
         - icon: mdi:palette
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -1839,7 +1881,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/rooms
+          navigation_path: /home-dashboard/rooms
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -2055,19 +2097,19 @@ views:
         - icon: mdi:palette
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -2108,7 +2150,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/rooms
+          navigation_path: /home-dashboard/rooms
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -2389,19 +2431,19 @@ views:
         - icon: mdi:palette
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -2442,7 +2484,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/rooms
+          navigation_path: /home-dashboard/rooms
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -2674,19 +2716,19 @@ views:
         - icon: mdi:palette
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -2727,7 +2769,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/rooms
+          navigation_path: /home-dashboard/rooms
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -2864,19 +2906,19 @@ views:
         - icon: mdi:palette
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -2917,7 +2959,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/rooms
+          navigation_path: /home-dashboard/rooms
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -3064,19 +3106,19 @@ views:
         - icon: mdi:palette
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -3117,7 +3159,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/rooms
+          navigation_path: /home-dashboard/rooms
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -3182,19 +3224,19 @@ views:
         style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -3235,7 +3277,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/rooms
+          navigation_path: /home-dashboard/rooms
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -3305,19 +3347,19 @@ views:
         - icon: mdi:palette
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -3357,7 +3399,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/home
+          navigation_path: /home-dashboard/home
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -3774,19 +3816,19 @@ views:
         style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -3826,7 +3868,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/home
+          navigation_path: /home-dashboard/home
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -4613,19 +4655,19 @@ views:
         style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
@@ -4665,7 +4707,7 @@ views:
         icon: mdi:arrow-left
         tap_action:
           action: navigate
-          navigation_path: /dashboard-test/home
+          navigation_path: /home-dashboard/home
           haptic: light
       - type: custom:button-card
         template: kohbo_header_page_title
@@ -4919,19 +4961,19 @@ views:
         style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
   - type: custom:navbar-card
     routes:
-    - url: /dashboard-test/home
+    - url: /home-dashboard/home
       icon: kohbo:kohbo-dashboard
       label: Home
-    - url: /dashboard-test/rooms
+    - url: /home-dashboard/rooms
       icon: kohbo:kohbo-rooms
       label: Rooms
-    - url: /dashboard-test/scenes
+    - url: /home-dashboard/scenes
       icon: kohbo:kohbo-light-2
       label: Scenes
-    - url: /dashboard-test/energy
+    - url: /home-dashboard/energy
       icon: mdi:lightning-bolt
       label: Energy
-    - url: /dashboard-test/more
+    - url: /home-dashboard/more
       icon: mdi:dots-horizontal
       label: More
     haptic:
