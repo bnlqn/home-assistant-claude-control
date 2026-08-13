@@ -1,0 +1,28 @@
+- id: waste_collection_evening_reminder
+  alias: "Waste Collection: Evening Reminder"
+  description: >
+    Notifies Ben's phone at 8pm the night before residual waste, PMC or
+    paper collection, so the right bin(s) go out. Organic waste is
+    intentionally excluded.
+  triggers:
+    - trigger: time
+      at: "20:00:00"
+  conditions:
+    - condition: template
+      value_template: >
+        {{ states('sensor.residual_waste') == '1'
+           or states('sensor.pmc') == '1'
+           or states('sensor.paper') == '1' }}
+  actions:
+    - action: notify.send_message
+      target:
+        entity_id: notify.iphone_16_pro
+      data:
+        title: "Bins out tonight"
+        message: >
+          {% set bins = [] %}
+          {% if states('sensor.residual_waste') == '1' %}{% set bins = bins + ['Residual waste'] %}{% endif %}
+          {% if states('sensor.pmc') == '1' %}{% set bins = bins + ['PMC'] %}{% endif %}
+          {% if states('sensor.paper') == '1' %}{% set bins = bins + ['Paper'] %}{% endif %}
+          {{ bins | join(' and ') }} collection is tomorrow — put the bin{{ 's' if bins | length > 1 else '' }} out tonight.
+  mode: single
