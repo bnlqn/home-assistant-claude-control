@@ -6,6 +6,8 @@
 
 # Home Assistant secrets/runtime
 config/secrets.yaml
+config/*.key
+config/image/
 config/.storage/
 config/home-assistant_v2.db*
 config/*.db
