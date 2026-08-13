@@ -1,0 +1,4957 @@
+button_card_templates:
+  kohbo_default:
+    styles:
+      card:
+      - --mdc-ripple-color: transparent
+      - -webkit-tap-highlight-color: transparent
+      - position: relative
+  kohbo_entity:
+    template:
+    - kohbo_default
+    show_state: true
+    styles:
+      card:
+      - padding: 20px
+      name:
+      - color: var(--primary-text-color)
+      - font-size: 16px
+      - font-weight: 600
+      - justify-self: start
+      - margin-bottom: 5px
+      state:
+      - color: var(--primary-text-color)
+      - font-size: 14px
+      - justify-self: start
+      - font-weight: 700
+      - opacity: 0.8
+      img_cell:
+      - width: 30px
+      - height: 30px
+      - background: transparent
+      - justify-self: start
+      icon:
+      - justify-self: start
+      - width: 100%
+      - height: 100%
+  kohbo_device_entity:
+    template: kohbo_entity
+    layout: vertical
+    show_state: true
+    size: 100%
+    tap_action:
+      action: more-info
+      haptic: light
+    variables:
+      last_changed: |
+        [[[
+          const last = new Date(entity.last_changed);
+          const now = new Date();
+          const diff = Math.floor((now - last) / 1000);
+          if (diff < 3600) {
+            return `${Math.floor(diff / 60) + "m"}`;
+          } else if (diff < 86400) {
+            return `${Math.floor(diff / 3600) + "h"}`;
+          } else {
+            return `${Math.floor(diff / 86400) + "d"}`;
+          }
+        ]]]
+    state_display: |
+      [[[
+        function titleCase(str) {
+          return str
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .split(" ")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+        }
+        const state = hass.formatEntityState ? hass.formatEntityState(entity): titleCase(entity.state);
+        return `${state} - ${variables.last_changed}`;
+      ]]]
+    styles:
+      card:
+      - height: 130px
+      - margin: 0
+      - --mdc-ripple-color: var(--secondary-background-color)
+      - --mdc-ripple-press-opacity: 0.8
+      name:
+      - margin-bottom: 8px
+      state:
+      - color: var(--secondary-text-color)
+      - font-size: 12px
+      - font-weight: normal
+      - opacity: 1
+      img_cell:
+      - height: 40px
+      - width: 40px
+      - margin-bottom: 15px
+  kohbo_thermostat_entity:
+    template: kohbo_device_entity
+    icon: |
+      [[[
+        if (entity.attributes.preset_mode === 'eco')
+          return "mdi:leaf"
+        else if (entity.state == "heat_cool")
+          return "mdi:sun-snowflake-variant"
+        else if (entity.state == "heat")
+          return "mdi:heat-wave"
+        else if (entity.state == "cool")
+          return "mdi:snowflake"
+        else if (entity.state == "dry")
+          return "mdi:water-percent"
+        else if (entity.state == "fan_only")
+          return "mdi:fan"
+        else
+          return "mdi:power"
+      ]]]
+    state_display: |
+      [[[
+        if (entity.attributes.preset_mode === 'eco')
+          return "Eco Mode"
+        else if (entity.state == "heat_cool")
+          return `Heat/Cool: ${entity.attributes.target_temp_low} - ${entity.attributes.target_temp_high}`
+        else if (entity.state == "heat")
+          return `Heat - ${entity.attributes.temperature}°`
+        else if (entity.state == "cool")
+          return `Cool - ${entity.attributes.temperature}°`
+        else if (entity.state == "dry")
+          return "Dry"
+        else if (entity.state == "fan_only")
+          return "Fan Only"
+        else
+          return "Off"
+      ]]]
+    styles:
+      icon:
+      - color: |
+          [[[
+            if (entity.state == "heat_cool")
+              return "var(--info-color, var(--primary-color))";
+            else if (entity.state == "heat")
+              return "var(--error-color)";
+            else if (entity.state == "cool")
+              return "var(--primary-color)";
+            else if (entity.state == "off")
+              return "var(--light-grey-color)";
+            else
+              return "var(--primary-color)";
+          ]]]
+  kohbo_room_card_overview:
+    size: 100%
+    show_icon: true
+    show_state: true
+    state_display: |
+      [[[
+        if (entity == null) return "";
+        if (entity.state == "on") {
+          const b = entity.attributes.brightness;
+          return b ? `On · ${Math.round(b / 255 * 100)}%` : "On";
+        }
+        return "Off";
+      ]]]
+    variables:
+      temperature: null
+    styles:
+      grid:
+      - grid-template-areas: '"i n temperature" "i s temperature"'
+      - grid-template-columns: 40px 1fr 60px
+      - grid-template-rows: 1fr 1fr
+      card:
+      - --mdc-ripple-color: transparent
+      - --mdc-ripple-press-opacity: 0
+      - padding: 20px 20px 20px 20px
+      - background: transparent
+      - box-shadow: none
+      - border: none
+      name:
+      - padding-left: 16px
+      - justify-self: start
+      - align-self: end
+      - font-size: 18px
+      - line-height: 19px
+      - font-weight: 700
+      - color: var(--primary-text-color)
+      state:
+      - padding-left: 16px
+      - justify-self: start
+      - font-size: 11px
+      - line-height: 11px
+      - font-weight: 500
+      - color: var(--secondary-text-color)
+      - align-self: start
+      - padding-top: 4px
+      custom_fields:
+        temperature:
+        - font-size: 20px
+        - line-height: 20px
+        - font-weight: 400
+        - color: var(--primary-text-color)
+        - justify-self: end
+        - align-self: center
+    custom_fields:
+      temperature: |
+        [[[
+          if (variables.temperature) {
+            return Math.round(variables.temperature * 10) / 10 + "°";
+          }
+          return "";
+        ]]]
+  kohbo_room_card_device:
+    show_state: true
+    styles:
+      grid:
+      - grid-template-areas: '"n n n" "i i i" "s s s"'
+      card:
+      - background: transparent
+      - box-shadow: none
+      - padding: 16px 10px
+      - border: none
+      icon:
+      - height: 26px
+      - margin-top: 10px
+      - margin-bottom: 10px
+      name:
+      - color: var(--primary-text-color)
+      - font-size: 13px
+      - font-weight: 500
+      state:
+      - font-weight: 400
+      - color: var(--secondary-text-color)
+      - font-size: 11px
+    tap_action:
+      action: toggle
+      haptic: light
+    hold_action:
+      action: more-info
+      haptic: medium
+  kohbo_chip_card:
+    size: 18px
+    show_state: true
+    show_name: false
+    layout: icon_state
+    tap_action:
+      action: more-info
+      haptic: light
+    styles:
+      grid:
+      - grid-template-areas: '"i s"'
+      - grid-template-columns: auto auto
+      card:
+      - padding: 0 14px
+      - display: inline-flex
+      - align-items: center
+      - height: 38px
+      - width: auto
+      - box-sizing: border-box
+      - min-width: 38px
+      - border-radius: 19px
+      - background: var(--secondary-background-color)
+      - border: none
+      - box-shadow: none
+      img_cell:
+      - width: 18px
+      state:
+      - color: var(--primary-text-color)
+      - font-size: 13px
+      - font-weight: 600
+      - justify-self: start
+      - margin-left: 8px
+      - line-height: 14px
+  kohbo_header_chip_card:
+    template: kohbo_chip_card
+    tap_action:
+      haptic: light
+    styles:
+      card:
+      - display: flex
+      - justify-content: center
+      - align-items: center
+      - padding: 0
+      - background: transparent
+      - height: 36px
+      - min-width: 36px
+      grid:
+      - grid-template-areas: '"i"'
+      - grid-template-columns: auto
+      - justify-content: center
+      - align-items: center
+  kohbo_page_title:
+    styles:
+      card:
+      - height: 44px
+      - background: transparent
+      - border: none
+      - box-shadow: none
+      - margin: 0
+      - padding: 0
+      name:
+      - color: var(--primary-text-color)
+      - justify-self: start
+      - font-size: 24px
+      - font-weight: 600
+      - letter-spacing: -.5px
+      - font-family: '''Inter'', sans-serif'
+  kohbo_header_page_title:
+    template: kohbo_page_title
+    styles:
+      name:
+      - justify-self: center
+      - font-size: 20px
+      - font-weight: 600
+      - letter-spacing: -.4px
+  kohbo_popup_page_title:
+    template: kohbo_page_title
+    styles:
+      name:
+      - justify-self: center
+  section_title:
+    styles:
+      card:
+      - background: transparent
+      - border: none
+      - box-shadow: none
+      - padding: 12px 4px 4px 4px
+      name:
+      - color: var(--secondary-text-color)
+      - font-size: 12px
+      - text-transform: uppercase
+      - letter-spacing: 0.06em
+      - font-weight: 700
+      - width: 100%
+      - text-align: left
+      - font-family: '''Inter'', sans-serif'
+  kohbo_scene_button:
+    show_icon: true
+    show_name: true
+    show_state: false
+    size: 34%
+    haptic: light
+    styles:
+      card:
+      - height: 76px
+      - background: var(--secondary-background-color)
+      - border-radius: 14px
+      - border: none
+      - box-shadow: none
+      name:
+      - font-size: 12px
+      - font-weight: 600
+      - color: var(--primary-text-color)
+      icon:
+      - color: var(--accent-color)
+  kohbo_person_entity:
+    show_state: false
+    show_name: false
+    show_entity_picture: true
+    size: 45px
+    icon: mdi:account
+    styles:
+      card:
+      - height: 45px
+      - width: 45px
+      - padding: 0
+      - background: transparent
+      - border: none
+      - border-radius: 0
+      img_cell:
+      - border-radius: 50%
+      custom_fields:
+        occupancy_state:
+        - background-color: |
+            [[[
+              if (entity.state == "home") {
+                return "var(--success-color)";
+              } else {
+                return "var(--text-light-primary-color)";
+              }
+            ]]]
+        - border-radius: 50%
+        - position: absolute
+        - bottom: 0
+        - right: 0
+        - height: 10px
+        - width: 10px
+        - box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.5)
+    custom_fields:
+      occupancy_state: |
+        [[[
+          return "";
+        ]]]
+  kohbo_card_header:
+    show_icon: false
+    show_state: false
+    show_name: true
+    styles:
+      card:
+      - background: transparent
+      - box-shadow: none
+      - padding: 16px 16px 8px
+      name:
+      - font-size: 12px
+      - font-weight: 600
+      - color: var(--secondary-text-color)
+      - text-transform: uppercase
+      - letter-spacing: 0.5px
+      - justify-self: start
+      - font-family: '''Inter'', sans-serif'
+    tap_action:
+      action: none
+  kohbo_energy_stat_card:
+    show_icon: false
+    show_state: false
+    show_name: true
+    show_label: false
+    variables:
+      show_divider: false
+      unit_label: kWh
+    styles:
+      grid:
+      - grid-template-areas: '"n" "s"'
+      - grid-template-columns: 1fr
+      - grid-template-rows: auto auto
+      - row-gap: 4px
+      card:
+      - background: transparent
+      - padding: 0 16px
+      - margin: 16px 0
+      - box-shadow: none
+      - border-right: |
+          [[[ return variables.show_divider ? '1px solid rgba(255,255,255,0.08)' : 'none'; ]]]
+      name:
+      - font-size: 11px
+      - font-weight: 600
+      - text-transform: uppercase
+      - letter-spacing: 0.3px
+      - color: var(--secondary-text-color)
+      - text-align: left
+      - justify-self: start
+      - width: 100%
+      - margin-bottom: 4px
+      state:
+      - font-size: 26px
+      - font-weight: 600
+      - color: var(--primary-text-color)
+      - text-align: left
+      - justify-self: start
+  kohbo_energy_stat_comparison:
+    template: kohbo_energy_stat_card
+    variables:
+      comparison_type: daily
+      comparison_label: vs avg
+    styles:
+      grid:
+      - grid-template-areas: '"n" "v" "c"'
+      - grid-template-rows: auto auto auto
+      custom_fields:
+        v:
+        - justify-self: start
+        c:
+        - justify-self: start
+        - margin-top: 2px
+    custom_fields:
+      v: |
+        [[[
+          const value = parseFloat(entity?.state || 0);
+          const unit = variables.unit_label || 'kWh';
+          const type = variables.comparison_type || 'daily';
+          const fmt = (n) => {
+            if (n >= 10000) return (n / 1000).toFixed(1) + 'k';
+            if (n >= 1000) return Math.round(n).toLocaleString();
+            return Math.ceil(n).toString();
+          };
+          const displayValue = (type === 'weekly' || type === 'monthly') ? fmt(value) : value.toFixed(1);
+          return `<span style="font-size:26px;font-weight:600;color:var(--primary-text-color);">${displayValue}</span><span style="font-size:12px;color:var(--secondary-text-color);margin-left:4px;">${unit}</span>`;
+        ]]]
+      c: |
+        [[[
+          const type = variables.comparison_type || 'daily';
+          const label = variables.comparison_label || 'vs avg';
+          const dailyBaseline = parseFloat(states['sensor.energy_expected_full_day']?.state || 0);
+          let actual = 0;
+          let expected = 0;
+          if (type === 'daily') {
+            actual = parseFloat(states['sensor.energy_forecast_end_of_day']?.state || 0);
+            expected = dailyBaseline;
+          } else if (type === 'weekly') {
+            actual = parseFloat(states['sensor.whole_home_energy_weekly_usage']?.state || 0);
+            const dow = new Date().getDay();
+            expected = dailyBaseline * (dow === 0 ? 7 : dow);
+          } else if (type === 'monthly') {
+            actual = parseFloat(states['sensor.whole_home_energy_monthly_usage']?.state || 0);
+            expected = dailyBaseline * new Date().getDate();
+          }
+          const pct = expected > 0 ? Math.round((actual - expected) / expected * 100) : 0;
+          const delta = actual - expected;
+          const arrow = pct > 5 ? '↑' : pct < -5 ? '↓' : '→';
+          const color = pct > 10 ? 'var(--error-color)' : pct < -10 ? 'var(--success-color)' : 'var(--secondary-text-color)';
+          const sign = delta > 0 ? '+' : (delta < 0 ? '-' : '');
+          let magnitude;
+          if (Math.abs(pct) >= 200) {
+            const ad = Math.abs(delta);
+            const d = ad >= 10000 ? (ad / 1000).toFixed(1) + 'k' : (ad >= 1000 ? Math.round(ad).toLocaleString() : Math.round(ad));
+            magnitude = `${sign}${d} kWh`;
+          } else {
+            magnitude = `${sign}${Math.abs(pct)}%`;
+          }
+          return `<span style="font-size:11px;font-weight:500;color:${color};">${arrow} ${magnitude} ${label}</span>`;
+        ]]]
+  kohbo_energy_stat_bar:
+    template: kohbo_energy_stat_card
+    show_state: true
+    variables:
+      show_divider: true
+      bar_mode: grid
+    styles:
+      grid:
+      - grid-template-areas: '"n n" "s u" "b b"'
+      - grid-template-columns: auto 1fr
+      - grid-template-rows: auto auto auto
+      card:
+      - padding: 0 16px 2px
+      - margin: 16px 0 14px
+      custom_fields:
+        u:
+        - font-size: 12px
+        - color: var(--secondary-text-color)
+        - justify-self: start
+        - align-self: end
+        - padding-bottom: 3px
+        - padding-left: 4px
+        b:
+        - margin-top: 10px
+        - display: flex
+        - gap: 3px
+        - height: 8px
+        - width: 100%
+    custom_fields:
+      u: '[[[ return variables.unit_label; ]]]'
+      b: |
+        [[[
+          const mode = variables.bar_mode || 'grid';
+          let pct = 0;
+          let color = 'var(--accent-color)';
+
+          if (mode === 'grid') {
+            const w = parseFloat(states['sensor.p1_meter_power']?.state || 0);
+            const peak = parseFloat(states['sensor.p1_meter_peak_demand_current_month']?.attributes?.value || states['sensor.p1_meter_peak_demand_current_month']?.state || 4000);
+            pct = Math.min(Math.max((w / peak) * 100, 0), 100);
+            if (w < 0) color = 'var(--success-color)';
+            else if (w < peak * 0.5) color = 'var(--accent-color)';
+            else if (w < peak * 0.85) color = 'var(--orange-color)';
+            else color = 'var(--error-color)';
+          } else if (mode === 'solar') {
+            const w = parseFloat(states['sensor.goodwe_pv_power']?.state || 0);
+            const maxW = 4300;
+            pct = Math.min(Math.max((w / maxW) * 100, 0), 100);
+            color = w > 0 ? 'var(--success-color)' : 'var(--divider-color)';
+          } else if (mode === 'house') {
+            const w = parseFloat(states['sensor.house_power_consumption']?.state || 0);
+            const maxW = 5500;
+            pct = Math.min(Math.max((w / maxW) * 100, 0), 100);
+            if (w < maxW * 0.35) color = 'var(--success-color)';
+            else if (w < maxW * 0.7) color = 'var(--accent-color)';
+            else color = 'var(--orange-color)';
+          }
+
+          const empty = 'var(--divider-color)';
+          let output = '<div style="display:flex;gap:3px;width:100%;height:8px;">';
+          for (let i = 1; i <= 10; i++) {
+            const filled = pct >= (i * 10);
+            const bg = filled ? color : empty;
+            output += `<div style="flex:1;height:100%;border-radius:2px;background:${bg};transition:background 0.3s ease;"></div>`;
+          }
+          output += '</div>';
+          return output;
+        ]]]
+decluttering_templates:
+  room_card:
+    card:
+      type: custom:stack-in-card
+      cards:
+      - type: custom:button-card
+        entity: '[[light_entity]]'
+        name: '[[room_name]]'
+        template: kohbo_room_card_overview
+        icon: '[[icon]]'
+        variables:
+          temperature: '[[temperature]]'
+        tap_action:
+          action: navigate
+          navigation_path: '[[navigation_path]]'
+          haptic: light
+      - type: custom:stack-in-card
+        mode: horizontal
+        card_mod:
+          style: |
+            ha-card {
+              background: var(--secondary-background-color);
+              border-top-right-radius: 0;
+              border-top-left-radius: 0;
+              box-shadow: none;
+              border: none;
+              margin-top: 8px;
+            }
+            hui-horizontal-stack-card$: |
+              #root {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                gap: 0 !important;
+              }
+              #root > hui-card > * {
+                flex: 0 0 25% !important;
+                max-width: 25%;
+                box-sizing: border-box;
+              }
+        cards: '[[room_devices]]'
+  room_page_top_toolbar:
+    card:
+      type: horizontal-stack
+      card_mod:
+        style: |
+          ha-card, #root {
+            align-items: center;
+          }
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: '[[navigation_path]]'
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: '[[name]]'
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: '[[[ return variables.action_icon || ''mdi:palette-outline'' ]]]'
+        variables:
+          action_icon: '[[action_icon]]'
+        tap_action:
+          action: navigate
+          navigation_path: '[[action_path]]'
+          haptic: light
+  scene_button:
+    card:
+      type: custom:button-card
+      template: kohbo_scene_button
+      entity: '[[scene_entity]]'
+      name: '[[scene_name]]'
+      icon: '[[[ return variables.icon || ''mdi:palette'' ]]]'
+      variables:
+        icon: '[[icon]]'
+      tap_action:
+        action: call-service
+        service: scene.turn_on
+        target:
+          entity_id: '[[scene_entity]]'
+        haptic: light
+views:
+- title: Home
+  path: home
+  icon: kohbo:kohbo-dashboard
+  theme: Kohbo
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:blank
+        styles:
+          card:
+          - opacity: 0
+          - pointer-events: none
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Home
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: kohbo:kohbo-notification
+        icon_color: '[[[ return states[''binary_sensor.home_attention''].state == ''on'' ? ''var(--error-color)'' : ''var(--secondary-text-color)'' ]]]'
+        tap_action:
+          action: more-info
+          entity: binary_sensor.home_attention
+          haptic: light
+    - type: horizontal-stack
+      card_mod:
+        style: |
+          #root { align-items: stretch !important; }
+          #root > *:nth-child(1) { flex: 3 !important; }
+          #root > *:nth-child(2) { flex: 2 !important; }
+      cards:
+      - type: horizontal-stack
+        card_mod:
+          style: '#root { gap: 8px !important; }'
+        cards:
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: binary_sensor.home_attention
+          name: Home Status
+          icon: kohbo:kohbo-house-auto
+          state:
+          - value: 'off'
+            icon: kohbo:kohbo-house-auto
+            color: var(--success-color)
+          - value: 'on'
+            icon: kohbo:kohbo-notification
+            color: var(--error-color)
+          state_display: '[[[ return states[''binary_sensor.home_attention''].state == ''on'' ? (states[''sensor.home_status_message''].state || ''Needs attention'') : ''All good'' ]]]'
+          tap_action:
+            action: more-info
+            entity: binary_sensor.home_attention
+            haptic: light
+        - type: custom:button-card
+          template: kohbo_chip_card
+          name: Energy Usage
+          icon: mdi:lightning-bolt
+          entity: sensor.p1_meter_power
+          tap_action:
+            action: navigate
+            navigation_path: /dashboard-test/energy
+            haptic: light
+          show_state: true
+          styles:
+            state:
+            - margin-left: 3px
+          state:
+          - operator: template
+            value: '[[[ return parseFloat(entity.state) < 0 ]]]'
+            color: var(--success-color)
+          - operator: template
+            value: '[[[ return parseFloat(entity.state) > 3000 ]]]'
+            color: var(--error-color)
+          - operator: template
+            value: '[[[ return parseFloat(entity.state) > 1500 ]]]'
+            color: var(--warning-color)
+          - operator: template
+            value: '[[[ return parseFloat(entity.state) >= 0 ]]]'
+            color: var(--light-grey-color)
+          state_display: '[[[ return (parseFloat(entity.state) / 1000).toFixed(2) + '' kW'' ]]]'
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: input_boolean.tesla_solar_charging_active
+          name: Solar Session
+          icon: mdi:car-electric
+          state:
+          - value: 'off'
+            icon: mdi:car-electric
+            color: var(--light-grey-color)
+          - value: 'on'
+            icon: mdi:car-electric
+            color: var(--success-color)
+          state_display: '[[[ return states[''input_boolean.tesla_solar_charging_active''].state == ''on'' ? ''Solar Only'' : ''Off'' ]]]'
+          tap_action:
+            action: toggle
+            haptic: light
+          hold_action:
+            action: more-info
+            haptic: medium
+      - type: horizontal-stack
+        card_mod:
+          style: '#root { justify-content: flex-end !important; }'
+        cards:
+        - type: custom:button-card
+          template: kohbo_person_entity
+          entity: person.ben
+          tap_action:
+            action: more-info
+            haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Today
+    - type: custom:stack-in-card
+      mode: vertical
+      card_mod:
+        style: ':host { --stack-card-gap: 0; --vertical-stack-card-gap: 0 !important; }'
+      cards:
+      - type: weather-forecast
+        entity: weather.forecast_home
+        show_current: true
+        show_forecast: false
+        card_mod:
+          style: 'ha-card { box-shadow: none; border-radius: 16px 16px 0 0; }'
+      - type: horizontal-stack
+        card_mod:
+          style: |-
+            ha-card { border-radius: 0; background: var(--card-background-color); box-shadow: var(--ha-card-box-shadow, none); margin-top: -1px; padding: 0 12px 12px; }
+            #root { gap: 8px !important; }
+        cards:
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: weather.forecast_home
+          icon: mdi:thermometer-high
+          show_state: true
+          state_display: '[[[ return Math.round(states[''sensor.today_high''].state) + ''°''; ]]]'
+          styles:
+            card:
+            - width: 100%
+            - justify-content: center
+            icon:
+            - color: var(--error-color)
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: weather.forecast_home
+          icon: mdi:thermometer-low
+          show_state: true
+          state_display: '[[[ return Math.round(states[''sensor.today_low''].state) + ''°''; ]]]'
+          styles:
+            card:
+            - width: 100%
+            - justify-content: center
+            icon:
+            - color: 'var(--info-color, #59A5D8)'
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: weather.forecast_home
+          icon: mdi:water-percent
+          show_state: true
+          state_display: '[[[ return states[''weather.forecast_home''].attributes.humidity + ''%''; ]]]'
+          styles:
+            card:
+            - width: 100%
+            - justify-content: center
+            icon:
+            - color: 'var(--info-color, #59A5D8)'
+        - type: custom:button-card
+          template: kohbo_chip_card
+          entity: weather.forecast_home
+          icon: mdi:white-balance-sunny
+          show_state: true
+          state_display: '[[[ return ''UV '' + states[''weather.forecast_home''].attributes.uv_index; ]]]'
+          styles:
+            card:
+            - width: 100%
+            - justify-content: center
+            icon:
+            - color: '[[[ const uv = states[''weather.forecast_home''].attributes.uv_index; if (uv >= 8) return ''var(--error-color)''; if (uv >= 6) return ''var(--orange-color)''; if (uv >= 3) return ''var(--warning-color)''; return ''var(--success-color)''; ]]]'
+      - type: custom:calendar-card-pro
+        days_to_show: 1
+        show_empty_days: false
+        show_past_events: false
+        language: en
+        time_24h: true
+        show_location: false
+        entities:
+        - entity: calendar.b_lo
+          color: var(--primary-color)
+        - entity: calendar.kids
+          color: var(--accent-color)
+        - entity: calendar.ben_personal
+          color: var(--success-color)
+        - entity: calendar.recycle
+          color: var(--orange-color)
+        background_color: var(--card-background-color)
+        event_color: var(--primary-text-color)
+        event_font_size: 14px
+        time_color: var(--secondary-text-color)
+        time_font_size: 12px
+        weekday_font_size: 12px
+        day_font_size: 26px
+        card_mod:
+          style: 'ha-card { border-radius: 0 0 16px 16px; box-shadow: none; margin-top: -1px; }'
+    - type: custom:button-card
+      template: section_title
+      name: Rooms
+    - type: horizontal-stack
+      card_mod:
+        style: |
+          #root {
+            overflow-x: auto;
+            flex-wrap: nowrap !important;
+            gap: 8px !important;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+          }
+          #root::-webkit-scrollbar { display: none; }
+      cards:
+      - type: custom:button-card
+        template: kohbo_device_entity
+        entity: light.living_room_living_room
+        name: Living Room
+        icon: kohbo:kohbo-chair
+        state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/living-room
+          haptic: light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          card:
+          - width: 104px
+          - height: 128px
+          - flex: 0 0 104px
+          - padding-bottom: 16px
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+          name:
+          - font-size: 12px
+      - type: custom:button-card
+        template: kohbo_device_entity
+        entity: light.bedroom_bedroom
+        name: Bedroom
+        icon: kohbo:kohbo-bed-king
+        state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/bedroom
+          haptic: light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          card:
+          - width: 104px
+          - height: 128px
+          - flex: 0 0 104px
+          - padding-bottom: 16px
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+          name:
+          - font-size: 12px
+      - type: custom:button-card
+        template: kohbo_device_entity
+        entity: light.bens_office_bens_office
+        name: Ben's Office
+        icon: kohbo:kohbo-laptop
+        state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/bens-office
+          haptic: light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          card:
+          - width: 104px
+          - height: 128px
+          - flex: 0 0 104px
+          - padding-bottom: 16px
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+          name:
+          - font-size: 12px
+      - type: custom:button-card
+        template: kohbo_device_entity
+        entity: light.juliens_bedroom_juliens_bedroom
+        name: Julien's Bedroom
+        icon: kohbo:kohbo-bed-single
+        state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/juliens-bedroom
+          haptic: light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          card:
+          - width: 104px
+          - height: 128px
+          - flex: 0 0 104px
+          - padding-bottom: 16px
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+          name:
+          - font-size: 12px
+      - type: custom:button-card
+        template: kohbo_device_entity
+        entity: light.mias_bedroom_mias_bedroom
+        name: Mia's Bedroom
+        icon: kohbo:kohbo-bed-single
+        state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/mias-bedroom
+          haptic: light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          card:
+          - width: 104px
+          - height: 128px
+          - flex: 0 0 104px
+          - padding-bottom: 16px
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+          name:
+          - font-size: 12px
+      - type: custom:button-card
+        template: kohbo_device_entity
+        entity: light.playground_playground
+        name: Playground
+        icon: kohbo:kohbo-lego
+        state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/playground
+          haptic: light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          card:
+          - width: 104px
+          - height: 128px
+          - flex: 0 0 104px
+          - padding-bottom: 16px
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+          name:
+          - font-size: 12px
+      - type: custom:button-card
+        template: kohbo_device_entity
+        entity: light.hallway_hallway
+        name: Hallway
+        icon: kohbo:kohbo-double-door
+        state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/hallway
+          haptic: light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          card:
+          - width: 104px
+          - height: 128px
+          - flex: 0 0 104px
+          - padding-bottom: 16px
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+          name:
+          - font-size: 12px
+      - type: custom:button-card
+        template: kohbo_device_entity
+        entity: light.corridor_corridor
+        name: Corridor
+        icon: kohbo:kohbo-location
+        state_display: '[[[ return entity.state === ''on'' ? ''On'' : ''Off''; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/corridor
+          haptic: light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          card:
+          - width: 104px
+          - height: 128px
+          - flex: 0 0 104px
+          - padding-bottom: 16px
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+          name:
+          - font-size: 12px
+    - type: custom:button-card
+      template: section_title
+      name: Devices
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: climate.ec3a56bc6527
+        name: Airco
+        template: kohbo_thermostat_entity
+        variables:
+          badge_color: '[[[ if (entity.state == ''heat_cool'') return ''var(--info-color, var(--primary-color))''; else if (entity.state == ''heat'') return ''var(--error-color)''; else if (entity.state == ''cool'') return ''var(--primary-color)''; else if (entity.state == ''off'') return ''var(--light-grey-color)''; else return ''var(--primary-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+      - type: custom:button-card
+        entity: vacuum.roborock_s8_pro_ultra
+        name: Vacuum
+        template: kohbo_device_entity
+        icon: mdi:robot-vacuum
+        variables:
+          badge_color: '[[[ const s = entity.state; if (s === ''cleaning'' || s === ''returning'') return ''var(--primary-color)''; if (s === ''error'') return ''var(--error-color)''; if (s === ''docked'') return ''var(--success-color)''; return ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/more
+          haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Favorites
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_movie
+        - scene_name: Movie
+        - icon: mdi:movie-open
+      - type: custom:button-card
+        template: kohbo_scene_button
+        name: Goodnight
+        icon: kohbo:kohbo-moon-2
+        styles:
+          icon:
+          - color: '#7C6FE0'
+        tap_action:
+          action: call-service
+          service: script.turn_on
+          target:
+            entity_id: script.goodnight
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_scene_button
+        name: All Lights Off
+        icon: mdi:lightbulb-off-outline
+        styles:
+          icon:
+          - color: 'var(--info-color, #59A5D8)'
+        tap_action:
+          action: call-service
+          service: light.turn_off
+          target:
+            entity_id: light.all_lights
+          haptic: light
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Rooms
+  path: rooms
+  icon: kohbo:kohbo-rooms
+  theme: Kohbo
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: |
+          ha-card, #root { align-items: center; }
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/home
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Rooms
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:blank
+        styles:
+          card:
+          - opacity: 0
+          - pointer-events: none
+    - type: custom:decluttering-card
+      template: room_card
+      variables:
+      - light_entity: light.living_room_living_room
+      - room_name: Living Room
+      - icon: kohbo:kohbo-chair
+      - navigation_path: /dashboard-test/living-room
+      - temperature: ''
+      - room_devices:
+        - type: custom:button-card
+          entity: light.living_room_living_room
+          name: Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-device-lights
+        - type: custom:button-card
+          entity: light.kitchen
+          name: Kitchen
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-fridge
+        - type: custom:button-card
+          entity: light.dining
+          name: Dining
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-dining
+        - type: custom:button-card
+          entity: vacuum.roborock_s8_pro_ultra
+          name: Vacuum
+          template: kohbo_room_card_device
+          icon: mdi:robot-vacuum
+          tap_action:
+            action: more-info
+            haptic: light
+        - type: custom:button-card
+          entity: media_player.tv_tv
+          name: TV
+          template: kohbo_room_card_device
+          icon: mdi:television
+          tap_action:
+            action: more-info
+            haptic: light
+    - type: custom:decluttering-card
+      template: room_card
+      variables:
+      - light_entity: light.bedroom_bedroom
+      - room_name: Bedroom
+      - icon: kohbo:kohbo-bed-king
+      - navigation_path: /dashboard-test/bedroom
+      - temperature: ''
+      - room_devices:
+        - type: custom:button-card
+          entity: light.bedroom_bedroom
+          name: Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-device-lights
+        - type: custom:button-card
+          entity: light.bedroom
+          name: Bed Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-lamp
+        - type: custom:button-card
+          entity: switch.bedroom_adaptive_lighting_bedroom
+          name: Adaptive
+          template: kohbo_room_card_device
+          icon: mdi:theme-light-dark
+    - type: custom:decluttering-card
+      template: room_card
+      variables:
+      - light_entity: light.bens_office_bens_office
+      - room_name: Ben's Office
+      - icon: kohbo:kohbo-laptop
+      - navigation_path: /dashboard-test/bens-office
+      - temperature: '[[[ return states[''climate.ec3a56bc6527''].attributes.current_temperature ]]]'
+      - room_devices:
+        - type: custom:button-card
+          entity: light.bens_office_bens_office
+          name: Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-device-lights
+        - type: custom:button-card
+          entity: climate.ec3a56bc6527
+          name: Airco
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-climate
+          tap_action:
+            action: more-info
+            haptic: light
+        - type: custom:button-card
+          entity: switch.ben_s_office_adaptive_lighting_ben_s_office
+          name: Adaptive
+          template: kohbo_room_card_device
+          icon: mdi:theme-light-dark
+    - type: custom:decluttering-card
+      template: room_card
+      variables:
+      - light_entity: light.juliens_bedroom_juliens_bedroom
+      - room_name: Julien's Bedroom
+      - icon: kohbo:kohbo-bed-single
+      - navigation_path: /dashboard-test/juliens-bedroom
+      - temperature: ''
+      - room_devices:
+        - type: custom:button-card
+          entity: light.juliens_bedroom_juliens_bedroom
+          name: Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-device-lights
+        - type: custom:button-card
+          entity: switch.julien_s_bedroom_adaptive_lighting_julien_s_bedroom
+          name: Adaptive
+          template: kohbo_room_card_device
+          icon: mdi:theme-light-dark
+    - type: custom:decluttering-card
+      template: room_card
+      variables:
+      - light_entity: light.mias_bedroom_mias_bedroom
+      - room_name: Mia's Bedroom
+      - icon: kohbo:kohbo-bed-single
+      - navigation_path: /dashboard-test/mias-bedroom
+      - temperature: ''
+      - room_devices:
+        - type: custom:button-card
+          entity: light.mias_bedroom_mias_bedroom
+          name: Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-device-lights
+        - type: custom:button-card
+          entity: switch.mia_s_bedroom_adaptive_lighting_mia_s_bedroom
+          name: Adaptive
+          template: kohbo_room_card_device
+          icon: mdi:theme-light-dark
+    - type: custom:decluttering-card
+      template: room_card
+      variables:
+      - light_entity: light.playground_playground
+      - room_name: Playground
+      - icon: kohbo:kohbo-lego
+      - navigation_path: /dashboard-test/playground
+      - temperature: ''
+      - room_devices:
+        - type: custom:button-card
+          entity: light.playground_playground
+          name: Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-device-lights
+        - type: custom:button-card
+          entity: light.ilonas_computer
+          name: Desk Light
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-lamp
+        - type: custom:button-card
+          entity: switch.playground_adaptive_lighting_playground
+          name: Adaptive
+          template: kohbo_room_card_device
+          icon: mdi:theme-light-dark
+    - type: custom:decluttering-card
+      template: room_card
+      variables:
+      - light_entity: light.hallway_hallway
+      - room_name: Hallway
+      - icon: kohbo:kohbo-double-door
+      - navigation_path: /dashboard-test/hallway
+      - temperature: ''
+      - room_devices:
+        - type: custom:button-card
+          entity: light.hallway_hallway
+          name: Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-device-lights
+        - type: custom:button-card
+          entity: switch.hallway_adaptive_lighting_hallway
+          name: Adaptive
+          template: kohbo_room_card_device
+          icon: mdi:theme-light-dark
+    - type: custom:decluttering-card
+      template: room_card
+      variables:
+      - light_entity: light.corridor_corridor
+      - room_name: Corridor
+      - icon: kohbo:kohbo-location
+      - navigation_path: /dashboard-test/corridor
+      - temperature: ''
+      - room_devices:
+        - type: custom:button-card
+          entity: light.corridor_corridor
+          name: Lights
+          template: kohbo_room_card_device
+          icon: kohbo:kohbo-device-lights
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Living Room
+  path: living-room
+  icon: kohbo:kohbo-chair
+  theme: Kohbo
+  subview: true
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/rooms
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Living Room
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: kohbo:kohbo-light-2
+        tap_action:
+          action: navigate
+          navigation_path: '#living_room_scenes'
+          haptic: light
+    - type: horizontal-stack
+      card_mod:
+        style: '#root { gap: 8px !important; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_chip_card
+        entity: sensor.living_room_living_room_switch_battery
+        icon: mdi:remote
+        show_state: true
+        state_display: '[[[ return ''Remote '' + entity.state + ''%''; ]]]'
+        styles:
+          icon:
+          - color: '[[[ const b = parseFloat(entity.state); if (b < 20) return ''var(--error-color)''; if (b < 40) return ''var(--warning-color)''; return ''var(--secondary-text-color)''; ]]]'
+        tap_action:
+          action: more-info
+          haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Lights
+    - type: tile
+      entity: light.living_room_living_room
+      name: All Living Room Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-chair
+    - type: tile
+      entity: light.kitchen
+      name: Kitchen
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-fridge
+    - type: tile
+      entity: light.dining
+      name: Dining
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-dining
+    - type: tile
+      entity: light.living_room_floor_lamp_living_room
+      name: Floor Lamp
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.living_room_living_room_table_lamp
+      name: Table Lamp
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: light.living_room_perifo_cylinder_spot_1
+        name: Cylinder Spot 1
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.living_room_perifo_cylinder_spot_2
+        name: Cylinder Spot 2
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.living_room_perifo_cylinder_spot_3
+        name: Cylinder Spot 3
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.living_room_perifo_cylinder_spot_4
+        name: Cylinder Spot 4
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.living_room_perifo_linear_light_bar_1
+        name: Linear Bar
+        template: kohbo_device_entity
+        icon: mdi:led-strip
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+    - type: custom:button-card
+      template: section_title
+      name: Quick Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_movie
+        - scene_name: Movie
+        - icon: mdi:movie-open
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_relax
+        - scene_name: Relax
+        - icon: mdi:sofa
+    - type: custom:button-card
+      template: section_title
+      name: Devices
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: vacuum.roborock_s8_pro_ultra
+        name: Roborock
+        template: kohbo_device_entity
+        icon: mdi:robot-vacuum
+      - type: custom:button-card
+        entity: media_player.tv_tv
+        name: Apple TV
+        template: kohbo_device_entity
+        icon: mdi:television
+      - type: custom:button-card
+        entity: media_player.ht_a9_2
+        name: Soundbar
+        template: kohbo_device_entity
+        icon: kohbo:kohbo-device-speaker
+    - type: custom:button-card
+      template: section_title
+      name: Quick Settings
+    - type: entities
+      entities:
+      - entity: switch.living_room_adaptive_lighting_living_room
+        name: Adaptive Lighting
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#living_room_scenes'
+    close_by_clicking_outside: true
+    styles: |
+      .bubble-pop-up-background { background: #212529 !important; }
+      .bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }
+      .bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+      .bubble-close-button { background: transparent !important; }
+    cards:
+    - type: custom:button-card
+      template: kohbo_popup_page_title
+      name: Living Room Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_sleepy
+        - scene_name: Sleepy
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_shine
+        - scene_name: Shine
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_read
+        - scene_name: Read
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_unwind
+        - scene_name: Unwind
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_night_time
+        - scene_name: Night Time
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_arise
+        - scene_name: Arise
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_movie
+        - scene_name: Movie
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_storybook
+        - scene_name: Storybook
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_dreamy_dusk
+        - scene_name: Dreamy Dusk
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_rest
+        - scene_name: Rest
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_golden_hours
+        - scene_name: Golden Hours
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_natural_light_4
+        - scene_name: Natural Light 4
+        - icon: mdi:palette
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Bedroom
+  path: bedroom
+  icon: kohbo:kohbo-bed-king
+  theme: Kohbo
+  subview: true
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/rooms
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Bedroom
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: kohbo:kohbo-light-2
+        tap_action:
+          action: navigate
+          navigation_path: '#bedroom_scenes'
+          haptic: light
+    - type: horizontal-stack
+      card_mod:
+        style: '#root { gap: 8px !important; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_chip_card
+        entity: sensor.bedroom_switch_battery
+        icon: mdi:remote
+        show_state: true
+        state_display: '[[[ return ''Remote '' + entity.state + ''%''; ]]]'
+        styles:
+          icon:
+          - color: '[[[ const b = parseFloat(entity.state); if (b < 20) return ''var(--error-color)''; if (b < 40) return ''var(--warning-color)''; return ''var(--secondary-text-color)''; ]]]'
+        tap_action:
+          action: more-info
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_chip_card
+        entity: sensor.bedroom_master_bedroom_switch_battery
+        icon: mdi:remote
+        show_state: true
+        state_display: '[[[ return ''Remote '' + entity.state + ''%''; ]]]'
+        styles:
+          icon:
+          - color: '[[[ const b = parseFloat(entity.state); if (b < 20) return ''var(--error-color)''; if (b < 40) return ''var(--warning-color)''; return ''var(--secondary-text-color)''; ]]]'
+        tap_action:
+          action: more-info
+          haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Lights
+    - type: tile
+      entity: light.bedroom_bedroom
+      name: All Bedroom Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-bed-king
+    - type: tile
+      entity: light.bedroom
+      name: Bed Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-lamp
+    - type: tile
+      entity: light.bedroom_ilonas_bed_table
+      name: Ilona's Bed Table
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.bedroom_bens_bed_table
+      name: Ben's Bed Table
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: light.bedroom_hue_ambiance_spot_1
+        name: Ceiling Spot 1
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.bedroom_hue_ambiance_spot_2
+        name: Ceiling Spot 2
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.bedroom_hue_ambiance_spot_3
+        name: Ceiling Spot 3
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+    - type: custom:button-card
+      template: section_title
+      name: Quick Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_bed_tables
+        - scene_name: Bed Tables
+        - icon: mdi:lamp
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_read
+        - scene_name: Read
+        - icon: mdi:book-open-page-variant
+    - type: custom:button-card
+      template: section_title
+      name: Quick Settings
+    - type: entities
+      entities:
+      - entity: switch.bedroom_adaptive_lighting_bedroom
+        name: Adaptive Lighting
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#bedroom_scenes'
+    close_by_clicking_outside: true
+    styles: |
+      .bubble-pop-up-background { background: #212529 !important; }
+      .bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }
+      .bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+      .bubble-close-button { background: transparent !important; }
+    cards:
+    - type: custom:button-card
+      template: kohbo_popup_page_title
+      name: Bedroom Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_dimmed
+        - scene_name: Dimmed
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_bed_tables
+        - scene_name: Bed Tables
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_read
+        - scene_name: Read
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Ben's Office
+  path: bens-office
+  icon: kohbo:kohbo-laptop
+  theme: Kohbo
+  subview: true
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/rooms
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Ben's Office
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: kohbo:kohbo-light-2
+        tap_action:
+          action: navigate
+          navigation_path: '#bens_office_scenes'
+          haptic: light
+    - type: horizontal-stack
+      card_mod:
+        style: '#root { gap: 8px !important; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_chip_card
+        entity: climate.ec3a56bc6527
+        icon: '[[[ if (entity.attributes.preset_mode === ''eco'') return ''mdi:leaf''; else if (entity.state == ''heat_cool'') return ''mdi:sun-snowflake-variant''; else if (entity.state == ''heat'') return ''mdi:heat-wave''; else if (entity.state == ''cool'') return ''mdi:snowflake''; else if (entity.state == ''dry'') return ''mdi:water-percent''; else if (entity.state == ''fan_only'') return ''mdi:fan''; else return ''mdi:power''; ]]]'
+        show_state: true
+        state_display: '[[[ const s = entity.state.charAt(0).toUpperCase() + entity.state.slice(1); return Math.round(entity.attributes.current_temperature) + ''° · '' + s; ]]]'
+        tap_action:
+          action: more-info
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_chip_card
+        entity: sensor.bens_office_tv_switch_battery
+        icon: mdi:remote
+        show_state: true
+        state_display: '[[[ return ''Remote '' + entity.state + ''%''; ]]]'
+        styles:
+          icon:
+          - color: '[[[ const b = parseFloat(entity.state); if (b < 20) return ''var(--error-color)''; if (b < 40) return ''var(--warning-color)''; return ''var(--secondary-text-color)''; ]]]'
+        tap_action:
+          action: more-info
+          haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Climate
+    - type: custom:stack-in-card
+      card_mod:
+        style: ':host { --stack-card-gap: 0; --vertical-stack-card-gap: 0; }'
+      cards:
+      - type: custom:mini-graph-card
+        entities:
+        - entity: climate.ec3a56bc6527
+          attribute: current_temperature
+          name: Indoor
+        name: Office Climate
+        icon: mdi:thermometer
+        points_per_hour: 2
+        line_width: 4
+        decimals: 0
+        smoothing: true
+        color_thresholds_transition: smooth
+        color_thresholds:
+        - color: '#59A5D8'
+          value: -10
+        - color: '#ADD2EB'
+          value: 7
+        - color: '#06D6A0'
+          value: 19
+        - color: '#FFD166'
+          value: 26
+        - color: '#ED4747'
+          value: 32
+        card_mod:
+          style: |-
+            ha-card { border: none; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+            ha-card .header { padding-bottom: 2px; }
+    - type: custom:button-card
+      template: section_title
+      name: Lights
+    - type: tile
+      entity: light.bens_office_bens_office
+      name: All Office Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-laptop
+    - type: tile
+      entity: light.bens_office_bens_screen
+      name: Screen Light
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: light.bens_office_hue_centris_ceiling_1
+        name: Ceiling
+        template: kohbo_device_entity
+        icon: mdi:ceiling-light
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.bens_office_hue_centris_spot_1
+        name: Spot 1
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.bens_office_hue_centris_spot_2
+        name: Spot 2
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.bens_office_hue_centris_spot_3
+        name: Spot 3
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+      - type: custom:button-card
+        entity: light.bens_office_hue_centris_spot_6
+        name: Spot 6
+        template: kohbo_device_entity
+        icon: mdi:lightbulb-spot
+        variables:
+          badge_color: '[[[ return entity.state === ''on'' ? ''var(--warning-color)'' : ''var(--disabled-text-color)''; ]]]'
+        styles:
+          img_cell:
+          - background: '[[[ return `color-mix(in srgb, ${variables.badge_color} 18%, transparent)`; ]]]'
+          - border-radius: 12px
+          icon:
+          - color: '[[[ return variables.badge_color; ]]]'
+    - type: custom:button-card
+      template: section_title
+      name: Quick Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:brain
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_relax
+        - scene_name: Relax
+        - icon: mdi:sofa
+    - type: custom:button-card
+      template: section_title
+      name: Devices
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: climate.ec3a56bc6527
+        name: Airco
+        template: kohbo_thermostat_entity
+    - type: custom:button-card
+      template: section_title
+      name: Quick Settings
+    - type: entities
+      entities:
+      - entity: switch.ben_s_office_adaptive_lighting_ben_s_office
+        name: Adaptive Lighting
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.adaptive_lighting_ben_s_office_adaptive_lighting_adapt_color_ben_s_office
+        name: Adapt Color
+        icon: mdi:palette
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.adaptive_lighting_ben_s_office_adaptive_lighting_adapt_brightness_ben_s_office
+        name: Adapt Brightness
+        icon: mdi:brightness-6
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#bens_office_scenes'
+    close_by_clicking_outside: true
+    styles: |
+      .bubble-pop-up-background { background: #212529 !important; }
+      .bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }
+      .bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+      .bubble-close-button { background: transparent !important; }
+    cards:
+    - type: custom:button-card
+      template: kohbo_popup_page_title
+      name: Ben's Office Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_read
+        - scene_name: Read
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Julien's Bedroom
+  path: juliens-bedroom
+  icon: kohbo:kohbo-bed-single
+  theme: Kohbo
+  subview: true
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/rooms
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Julien's Bedroom
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: kohbo:kohbo-light-2
+        tap_action:
+          action: navigate
+          navigation_path: '#juliens_bedroom_scenes'
+          haptic: light
+    - type: horizontal-stack
+      card_mod:
+        style: '#root { gap: 8px !important; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_chip_card
+        entity: sensor.juliens_bedroom_juliens_bedroom_switch_battery
+        icon: mdi:remote
+        show_state: true
+        state_display: '[[[ return ''Remote '' + entity.state + ''%''; ]]]'
+        styles:
+          icon:
+          - color: '[[[ const b = parseFloat(entity.state); if (b < 20) return ''var(--error-color)''; if (b < 40) return ''var(--warning-color)''; return ''var(--secondary-text-color)''; ]]]'
+        tap_action:
+          action: more-info
+          haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Lights
+    - type: tile
+      entity: light.juliens_bedroom_juliens_bedroom
+      name: All Julien's Bedroom Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-bed-single
+    - type: tile
+      entity: light.juliens_bedroom_hue_color_spot_3
+      name: Spot 3
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.juliens_bedroom_hue_color_spot_4
+      name: Spot 4
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.juliens_bedroom_hue_color_spot_5
+      name: Spot 5
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.juliens_bedroom_hue_go_julien
+      name: Hue Go
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: custom:button-card
+      template: section_title
+      name: Quick Settings
+    - type: entities
+      entities:
+      - entity: switch.julien_s_bedroom_adaptive_lighting_julien_s_bedroom
+        name: Adaptive Lighting
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#juliens_bedroom_scenes'
+    close_by_clicking_outside: true
+    styles: |
+      .bubble-pop-up-background { background: #212529 !important; }
+      .bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }
+      .bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+      .bubble-close-button { background: transparent !important; }
+    cards:
+    - type: custom:button-card
+      template: kohbo_popup_page_title
+      name: Julien's Bedroom Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_storybook
+        - scene_name: Storybook
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_rest
+        - scene_name: Rest
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_unwind
+        - scene_name: Unwind
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_sleepy
+        - scene_name: Sleepy
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_nighttime
+        - scene_name: Nighttime
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_arise
+        - scene_name: Arise
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_natural_light_3
+        - scene_name: Natural Light 3
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_golden_hours_6
+        - scene_name: Golden Hours 6
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_read_2
+        - scene_name: Read 2
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_pensive
+        - scene_name: Pensive
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_shine
+        - scene_name: Shine
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_read
+        - scene_name: Read
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_concentrate_2
+        - scene_name: Concentrate 2
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_diaper_at_night
+        - scene_name: Diaper At Night
+        - icon: mdi:palette
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Mia's Bedroom
+  path: mias-bedroom
+  icon: kohbo:kohbo-bed-single
+  theme: Kohbo
+  subview: true
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/rooms
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Mia's Bedroom
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: kohbo:kohbo-light-2
+        tap_action:
+          action: navigate
+          navigation_path: '#mias_bedroom_scenes'
+          haptic: light
+    - type: horizontal-stack
+      card_mod:
+        style: '#root { gap: 8px !important; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_chip_card
+        entity: sensor.mias_bedroom_marcis_bedroom_switch_battery
+        icon: mdi:remote
+        show_state: true
+        state_display: '[[[ return ''Remote '' + entity.state + ''%''; ]]]'
+        styles:
+          icon:
+          - color: '[[[ const b = parseFloat(entity.state); if (b < 20) return ''var(--error-color)''; if (b < 40) return ''var(--warning-color)''; return ''var(--secondary-text-color)''; ]]]'
+        tap_action:
+          action: more-info
+          haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Lights
+    - type: tile
+      entity: light.mias_bedroom_mias_bedroom
+      name: All Mia's Bedroom Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-bed-single
+    - type: tile
+      entity: light.mias_bedroom_marci_spot_1
+      name: Spot 1
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.mias_bedroom_marci_spot_2
+      name: Spot 2
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.mias_bedroom_marci_spot_3
+      name: Spot 3
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: custom:button-card
+      template: section_title
+      name: Quick Settings
+    - type: entities
+      entities:
+      - entity: switch.mia_s_bedroom_adaptive_lighting_mia_s_bedroom
+        name: Adaptive Lighting
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#mias_bedroom_scenes'
+    close_by_clicking_outside: true
+    styles: |
+      .bubble-pop-up-background { background: #212529 !important; }
+      .bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }
+      .bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+      .bubble-close-button { background: transparent !important; }
+    cards:
+    - type: custom:button-card
+      template: kohbo_popup_page_title
+      name: Mia's Bedroom Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_read
+        - scene_name: Read
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Playground
+  path: playground
+  icon: kohbo:kohbo-lego
+  theme: Kohbo
+  subview: true
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/rooms
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Playground
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: kohbo:kohbo-light-2
+        tap_action:
+          action: navigate
+          navigation_path: '#playground_scenes'
+          haptic: light
+    - type: horizontal-stack
+      card_mod:
+        style: '#root { gap: 8px !important; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_chip_card
+        entity: sensor.playground_office_switch_battery
+        icon: mdi:remote
+        show_state: true
+        state_display: '[[[ return ''Remote '' + entity.state + ''%''; ]]]'
+        styles:
+          icon:
+          - color: '[[[ const b = parseFloat(entity.state); if (b < 20) return ''var(--error-color)''; if (b < 40) return ''var(--warning-color)''; return ''var(--secondary-text-color)''; ]]]'
+        tap_action:
+          action: more-info
+          haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Lights
+    - type: tile
+      entity: light.playground_playground
+      name: All Playground Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-lego
+    - type: tile
+      entity: light.ilonas_computer
+      name: Ilona's Computer
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-lamp
+    - type: tile
+      entity: light.playground_hue_centris_spot_office_1
+      name: Spot 1
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.playground_hue_centris_spot_office_2
+      name: Spot 2
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.playground_hue_centris_ceiling_office
+      name: Ceiling Light
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: custom:button-card
+      template: section_title
+      name: Quick Settings
+    - type: entities
+      entities:
+      - entity: switch.playground_adaptive_lighting_playground
+        name: Adaptive Lighting
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#playground_scenes'
+    close_by_clicking_outside: true
+    styles: |
+      .bubble-pop-up-background { background: #212529 !important; }
+      .bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }
+      .bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+      .bubble-close-button { background: transparent !important; }
+    cards:
+    - type: custom:button-card
+      template: kohbo_popup_page_title
+      name: Playground Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_read
+        - scene_name: Read
+        - icon: mdi:palette
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Hallway
+  path: hallway
+  icon: kohbo:kohbo-double-door
+  theme: Kohbo
+  subview: true
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/rooms
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Hallway
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:blank
+        styles:
+          card:
+          - opacity: 0
+          - pointer-events: none
+    - type: custom:button-card
+      template: section_title
+      name: Lights
+    - type: tile
+      entity: light.hallway_hallway
+      name: All Hallway Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-double-door
+    - type: tile
+      entity: light.hallway_hue_enrave_ceiling_1
+      name: Ceiling 1
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.hallway_hue_enrave_ceiling_2
+      name: Ceiling 2
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: custom:button-card
+      template: section_title
+      name: Quick Settings
+    - type: entities
+      entities:
+      - entity: switch.hallway_adaptive_lighting_hallway
+        name: Adaptive Lighting
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Corridor
+  path: corridor
+  icon: kohbo:kohbo-location
+  theme: Kohbo
+  subview: true
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/rooms
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Corridor
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: kohbo:kohbo-light-2
+        tap_action:
+          action: navigate
+          navigation_path: '#corridor_scenes'
+          haptic: light
+    - type: custom:button-card
+      template: section_title
+      name: Lights
+    - type: tile
+      entity: light.corridor_corridor
+      name: All Corridor Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: kohbo:kohbo-location
+    - type: tile
+      entity: light.corridor_hue_color_spot_1
+      name: Spot 1
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: tile
+      entity: light.corridor_hue_color_spot_2
+      name: Spot 2
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: '#corridor_scenes'
+    close_by_clicking_outside: true
+    styles: |
+      .bubble-pop-up-background { background: #212529 !important; }
+      .bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }
+      .bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }
+      .bubble-close-button { background: transparent !important; }
+    cards:
+    - type: custom:button-card
+      template: kohbo_popup_page_title
+      name: Corridor Scenes
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.corridor_corridor_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Scenes
+  path: scenes
+  icon: kohbo:kohbo-light-2
+  theme: Kohbo
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/home
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Scenes
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:blank
+        styles:
+          card:
+          - opacity: 0
+          - pointer-events: none
+    - type: custom:button-card
+      template: section_title
+      name: Living Room
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_sleepy
+        - scene_name: Sleepy
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_shine
+        - scene_name: Shine
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_read
+        - scene_name: Read
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_unwind
+        - scene_name: Unwind
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_night_time
+        - scene_name: Night Time
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_arise
+        - scene_name: Arise
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_movie
+        - scene_name: Movie
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_storybook
+        - scene_name: Storybook
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_dreamy_dusk
+        - scene_name: Dreamy Dusk
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_rest
+        - scene_name: Rest
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_golden_hours
+        - scene_name: Golden Hours
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.living_room_living_room_natural_light_4
+        - scene_name: Natural Light 4
+        - icon: mdi:palette
+    - type: custom:button-card
+      template: section_title
+      name: Bedroom
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_dimmed
+        - scene_name: Dimmed
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_bed_tables
+        - scene_name: Bed Tables
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_read
+        - scene_name: Read
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bedroom_bedroom_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+    - type: custom:button-card
+      template: section_title
+      name: Ben's Office
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_read
+        - scene_name: Read
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.bens_office_bens_office_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+    - type: custom:button-card
+      template: section_title
+      name: Julien's Bedroom
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_storybook
+        - scene_name: Storybook
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_rest
+        - scene_name: Rest
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_unwind
+        - scene_name: Unwind
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_sleepy
+        - scene_name: Sleepy
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_nighttime
+        - scene_name: Nighttime
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_arise
+        - scene_name: Arise
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_natural_light_3
+        - scene_name: Natural Light 3
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_golden_hours_6
+        - scene_name: Golden Hours 6
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_read_2
+        - scene_name: Read 2
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_pensive
+        - scene_name: Pensive
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_shine
+        - scene_name: Shine
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_read
+        - scene_name: Read
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_concentrate_2
+        - scene_name: Concentrate 2
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.juliens_bedroom_juliens_bedroom_diaper_at_night
+        - scene_name: Diaper At Night
+        - icon: mdi:palette
+    - type: custom:button-card
+      template: section_title
+      name: Mia's Bedroom
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_read
+        - scene_name: Read
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.mias_bedroom_mias_bedroom_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+    - type: custom:button-card
+      template: section_title
+      name: Playground
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_energize
+        - scene_name: Energize
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_relax
+        - scene_name: Relax
+        - icon: mdi:palette
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_concentrate
+        - scene_name: Concentrate
+        - icon: mdi:palette
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.playground_playground_read
+        - scene_name: Read
+        - icon: mdi:palette
+    - type: custom:button-card
+      template: section_title
+      name: Corridor
+    - type: horizontal-stack
+      cards:
+      - type: custom:decluttering-card
+        template: scene_button
+        variables:
+        - scene_entity: scene.corridor_corridor_nightlight
+        - scene_name: Nightlight
+        - icon: mdi:palette
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: Energy
+  path: energy
+  icon: mdi:lightning-bolt
+  theme: Kohbo
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/home
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: Energy
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:blank
+        styles:
+          card:
+          - opacity: 0
+          - pointer-events: none
+    - type: custom:stack-in-card
+      mode: vertical
+      card_mod:
+        style: |-
+          :host {
+            --stack-card-gap: 0;
+            --vertical-stack-card-gap: 0 !important;
+          }
+      cards:
+      - type: custom:button-card
+        template: kohbo_card_header
+        name: Today's Overview
+      - type: custom:stack-in-card
+        mode: horizontal
+        cards:
+        - type: custom:button-card
+          template: kohbo_energy_stat_bar
+          entity: sensor.p1_meter_power
+          name: Grid
+          state_display: '[[[ const w = parseFloat(entity?.state || 0); return w >= 1000 ? (w / 1000).toFixed(1) : Math.round(w); ]]]'
+          variables:
+            unit_label: '[[[ const w = parseFloat(states[''sensor.p1_meter_power'']?.state || 0); return Math.abs(w) >= 1000 ? ''kW'' : ''W''; ]]]'
+            show_divider: true
+            bar_mode: grid
+        - type: custom:button-card
+          template: kohbo_energy_stat_bar
+          entity: sensor.goodwe_pv_power
+          name: Solar
+          state_display: '[[[ const w = parseFloat(entity?.state || 0); return w >= 1000 ? (w / 1000).toFixed(1) : Math.round(w); ]]]'
+          variables:
+            unit_label: '[[[ const w = parseFloat(states[''sensor.goodwe_pv_power'']?.state || 0); return w >= 1000 ? ''kW'' : ''W''; ]]]'
+            show_divider: true
+            bar_mode: solar
+        - type: custom:button-card
+          template: kohbo_energy_stat_bar
+          entity: sensor.house_power_consumption
+          name: House
+          state_display: '[[[ const w = parseFloat(entity?.state || 0); return w >= 1000 ? (w / 1000).toFixed(1) : Math.round(w); ]]]'
+          variables:
+            unit_label: '[[[ const w = parseFloat(states[''sensor.house_power_consumption'']?.state || 0); return w >= 1000 ? ''kW'' : ''W''; ]]]'
+            show_divider: false
+            bar_mode: house
+      - type: custom:apexcharts-card
+        card_mod:
+          style: |-
+            ha-card {
+              background: transparent;
+              border-radius: 0;
+              box-shadow: none;
+              border: none;
+              padding-bottom: 16px;
+            }
+            .apexcharts-legend {
+              padding: 0 !important;
+              margin: 0 !important;
+              margin-top: 10px !important;
+              display: flex !important;
+              flex-direction: row !important;
+              flex-wrap: wrap !important;
+              justify-content: center !important;
+            }
+        graph_span: 24h
+        span:
+          start: day
+        header:
+          show: false
+        apex_config:
+          chart:
+            height: 200
+          grid:
+            borderColor: rgba(255,255,255,0.05)
+          legend:
+            show: true
+            position: bottom
+            horizontalAlign: center
+            floating: false
+            fontSize: 11px
+            markers:
+              width: 8
+              height: 8
+            itemMargin:
+              horizontal: 16
+              vertical: 0
+          xaxis:
+            labels:
+              format: HH
+            axisBorder:
+              show: false
+            axisTicks:
+              show: false
+          yaxis:
+          - id: energy
+            seriesName: Grid Import
+            min: 0
+            forceNiceScale: true
+            labels:
+              style:
+                fontSize: 10px
+              formatter: 'EVAL: (val) => val ? `${val.toFixed(1)}` : ''0'''
+          tooltip:
+            x:
+              format: HH:mm
+        series:
+        - entity: sensor.p1_meter_energy_import
+          type: column
+          name: Grid Import
+          unit: kWh
+          group_by:
+            func: diff
+            duration: 1h
+          color: var(--primary-color)
+          yaxis_id: energy
+          show:
+            extremas: false
+            in_header: true
+            legend_value: true
+        - entity: sensor.goodwe_today_s_pv_generation
+          type: line
+          name: Solar
+          color: var(--accent-color)
+          unit: kWh
+          stroke_width: 2
+          curve: smooth
+          yaxis_id: energy
+          group_by:
+            func: diff
+            duration: 1h
+          show:
+            extremas: false
+            in_header: true
+            legend_value: true
+    - type: custom:stack-in-card
+      card_mod:
+        style: ':host { --stack-card-gap: 0; --vertical-stack-card-gap: 0 !important; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_card_header
+        name: Energy History
+        card_mod:
+          style: 'ha-card { padding-bottom: 4px !important; }'
+      - type: custom:stack-in-card
+        mode: horizontal
+        card_mod:
+          style: 'ha-card { background: transparent; box-shadow: none; padding: 0 0 4px; }'
+        cards:
+        - type: custom:button-card
+          template: kohbo_energy_stat_comparison
+          entity: sensor.whole_home_energy_daily_usage
+          name: Today
+          variables:
+            comparison_type: daily
+            comparison_label: vs avg
+            show_divider: true
+        - type: custom:button-card
+          template: kohbo_energy_stat_comparison
+          entity: sensor.whole_home_energy_weekly_usage
+          name: This Week
+          variables:
+            comparison_type: weekly
+            comparison_label: vs expected
+            show_divider: true
+        - type: custom:button-card
+          template: kohbo_energy_stat_comparison
+          entity: sensor.whole_home_energy_monthly_usage
+          name: This Month
+          variables:
+            comparison_type: monthly
+            comparison_label: vs expected
+            show_divider: false
+      - type: custom:stack-in-card
+        mode: horizontal
+        card_mod:
+          style: 'ha-card { background: rgba(0,0,0,0.2); border-radius: 20px; margin: 6px 16px; padding: 3px; box-shadow: none; }'
+        cards:
+        - type: custom:button-card
+          entity: input_select.energy_history_timeframe
+          name: Week
+          show_icon: false
+          show_state: false
+          card_mod:
+            style: 'ha-card { background: {{ ''var(--accent-color)'' if states(''input_select.energy_history_timeframe'') not in [''Past 30 Days'',''Weekly'',''Monthly''] else ''transparent'' }} !important; }'
+          styles:
+            card:
+            - background: '[[[ const state = entity?.state || states[''input_select.energy_history_timeframe'']?.state; const isActive = !state || state === ''unknown'' || state === ''unavailable'' || state === ''This Week''; return isActive ? ''var(--accent-color)'' : ''transparent''; ]]]'
+            - border-radius: 16px
+            - padding: 6px 2px
+            - box-shadow: none
+            name:
+            - font-size: 12px
+            - font-weight: 500
+            - color: '[[[ const state = entity?.state || states[''input_select.energy_history_timeframe'']?.state; const isActive = !state || state === ''unknown'' || state === ''unavailable'' || state === ''This Week''; return isActive ? ''var(--dark-primary-color)'' : ''var(--secondary-text-color)''; ]]]'
+          tap_action:
+            action: call-service
+            service: input_select.select_option
+            service_data:
+              entity_id: input_select.energy_history_timeframe
+              option: This Week
+        - type: custom:button-card
+          entity: input_select.energy_history_timeframe
+          name: 30 Days
+          show_icon: false
+          show_state: false
+          card_mod:
+            style: 'ha-card { background: {{ ''var(--accent-color)'' if is_state(''input_select.energy_history_timeframe'',''Past 30 Days'') else ''transparent'' }} !important; }'
+          styles:
+            card:
+            - background: '[[[ const state = entity?.state || states[''input_select.energy_history_timeframe'']?.state; const isActive = state === ''Past 30 Days''; return isActive ? ''var(--accent-color)'' : ''transparent''; ]]]'
+            - border-radius: 16px
+            - padding: 6px 2px
+            - box-shadow: none
+            name:
+            - font-size: 12px
+            - font-weight: 500
+            - color: '[[[ const state = entity?.state || states[''input_select.energy_history_timeframe'']?.state; const isActive = state === ''Past 30 Days''; return isActive ? ''var(--dark-primary-color)'' : ''var(--secondary-text-color)''; ]]]'
+          tap_action:
+            action: call-service
+            service: input_select.select_option
+            service_data:
+              entity_id: input_select.energy_history_timeframe
+              option: Past 30 Days
+        - type: custom:button-card
+          entity: input_select.energy_history_timeframe
+          name: Weekly
+          show_icon: false
+          show_state: false
+          card_mod:
+            style: 'ha-card { background: {{ ''var(--accent-color)'' if is_state(''input_select.energy_history_timeframe'',''Weekly'') else ''transparent'' }} !important; }'
+          styles:
+            card:
+            - background: '[[[ const state = entity?.state || states[''input_select.energy_history_timeframe'']?.state; const isActive = state === ''Weekly''; return isActive ? ''var(--accent-color)'' : ''transparent''; ]]]'
+            - border-radius: 16px
+            - padding: 6px 2px
+            - box-shadow: none
+            name:
+            - font-size: 12px
+            - font-weight: 500
+            - color: '[[[ const state = entity?.state || states[''input_select.energy_history_timeframe'']?.state; const isActive = state === ''Weekly''; return isActive ? ''var(--dark-primary-color)'' : ''var(--secondary-text-color)''; ]]]'
+          tap_action:
+            action: call-service
+            service: input_select.select_option
+            service_data:
+              entity_id: input_select.energy_history_timeframe
+              option: Weekly
+        - type: custom:button-card
+          entity: input_select.energy_history_timeframe
+          name: Monthly
+          show_icon: false
+          show_state: false
+          card_mod:
+            style: 'ha-card { background: {{ ''var(--accent-color)'' if is_state(''input_select.energy_history_timeframe'',''Monthly'') else ''transparent'' }} !important; }'
+          styles:
+            card:
+            - background: '[[[ const state = entity?.state || states[''input_select.energy_history_timeframe'']?.state; const isActive = state === ''Monthly''; return isActive ? ''var(--accent-color)'' : ''transparent''; ]]]'
+            - border-radius: 16px
+            - padding: 6px 2px
+            - box-shadow: none
+            name:
+            - font-size: 12px
+            - font-weight: 500
+            - color: '[[[ const state = entity?.state || states[''input_select.energy_history_timeframe'']?.state; const isActive = state === ''Monthly''; return isActive ? ''var(--dark-primary-color)'' : ''var(--secondary-text-color)''; ]]]'
+          tap_action:
+            action: call-service
+            service: input_select.select_option
+            service_data:
+              entity_id: input_select.energy_history_timeframe
+              option: Monthly
+      - type: custom:button-card
+        entity: input_select.energy_history_timeframe
+        show_name: false
+        show_icon: false
+        show_state: false
+        show_label: true
+        styles:
+          card:
+          - display: none
+        label: '[[[ const s = states[''input_select.energy_history_timeframe'']?.state; if (window.__bensEnergyTimeframe !== s) { window.__bensEnergyTimeframe = s; setTimeout(() => window.dispatchEvent(new Event(''resize'')), 50); setTimeout(() => window.dispatchEvent(new Event(''resize'')), 300); } return ''''; ]]]'
+      - type: custom:state-switch
+        entity: input_select.energy_history_timeframe
+        default: This Week
+        states:
+          This Week:
+            type: custom:apexcharts-card
+            experimental:
+              color_threshold: true
+            graph_span: 7d
+            span:
+              end: day
+            card_mod:
+              style: 'ha-card { background: transparent; box-shadow: none; border: none; min-height: 190px; }'
+            header:
+              show: false
+            apex_config:
+              chart:
+                height: 180
+                redrawOnParentResize: true
+                redrawOnWindowResize: true
+              grid:
+                borderColor: rgba(255,255,255,0.05)
+              xaxis:
+                labels:
+                  format: ddd
+                axisBorder:
+                  show: false
+                axisTicks:
+                  show: false
+              yaxis:
+              - min: 0
+                forceNiceScale: true
+                labels:
+                  style:
+                    fontSize: 10px
+                  formatter: 'EVAL: (val) => val ? `${val.toFixed(0)}` : ''0'''
+              legend:
+                show: false
+              tooltip:
+                x:
+                  format: ddd MMM d
+            series:
+            - entity: sensor.whole_home_energy_daily_usage
+              type: column
+              name: Daily Usage
+              statistics:
+                type: change
+                period: day
+                align: start
+              color_threshold:
+              - value: 0
+                color: var(--success-color)
+              - value: 2.5
+                color: var(--accent-color)
+              - value: 5
+                color: var(--orange-color)
+              - value: 10
+                color: var(--error-color)
+          Past 30 Days:
+            type: custom:apexcharts-card
+            experimental:
+              color_threshold: true
+            graph_span: 30d
+            span:
+              end: day
+            card_mod:
+              style: 'ha-card { background: transparent; box-shadow: none; border: none; min-height: 190px; }'
+            header:
+              show: false
+            apex_config:
+              chart:
+                height: 180
+                redrawOnParentResize: true
+                redrawOnWindowResize: true
+              grid:
+                borderColor: rgba(255,255,255,0.05)
+              xaxis:
+                labels:
+                  format: MMM d
+                axisBorder:
+                  show: false
+                axisTicks:
+                  show: false
+              yaxis:
+              - min: 0
+                forceNiceScale: true
+                labels:
+                  style:
+                    fontSize: 10px
+                  formatter: 'EVAL: (val) => val ? `${val.toFixed(0)}` : ''0'''
+              legend:
+                show: false
+              tooltip:
+                x:
+                  format: ddd MMM d
+            series:
+            - entity: sensor.whole_home_energy_daily_usage
+              type: column
+              name: Daily Usage
+              statistics:
+                type: change
+                period: day
+                align: start
+              color_threshold:
+              - value: 0
+                color: var(--success-color)
+              - value: 2.5
+                color: var(--accent-color)
+              - value: 5
+                color: var(--orange-color)
+              - value: 10
+                color: var(--error-color)
+          Weekly:
+            type: custom:apexcharts-card
+            experimental:
+              color_threshold: true
+            graph_span: 12w
+            span:
+              end: week
+            card_mod:
+              style: 'ha-card { background: transparent; box-shadow: none; border: none; min-height: 190px; }'
+            header:
+              show: false
+            apex_config:
+              chart:
+                height: 180
+                redrawOnParentResize: true
+                redrawOnWindowResize: true
+              grid:
+                borderColor: rgba(255,255,255,0.05)
+              xaxis:
+                labels:
+                  format: MMM d
+                axisBorder:
+                  show: false
+                axisTicks:
+                  show: false
+              yaxis:
+              - min: 0
+                forceNiceScale: true
+                labels:
+                  style:
+                    fontSize: 10px
+                  formatter: 'EVAL: (val) => val ? `${val.toFixed(0)}` : ''0'''
+              legend:
+                show: false
+              tooltip:
+                x:
+                  format: '''Week of'' MMM d'
+            series:
+            - entity: sensor.whole_home_energy_daily_usage
+              type: column
+              name: Weekly Usage
+              statistics:
+                type: change
+                period: week
+                align: start
+              color_threshold:
+              - value: 0
+                color: var(--success-color)
+              - value: 17
+                color: var(--accent-color)
+              - value: 35
+                color: var(--orange-color)
+              - value: 70
+                color: var(--error-color)
+          Monthly:
+            type: custom:apexcharts-card
+            experimental:
+              color_threshold: true
+            graph_span: 365d
+            span:
+              end: month
+            card_mod:
+              style: 'ha-card { background: transparent; box-shadow: none; border: none; min-height: 190px; }'
+            header:
+              show: false
+            apex_config:
+              chart:
+                height: 180
+                redrawOnParentResize: true
+                redrawOnWindowResize: true
+              grid:
+                borderColor: rgba(255,255,255,0.05)
+              xaxis:
+                labels:
+                  format: MMM
+                axisBorder:
+                  show: false
+                axisTicks:
+                  show: false
+              yaxis:
+              - min: 0
+                forceNiceScale: true
+                labels:
+                  style:
+                    fontSize: 10px
+                  formatter: 'EVAL: (val) => val ? `${val.toFixed(0)}` : ''0'''
+              legend:
+                show: false
+              tooltip:
+                x:
+                  format: MMMM yyyy
+            series:
+            - entity: sensor.whole_home_energy_daily_usage
+              type: column
+              name: Monthly Usage
+              statistics:
+                type: change
+                period: month
+                align: start
+              color_threshold:
+              - value: 0
+                color: var(--success-color)
+              - value: 75
+                color: var(--accent-color)
+              - value: 150
+                color: var(--orange-color)
+              - value: 300
+                color: var(--error-color)
+      - type: custom:stack-in-card
+        mode: horizontal
+        card_mod:
+          style: 'ha-card { background: transparent; padding: 8px 16px 20px; }'
+        cards:
+        - type: custom:button-card
+          entity: sensor.whole_home_energy_weekly_usage
+          name: This Week
+          show_icon: false
+          show_state: true
+          show_name: true
+          state_display: '[[[ return Math.ceil(parseFloat(entity?.state || 0)) + '' kWh''; ]]]'
+          styles:
+            grid:
+            - grid-template-areas: '"n s" "b b"'
+            - grid-template-columns: 1fr auto
+            card:
+            - background: transparent
+            - padding: 8px
+            - box-shadow: none
+            name:
+            - font-size: 11px
+            - font-weight: 600
+            - color: var(--secondary-text-color)
+            - text-align: left
+            - justify-self: start
+            state:
+            - font-size: 11px
+            - font-weight: 600
+            - color: var(--primary-text-color)
+            - text-align: right
+            - justify-self: end
+            custom_fields:
+              b:
+              - margin-top: 6px
+              - display: flex
+              - gap: 2px
+              - height: 5px
+              - width: 100%
+          custom_fields:
+            b: '[[[ const val = parseFloat(states[''sensor.whole_home_energy_weekly_usage'']?.state || 0); const daily = parseFloat(states[''sensor.energy_expected_full_day'']?.state || 0); const target = daily > 0 ? daily * 7 : 1; const pct = Math.min((val / target) * 100, 100); let color = ''var(--success-color)''; if (val > target * 0.85) color = ''var(--accent-color)''; if (val > target * 1.15) color = ''var(--orange-color)''; if (val > target * 1.45) color = ''var(--error-color)''; const empty = ''var(--divider-color)''; let output = ''<div style="display:flex;gap:2px;width:100%;height:5px;">''; for (let i = 1; i <= 10; i++) { const filled = pct >= (i * 10); const bg = filled ? color : empty; output += `<div style="flex:1;height:100%;border-radius:2px;background:${bg};"></div>`; } output += ''</div>''; return output; ]]]'
+        - type: custom:button-card
+          entity: sensor.whole_home_energy_monthly_usage
+          name: This Month
+          show_icon: false
+          show_state: true
+          show_name: true
+          state_display: '[[[ return Math.ceil(parseFloat(entity?.state || 0)) + '' kWh''; ]]]'
+          styles:
+            grid:
+            - grid-template-areas: '"n s" "b b"'
+            - grid-template-columns: 1fr auto
+            card:
+            - background: transparent
+            - padding: 8px
+            - box-shadow: none
+            name:
+            - font-size: 11px
+            - font-weight: 600
+            - color: var(--secondary-text-color)
+            - text-align: left
+            - justify-self: start
+            state:
+            - font-size: 11px
+            - font-weight: 600
+            - color: var(--primary-text-color)
+            - text-align: right
+            - justify-self: end
+            custom_fields:
+              b:
+              - margin-top: 6px
+              - display: flex
+              - gap: 2px
+              - height: 5px
+              - width: 100%
+          custom_fields:
+            b: '[[[ const val = parseFloat(states[''sensor.whole_home_energy_monthly_usage'']?.state || 0); const daily = parseFloat(states[''sensor.energy_expected_full_day'']?.state || 0); const target = daily > 0 ? daily * (new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()) : 1; const pct = Math.min((val / target) * 100, 100); let color = ''var(--success-color)''; if (val > target * 0.85) color = ''var(--accent-color)''; if (val > target * 1.15) color = ''var(--orange-color)''; if (val > target * 1.45) color = ''var(--error-color)''; const empty = ''var(--divider-color)''; let output = ''<div style="display:flex;gap:2px;width:100%;height:5px;">''; for (let i = 1; i <= 10; i++) { const filled = pct >= (i * 10); const bg = filled ? color : empty; output += `<div style="flex:1;height:100%;border-radius:2px;background:${bg};"></div>`; } output += ''</div>''; return output; ]]]'
+    - type: custom:button-card
+      template: section_title
+      name: Power Flow
+    - type: custom:power-flow-card-plus
+      entities:
+        battery: null
+        grid:
+          entity: sensor.p1_meter_power
+        solar:
+          entity: sensor.goodwe_pv_power
+        home:
+          entity: sensor.house_power_consumption
+      clickable_entities: true
+      display_zero_lines:
+        mode: show
+      card_mod:
+        style: 'ha-card { background: var(--card-background-color); }'
+    - type: custom:button-card
+      template: section_title
+      name: Totals
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: sensor.goodwe_today_s_pv_generation
+        name: Solar Today
+        template: kohbo_device_entity
+        icon: mdi:solar-power
+      - type: custom:button-card
+        entity: sensor.p1_meter_energy_import
+        name: Grid Import (total)
+        template: kohbo_device_entity
+        icon: mdi:transmission-tower-import
+      - type: custom:button-card
+        entity: sensor.p1_meter_energy_export
+        name: Grid Export (total)
+        template: kohbo_device_entity
+        icon: mdi:transmission-tower-export
+      - type: custom:button-card
+        entity: sensor.goodwe_total_pv_generation
+        name: Solar (total)
+        template: kohbo_device_entity
+        icon: mdi:solar-power-variant
+    - type: custom:button-card
+      template: section_title
+      name: EV Charging
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: sensor.tesla_wall_connector_status
+        name: Charger Status
+        template: kohbo_device_entity
+        icon: mdi:ev-station
+      - type: custom:button-card
+        entity: sensor.tesla_wall_connector_total_power
+        name: Charging Power
+        template: kohbo_device_entity
+        icon: mdi:flash
+      - type: custom:button-card
+        entity: sensor.tesla_wall_connector_session_energy
+        name: Session Energy
+        template: kohbo_device_entity
+        icon: mdi:battery-charging-high
+      - type: custom:button-card
+        entity: binary_sensor.tesla_wall_connector_vehicle_connected
+        name: Vehicle Connected
+        template: kohbo_device_entity
+        icon: mdi:car-electric
+    - type: custom:button-card
+      template: section_title
+      name: Solar Charging Control
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: automation.tesla_solar_start_solar_charging
+        name: Start Trigger
+        template: kohbo_room_card_device
+        icon: mdi:play-circle-outline
+      - type: custom:button-card
+        entity: automation.tesla_solar_stop_solar_charging
+        name: Stop Trigger
+        template: kohbo_room_card_device
+        icon: mdi:stop-circle-outline
+      - type: custom:button-card
+        entity: automation.tesla_solar_adjust_solar_charge_current
+        name: Adjust Trigger
+        template: kohbo_room_card_device
+        icon: mdi:tune-variant
+      - type: custom:button-card
+        entity: input_boolean.tesla_solar_charging_active
+        name: Solar Session
+        template: kohbo_room_card_device
+        icon: mdi:solar-power-variant
+      - type: custom:button-card
+        entity: switch.other_tesla_model_3_charge
+        name: Charge Switch
+        template: kohbo_room_card_device
+        icon: mdi:ev-station
+    - type: entities
+      title: Solar Charging Thresholds
+      entities:
+      - entity: input_number.tesla_solar_min_charge_current
+        name: Min Charge Current
+        icon: mdi:current-ac
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: input_number.tesla_solar_deadband_current_a
+        name: Adjustment Deadband
+        icon: mdi:tune-variant
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: input_number.tesla_solar_grid_start_threshold_w
+        name: Start Export Threshold
+        icon: mdi:transmission-tower-export
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: input_number.tesla_solar_grid_stop_threshold_w
+        name: Stop Import Threshold
+        icon: mdi:transmission-tower-import
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: custom:button-card
+      template: section_title
+      name: Solar Charging Live Status
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+      - type: custom:button-card
+        entity: sensor.p1_meter_power
+        name: Grid Power
+        template: kohbo_device_entity
+        icon: mdi:transmission-tower
+      - type: custom:button-card
+        entity: number.other_tesla_model_3_charge_current
+        name: Charge Current
+        template: kohbo_device_entity
+        icon: mdi:current-ac
+      - type: custom:button-card
+        entity: sensor.other_tesla_model_3_charging
+        name: Charging State
+        template: kohbo_device_entity
+        icon: mdi:ev-station
+      - type: custom:button-card
+        entity: sensor.other_tesla_model_3_battery_level
+        name: Battery Level
+        template: kohbo_device_entity
+        icon: mdi:battery-medium
+      - type: custom:button-card
+        entity: sensor.other_tesla_model_3_charger_power
+        name: Charger Power
+        template: kohbo_device_entity
+        icon: mdi:flash
+      - type: custom:button-card
+        entity: binary_sensor.other_tesla_model_3_charge_cable
+        name: Cable Connected
+        template: kohbo_device_entity
+        icon: mdi:ev-plug-type2
+      - type: custom:button-card
+        entity: device_tracker.other_tesla_model_3_location
+        name: Location
+        template: kohbo_device_entity
+        icon: mdi:map-marker
+    - type: custom:button-card
+      template: section_title
+      name: More
+    - type: tile
+      entity: sensor.goodwe_today_s_pv_generation
+      name: Open Full Energy Dashboard
+      icon: mdi:chart-areaspline
+      hide_state: true
+      tap_action:
+        action: navigate
+        navigation_path: /energy
+        haptic: light
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
+- title: More
+  path: more
+  icon: mdi:dots-horizontal
+  theme: Kohbo
+  cards:
+  - type: vertical-stack
+    cards:
+    - type: horizontal-stack
+      card_mod:
+        style: 'ha-card, #root { align-items: center; }'
+      cards:
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:arrow-left
+        tap_action:
+          action: navigate
+          navigation_path: /dashboard-test/home
+          haptic: light
+      - type: custom:button-card
+        template: kohbo_header_page_title
+        name: More
+      - type: custom:button-card
+        template: kohbo_header_chip_card
+        icon: mdi:blank
+        styles:
+          card:
+          - opacity: 0
+          - pointer-events: none
+    - type: custom:button-card
+      template: section_title
+      name: Adaptive Lighting
+    - type: entities
+      entities:
+      - entity: switch.living_room_adaptive_lighting_living_room
+        name: Living Room Adaptive
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.bedroom_adaptive_lighting_bedroom
+        name: Bedroom Adaptive
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.ben_s_office_adaptive_lighting_ben_s_office
+        name: Ben's Office Adaptive
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.julien_s_bedroom_adaptive_lighting_julien_s_bedroom
+        name: Julien's Bedroom Adaptive
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.mia_s_bedroom_adaptive_lighting_mia_s_bedroom
+        name: Mia's Bedroom Adaptive
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.playground_adaptive_lighting_playground
+        name: Playground Adaptive
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.hallway_adaptive_lighting_hallway
+        name: Hallway Adaptive
+        icon: mdi:theme-light-dark
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: custom:button-card
+      template: section_title
+      name: Vacuum
+    - type: custom:mushroom-vacuum-card
+      entity: vacuum.roborock_s8_pro_ultra
+      name: Roborock
+      commands:
+      - start_pause
+      - return_home
+      - locate
+    - type: entities
+      entities:
+      - entity: switch.roborock_s8_pro_ultra_dock_child_lock
+        name: Child Lock
+        icon: mdi:lock
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.roborock_s8_pro_ultra_do_not_disturb
+        name: Do Not Disturb
+        icon: mdi:sleep
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: custom:button-card
+      template: section_title
+      name: Airco Settings
+    - type: entities
+      entities:
+      - entity: switch.ec3a56bc6527_power
+        name: Power
+        icon: mdi:power
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.ec3a56bc6527_economy_mode
+        name: Economy Mode
+        icon: mdi:leaf
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.ec3a56bc6527_powerful
+        name: Powerful
+        icon: mdi:weather-windy
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.ec3a56bc6527_quiet_fan
+        name: Quiet Fan
+        icon: mdi:fan-off
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.ec3a56bc6527_energy_saving_fan
+        name: Energy Saving Fan
+        icon: mdi:fan-chevron-down
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.ec3a56bc6527_outdoor_unit_low_noise
+        name: Outdoor Unit Low Noise
+        icon: mdi:volume-low
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.ec3a56bc6527_indoor_led
+        name: Indoor LED
+        icon: mdi:led-on
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+      - entity: switch.ec3a56bc6527_human_detection
+        name: Human Detection
+        icon: mdi:motion-sensor
+        secondary_info: last-changed
+        state_color: true
+        card_mod:
+          style: |
+            hui-generic-entity-row { padding: 4px 0px !important; }
+            hui-generic-entity-row:first-child { padding-top: 0px !important; }
+            hui-generic-entity-row:last-child { padding-bottom: 0px !important; }
+            ha-icon { fill: white !important; }
+    - type: custom:button-card
+      template: section_title
+      name: Other
+    - type: tile
+      entity: light.other_other
+      name: Other Lights
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: mdi:lightbulb-group
+    - type: tile
+      entity: light.other_hue_smart_plug_1
+      name: Smart Plug
+      show_entity_picture: false
+      hide_state: false
+      features:
+      - type: light-brightness
+      features_position: inline
+      vertical: false
+      icon: mdi:power-plug
+    - type: tile
+      entity: media_player.ht_a9
+      name: HT-A9
+      hide_state: false
+    - type: markdown
+      content: ' '
+      card_mod:
+        style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
+  - type: custom:navbar-card
+    routes:
+    - url: /dashboard-test/home
+      icon: kohbo:kohbo-dashboard
+      label: Home
+    - url: /dashboard-test/rooms
+      icon: kohbo:kohbo-rooms
+      label: Rooms
+    - url: /dashboard-test/scenes
+      icon: kohbo:kohbo-light-2
+      label: Scenes
+    - url: /dashboard-test/energy
+      icon: mdi:lightning-bolt
+      label: Energy
+    - url: /dashboard-test/more
+      icon: mdi:dots-horizontal
+      label: More
+    haptic:
+      url: true
+      tap_action: true
+      hold_action: true
+      double_tap_action: true
+    mobile:
+      show_labels: true
+      show_popup_label_backgrounds: true
+    styles: |
+      .navbar-card {
+        border: none;
+        background: rgba(33, 37, 41, 0.9);
+        backdrop-filter: blur(4px);
+        width: 100%;
+        max-width: 500px;
+        bottom: 0;
+      }
+      .button.active { background: transparent; }
+      .icon { fill: #ADB5BD !important; }
+      .icon.active { fill: #FFFFFF !important; }
+      ha-ripple { display: none !important; }
