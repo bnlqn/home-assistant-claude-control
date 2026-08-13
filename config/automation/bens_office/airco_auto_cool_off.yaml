@@ -1,0 +1,22 @@
+- id: office_airco_auto_cool_off
+  alias: "Office Airco: Auto Cool Off"
+  description: >
+    Turns off the office Airco once the unit's own outdoor temperature
+    sensor has read below 22°C for 30 minutes — a signal that
+    evening/night has cooled things down naturally. Uses the outdoor
+    sensor rather than the indoor one: the indoor sensor reads the air
+    right at the unit, which it biases while actively cooling, so it's a
+    poor signal for "the room is actually comfortable."
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.ec3a56bc6527_outdoor_temperature
+      below: 22
+      for:
+        minutes: 30
+  actions:
+    - action: climate.set_hvac_mode
+      target:
+        entity_id: climate.ec3a56bc6527
+      data:
+        hvac_mode: "off"
+  mode: single
