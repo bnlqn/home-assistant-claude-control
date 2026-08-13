@@ -13,4 +13,6 @@
     - action: light.turn_off
       target:
         entity_id: light.bens_office_bens_office
+      data:
+        transition: 2
   mode: single

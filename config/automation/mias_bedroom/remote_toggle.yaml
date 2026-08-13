@@ -14,4 +14,6 @@
     - action: light.toggle
       target:
         entity_id: light.mias_bedroom_mias_bedroom
+      data:
+        transition: 2
   mode: single

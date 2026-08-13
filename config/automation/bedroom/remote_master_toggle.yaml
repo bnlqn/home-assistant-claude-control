@@ -13,4 +13,6 @@
     - action: light.toggle
       target:
         entity_id: light.bedroom_bedroom
+      data:
+        transition: 2
   mode: single
