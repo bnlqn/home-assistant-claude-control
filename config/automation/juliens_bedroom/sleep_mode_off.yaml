@@ -1,0 +1,14 @@
+- id: juliens_bedroom_sleep_mode_off
+  alias: "Julien's Bedroom: Adaptive Lighting Sleep Mode Off"
+  description: >
+    Disables Adaptive Lighting Sleep Mode for Julien's Bedroom in the
+    morning, returning to normal daytime adaptive brightness. Pairs
+    with juliens_bedroom_sleep_mode_on.
+  triggers:
+    - trigger: time
+      at: "07:00:00"
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.adaptive_lighting_julien_s_bedroom_adaptive_lighting_sleep_mode_julien_s_bedroom
+  mode: single

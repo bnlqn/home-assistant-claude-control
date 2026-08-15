@@ -1,0 +1,15 @@
+- id: juliens_bedroom_sleep_mode_on
+  alias: "Julien's Bedroom: Adaptive Lighting Sleep Mode On"
+  description: >
+    Enables Adaptive Lighting Sleep Mode for Julien's Bedroom at
+    bedtime, so any light turned on overnight (e.g. via the wall
+    switch) comes on dim and warm instead of normal daytime adaptive
+    brightness. Pairs with juliens_bedroom_sleep_mode_off.
+  triggers:
+    - trigger: time
+      at: "22:00:00"
+  actions:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.adaptive_lighting_julien_s_bedroom_adaptive_lighting_sleep_mode_julien_s_bedroom
+  mode: single
