@@ -10,10 +10,8 @@ goodnight:
       target:
         entity_id:
           - scene.bedroom_bedroom_nightlight
-          - scene.living_room_living_room_nightlight
           - scene.juliens_bedroom_juliens_bedroom_nightlight
           - scene.mias_bedroom_mias_bedroom_nightlight
           - scene.playground_playground_nightlight
-          - scene.bens_office_bens_office_nightlight
       data:
         transition: 2
