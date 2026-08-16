@@ -2606,11 +2606,11 @@ views:
         name: Mia's Bedroom
       - type: custom:button-card
         template: kohbo_header_chip_card
-        icon: kohbo:kohbo-light-2
-        tap_action:
-          action: navigate
-          navigation_path: '#mias_bedroom_scenes'
-          haptic: light
+        icon: mdi:blank
+        styles:
+          card:
+          - opacity: 0
+          - pointer-events: none
     - type: horizontal-stack
       card_mod:
         style: '#root { gap: 8px !important; }'
@@ -2687,53 +2687,6 @@ views:
       content: ' '
       card_mod:
         style: 'ha-card { height: 90px; background: transparent; border: none; box-shadow: none; }'
-  - type: custom:bubble-card
-    card_type: pop-up
-    hash: '#mias_bedroom_scenes'
-    close_by_clicking_outside: true
-    styles: |
-      .bubble-pop-up-background { background: #212529 !important; }
-      .bubble-pop-up-container { padding: 20px 20px calc(140px + var(--custom-height-offset-mobile)) 20px !important; margin-top: -30px !important; }
-      .bubble-header-container { height: 20px !important; padding-top: 0px !important; padding-bottom: 0px !important; }
-      .bubble-close-button { background: transparent !important; }
-    cards:
-    - type: custom:button-card
-      template: kohbo_popup_page_title
-      name: Mia's Bedroom Scenes
-    - type: horizontal-stack
-      cards:
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_energize
-        - scene_name: Energize
-        - icon: mdi:palette
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_nightlight
-        - scene_name: Nightlight
-        - icon: mdi:palette
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_concentrate
-        - scene_name: Concentrate
-        - icon: mdi:palette
-    - type: horizontal-stack
-      cards:
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_read
-        - scene_name: Read
-        - icon: mdi:palette
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_relax
-        - scene_name: Relax
-        - icon: mdi:palette
   - type: custom:navbar-card
     routes:
     - url: /home-dashboard/home
@@ -3417,43 +3370,6 @@ views:
         variables:
         - scene_entity: scene.juliens_bedroom_juliens_bedroom_diaper_at_night
         - scene_name: Diaper At Night
-        - icon: mdi:palette
-    - type: custom:button-card
-      template: section_title
-      name: Mia's Bedroom
-    - type: horizontal-stack
-      cards:
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_energize
-        - scene_name: Energize
-        - icon: mdi:palette
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_nightlight
-        - scene_name: Nightlight
-        - icon: mdi:palette
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_concentrate
-        - scene_name: Concentrate
-        - icon: mdi:palette
-    - type: horizontal-stack
-      cards:
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_read
-        - scene_name: Read
-        - icon: mdi:palette
-      - type: custom:decluttering-card
-        template: scene_button
-        variables:
-        - scene_entity: scene.mias_bedroom_mias_bedroom_relax
-        - scene_name: Relax
         - icon: mdi:palette
     - type: custom:button-card
       template: section_title

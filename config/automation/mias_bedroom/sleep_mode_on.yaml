@@ -1,0 +1,15 @@
+- id: mias_bedroom_sleep_mode_on
+  alias: "Mia's Bedroom: Adaptive Lighting Sleep Mode On"
+  description: >
+    Enables Adaptive Lighting Sleep Mode for Mia's Bedroom at
+    bedtime, so any light turned on overnight (e.g. via the wall
+    switch) comes on dim and warm instead of normal daytime adaptive
+    brightness. Pairs with mias_bedroom_sleep_mode_off.
+  triggers:
+    - trigger: time
+      at: "22:00:00"
+  actions:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.adaptive_lighting_mia_s_bedroom_adaptive_lighting_sleep_mode_mia_s_bedroom
+  mode: single
