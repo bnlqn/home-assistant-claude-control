@@ -1,0 +1,54 @@
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Home
+  variables:
+    path: /dashboard-homio/home
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Living Room
+  variables:
+    path: /dashboard-homio/living-room
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Bedroom
+  variables:
+    path: /dashboard-homio/bedroom
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Ben's Office
+  variables:
+    path: /dashboard-homio/bens-office
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Julien's Bedroom
+  variables:
+    path: /dashboard-homio/juliens-bedroom
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Mia's Bedroom
+  variables:
+    path: /dashboard-homio/mias-bedroom
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Playground
+  variables:
+    path: /dashboard-homio/playground
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Hallway
+  variables:
+    path: /dashboard-homio/hallway
+- type: custom:button-card
+  template:
+    - homio_nav_button
+  name: Corridor
+  variables:
+    path: /dashboard-homio/corridor

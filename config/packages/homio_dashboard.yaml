@@ -1,0 +1,29 @@
+input_boolean:
+  homio_heating_control:
+    name: Homio Heating Control
+    initial: off
+  homio_mobile_navigation:
+    name: Homio Mobile Navigation
+    initial: off
+
+input_number:
+  homio_thermostat_target_temperature:
+    name: Homio Thermostat Target Temperature
+    min: 16
+    max: 30
+    step: 0.5
+    unit_of_measurement: "°C"
+    mode: slider
+
+template:
+  - sensor:
+      - name: Current Time
+        unique_id: homio_current_time
+        state: "{{ now().strftime('%H:%M') }}"
+      - name: Current Date
+        unique_id: homio_current_date
+        state: >
+          {% set days = ["st", "nd", "rd"] %}
+          {% set day = now().day %}
+          {{ now().strftime('%A ') }}{{ day }}{{ days[day-1] if day in range(1, 4)
+          and day not in range(11, 14) else 'th' }} {{ now().strftime('%B %Y') }}

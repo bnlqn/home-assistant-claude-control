@@ -1,0 +1,373 @@
+button_card_templates: !include_dir_merge_named /config/dashboards/templates/button_cards
+views:
+  - type: custom:grid-layout
+    title: Home
+    path: home
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Home
+        variables:
+          image: home
+          accent: "#3a3f4b"
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.all_lights
+            name: All Lights
+          - type: custom:button-card
+            variables:
+              icon: person
+            template:
+              - homio_entity
+            entity: person.ben
+            name: Ben
+          - type: custom:button-card
+            variables:
+              icon: vacuum
+            template:
+              - homio_entity
+            entity: vacuum.roborock_s8_pro_ultra
+            name: Vacuum
+
+  - type: custom:grid-layout
+    title: Living Room
+    path: living-room
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Living Room
+        variables:
+          image: living_room
+          accent: "#4a3f56"
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.living_room_living_room
+            name: Living Room Lights
+          - type: custom:button-card
+            variables:
+              icon: kitchen
+            template:
+              - homio_light
+            entity: light.kitchen
+            name: Kitchen
+          - type: custom:button-card
+            variables:
+              icon: dining
+            template:
+              - homio_light
+            entity: light.dining
+            name: Dining
+          - type: custom:button-card
+            variables:
+              icon: lamp
+            template:
+              - homio_light
+            entity: light.living_room_floor_lamp_living_room
+            name: Floor Lamp
+          - type: custom:button-card
+            variables:
+              icon: lamp
+            template:
+              - homio_light
+            entity: light.living_room_living_room_table_lamp
+            name: Table Lamp
+          - type: custom:button-card
+            variables:
+              icon: spotlight
+            template:
+              - homio_light
+            entity: light.living_room_perifo_cylinder_spot_1
+            name: Cylinder Spot 1
+          - type: custom:button-card
+            variables:
+              icon: spotlight
+            template:
+              - homio_light
+            entity: light.living_room_perifo_cylinder_spot_2
+            name: Cylinder Spot 2
+          - type: custom:button-card
+            variables:
+              icon: spotlight
+            template:
+              - homio_light
+            entity: light.living_room_perifo_cylinder_spot_3
+            name: Cylinder Spot 3
+          - type: custom:button-card
+            variables:
+              icon: spotlight
+            template:
+              - homio_light
+            entity: light.living_room_perifo_cylinder_spot_4
+            name: Cylinder Spot 4
+          - type: custom:button-card
+            variables:
+              icon: apple_tv
+            template:
+              - homio_entity
+            entity: media_player.tv_tv
+            name: TV
+          - type: custom:button-card
+            variables:
+              icon: vacuum
+            template:
+              - homio_entity
+            entity: vacuum.roborock_s8_pro_ultra
+            name: Vacuum
+
+  - type: custom:grid-layout
+    title: Bedroom
+    path: bedroom
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Bedroom
+        variables:
+          image: bedroom
+          accent: "#3f4a56"
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.bedroom_bedroom
+            name: Lights
+          - type: custom:button-card
+            variables:
+              icon: lamp
+            template:
+              - homio_light
+            entity: light.bedroom
+            name: Bed Lights
+          - type: custom:button-card
+            variables:
+              icon: clock
+            template:
+              - homio_entity
+            entity: switch.bedroom_adaptive_lighting_bedroom
+            name: Adaptive Lighting
+
+  - type: custom:grid-layout
+    title: Ben's Office
+    path: bens-office
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Ben's Office
+        variables:
+          image: bens_office
+          accent: "#3f5650"
+          show_temp: true
+          temp_sensor: sensor.ec3a56bc6527_indoor_temperature
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.bens_office_bens_office
+            name: Lights
+          - type: custom:button-card
+            template:
+              - homio_thermostat
+            entity: climate.ec3a56bc6527
+            name: Airco
+          - type: custom:button-card
+            variables:
+              icon: clock
+            template:
+              - homio_entity
+            entity: switch.ben_s_office_adaptive_lighting_ben_s_office
+            name: Adaptive Lighting
+
+  - type: custom:grid-layout
+    title: Julien's Bedroom
+    path: juliens-bedroom
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Julien's Bedroom
+        variables:
+          image: juliens_bedroom
+          accent: "#4a5040"
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.juliens_bedroom_juliens_bedroom
+            name: Lights
+          - type: custom:button-card
+            variables:
+              icon: clock
+            template:
+              - homio_entity
+            entity: switch.julien_s_bedroom_adaptive_lighting_julien_s_bedroom
+            name: Adaptive Lighting
+
+  - type: custom:grid-layout
+    title: Mia's Bedroom
+    path: mias-bedroom
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Mia's Bedroom
+        variables:
+          image: mias_bedroom
+          accent: "#563f4a"
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.mias_bedroom_mias_bedroom
+            name: Lights
+          - type: custom:button-card
+            variables:
+              icon: clock
+            template:
+              - homio_entity
+            entity: switch.mia_s_bedroom_adaptive_lighting_mia_s_bedroom
+            name: Adaptive Lighting
+
+  - type: custom:grid-layout
+    title: Playground
+    path: playground
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Playground
+        variables:
+          image: playground
+          accent: "#56503f"
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.playground_playground
+            name: Lights
+          - type: custom:button-card
+            variables:
+              icon: lamp
+            template:
+              - homio_light
+            entity: light.ilonas_computer
+            name: Desk Light
+          - type: custom:button-card
+            variables:
+              icon: clock
+            template:
+              - homio_entity
+            entity: switch.playground_adaptive_lighting_playground
+            name: Adaptive Lighting
+
+  - type: custom:grid-layout
+    title: Hallway
+    path: hallway
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Hallway
+        variables:
+          image: hallway
+          accent: "#3f3f4a"
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.hallway_hallway
+            name: Lights
+          - type: custom:button-card
+            variables:
+              icon: clock
+            template:
+              - homio_entity
+            entity: switch.hallway_adaptive_lighting_hallway
+            name: Adaptive Lighting
+
+  - type: custom:grid-layout
+    title: Corridor
+    path: corridor
+    layout: !include /config/dashboards/templates/includes/homio_screen_layout.yaml
+    theme: homio
+    cards:
+      - type: custom:button-card
+        template:
+          - homio_room
+        name: Corridor
+        variables:
+          image: corridor
+          accent: "#4a4a3f"
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout: !include /config/dashboards/templates/includes/homio_entity_layout.yaml
+        cards:
+          - type: custom:button-card
+            variables:
+              icon: power_on
+            template:
+              - homio_light
+            entity: light.corridor_corridor
+            name: Lights
