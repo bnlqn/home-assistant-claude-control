@@ -8,12 +8,12 @@ goodnight:
         transition: 2
     - action: scene.turn_on
       target:
-        entity_id:
-          - scene.bedroom_bedroom_nightlight
-          - scene.juliens_bedroom_juliens_bedroom_nightlight
-          - scene.playground_playground_nightlight
+        entity_id: scene.bedroom_bedroom_nightlight
       data:
         transition: 2
     - action: light.turn_on
       target:
-        entity_id: light.mias_bedroom_mias_bedroom
+        entity_id:
+          - light.mias_bedroom_mias_bedroom
+          - light.juliens_bedroom_juliens_bedroom
+          - light.playground_playground
