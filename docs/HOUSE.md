@@ -4,20 +4,28 @@ What's actually in this Home Assistant instance, kept short enough to stay
 current. For control-plane/tooling docs, see `docs/ACCESS-MODEL.md`,
 `docs/OPERATIONS.md`, `docs/SECURITY.md`, and `docs/HACS.md`.
 
-## Areas
+## Areas & floors
 
-Registered in `core.area_registry`:
+Registered in `core.area_registry` / `core.floor_registry`:
 
-- Living Room
-- Kitchen
-- Bedroom
-- Mia's bedroom
-- Julien's bedroom
-- Office (Ben's office)
-- Playground
-- Hallway
-- Corridor
-- Other
+- **Ground Floor** — Living Room, Kitchen, Dining Room, Hallway
+- **First Floor** — Bedroom, Mia's bedroom, Julien's bedroom, Corridor
+- **Second Floor** — Office (Ben's office), Playground
+- *(no floor)* — Other, Outside
+
+Living Room / Kitchen / Dining Room are one physically open downstairs
+space with no walls between them. Modeled as three areas sharing a floor
+rather than merged into one, since lighting (incl. Adaptive Lighting) is
+already zoned per-room in the Hue app — grouping them under Ground Floor
+gives "turn off downstairs" semantics without losing per-room control.
+
+Office and Playground are likewise one physical room with no wall between
+them, but kept as separate areas deliberately: Playground is meant to be
+addressable on its own rather than folded into Office's targeting.
+
+Outside holds the Tesla Model 3 and Tesla Wall Connector (parked in front
+of the house) — split out of the `Other` catch-all, which otherwise holds
+non-physical infra (AdGuard Home, UniFi Network, Codeetry).
 
 ## Automations (`config/automation/`)
 
