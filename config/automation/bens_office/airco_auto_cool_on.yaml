@@ -3,17 +3,24 @@
   description: >
     Starts cooling the office Airco (target 23°C) once the room has been
     above 24°C for 5 minutes, so a brief spike doesn't trigger it on its
-    own. It's the only AC in the house and Ben works in this attic office
-    all day, so once started it's left running continuously — the unit's
-    own inverter modulates against the 23°C target rather than the
-    automation cycling it off. See office_airco_auto_cool_off for the
-    actual shutoff condition.
+    own. Also requires the unit's own outdoor sensor to read above 25°C,
+    so it doesn't kick on for an indoor heat source (e.g. equipment,
+    sun through the window) on a mild day outside. It's the only AC in
+    the house and Ben works in this attic office all day, so once
+    started it's left running continuously — the unit's own inverter
+    modulates against the 23°C target rather than the automation
+    cycling it off. See office_airco_auto_cool_off for the actual
+    shutoff condition.
   triggers:
     - trigger: numeric_state
       entity_id: sensor.ec3a56bc6527_indoor_temperature
       above: 24
       for:
         minutes: 5
+  conditions:
+    - condition: numeric_state
+      entity_id: sensor.ec3a56bc6527_outdoor_temperature
+      above: 25
   actions:
     - action: climate.set_hvac_mode
       target:
