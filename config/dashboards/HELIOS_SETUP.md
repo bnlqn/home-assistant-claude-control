@@ -2,8 +2,7 @@
 
 The Kohbo dashboard's Energy view (`home-dashboard.yaml`, path `energy`)
 now uses `type: custom:helios-card` in place of the old grid/solar/house
-stat bars and 24h chart. Same situation as the Homio cards in
-`HOMIO_SETUP.md`: this is third-party JS Claude Code can't fetch or
+stat bars and 24h chart. This is third-party JS Claude Code can't fetch or
 install for you.
 
 ## 1. Install via HACS
@@ -18,9 +17,8 @@ place it at `config/www/community/helios/helios.js`.
 
 ## 2. Register the Lovelace resource
 
-Resources aren't managed via `configuration.yaml` here (same note as
-`HOMIO_SETUP.md`), so add it via **Settings → Dashboards → ⋮ →
-Resources**:
+Resources aren't managed via `configuration.yaml` here, so add it via
+**Settings → Dashboards → ⋮ → Resources**:
 
 | URL | Type |
 |---|---|

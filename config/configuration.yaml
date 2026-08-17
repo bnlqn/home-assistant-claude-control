@@ -15,13 +15,6 @@ lovelace:
       icon: mdi:abjad-arabic
       show_in_sidebar: true
       require_admin: false
-    dashboard-homio:
-      mode: yaml
-      filename: dashboards/homio-dashboard.yaml
-      title: Homio
-      icon: mdi:star-plus-outline
-      show_in_sidebar: true
-      require_admin: false
 
 automation: !include_dir_merge_list automation
 script: !include scripts.yaml
