@@ -430,6 +430,7 @@ Config workflow:
 Escape hatches:
   ssh-cli <ha CLI arguments...>
   ssh-shell <remote shell command...>
+  rest <METHOD> <path> ['<json-body>']
 `);
 }
 
@@ -645,6 +646,18 @@ async function main() {
     case "ssh-shell":
       shell(cfg, args);
       break;
+
+    case "rest": {
+      const [method, path, ...bodyParts] = args;
+      if (!method || !path) die("rest requires METHOD and PATH arguments.");
+      let body;
+      if (bodyParts.length) {
+        try { body = JSON.parse(bodyParts.join(" ")); }
+        catch { die("Invalid JSON supplied to rest."); }
+      }
+      print(await api(cfg, method.toUpperCase(), path, body));
+      break;
+    }
 
     default:
       die(`Unknown command: ${command}\nRun ./bin/ha help`);

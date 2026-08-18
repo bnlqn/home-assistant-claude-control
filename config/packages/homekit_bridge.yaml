@@ -1,0 +1,43 @@
+# HomeKit Bridge - curated "everyday" accessories for Apple Home.
+#
+# Explicit include_entities rather than include_domains, so the stuff
+# that's exposed to Assist/voice but isn't a real household control -
+# adaptive_lighting config switches, AdGuard switches, Roborock DND/child
+# lock, Tesla vehicle entities, UniFi/network status LEDs - never shows
+# up as clutter in the Home app. Room lighting uses the Hue zone entities
+# (one accessory per room) instead of every individual bulb.
+#
+# NOTE: contrary to what home-assistant.io/integrations/homekit implies,
+# editing this filter and doing a normal deploy + Core restart DOES take
+# effect on the existing config entry - confirmed by reading
+# core.config_entries before/after (matched by name+port, same entry_id,
+# same HomeKit pairing preserved). The integration's options flow itself
+# is a no-op for YAML-managed entries (immediately returns without a
+# form), so don't bother with Settings > Devices & services > Configure
+# for this bridge - edit this file and restart instead.
+homekit:
+  - name: Everyday
+    filter:
+      include_entities:
+        # Room lighting (Hue zones - kitchen/dining share bulbs with
+        # living room, same overlap as in the Hue app itself)
+        - light.living_room_living_room
+        - light.kitchen
+        - light.dining
+        - light.hallway_hallway
+        - light.corridor_corridor
+        - light.bedroom_bedroom
+        - light.mias_bedroom_mias_bedroom
+        - light.juliens_bedroom_juliens_bedroom
+        - light.bens_office_bens_office
+        - light.playground_playground
+        - light.other_other
+
+        # Climate
+        - climate.ec3a56bc6527
+
+        # Media
+        - media_player.tv_tv
+
+        # Vacuum
+        - vacuum.roborock_s8_pro_ultra
