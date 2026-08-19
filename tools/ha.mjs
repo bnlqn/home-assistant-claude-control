@@ -230,6 +230,8 @@ function pullConfig(cfg) {
   const remote = `${cfg.sshUser}@${cfg.sshHost}:/config/`;
   const excludes = [
     ".storage/",
+    ".cache/",
+    ".ha_run.lock",
     "secrets.yaml",
     "home-assistant_v2.db*",
     "*.db",
@@ -257,6 +259,8 @@ function diffRemote(cfg) {
   const remote = `${cfg.sshUser}@${cfg.sshHost}:/config/`;
   const excludes = [
     ".storage/",
+    ".cache/",
+    ".ha_run.lock",
     "secrets.yaml",
     "home-assistant_v2.db*",
     "*.db",
@@ -356,6 +360,8 @@ function deploy(cfg, withDelete = false) {
   const remote = `${cfg.sshUser}@${cfg.sshHost}:/config/`;
   const excludes = [
     ".storage/",
+    ".cache/",
+    ".ha_run.lock",
     "secrets.yaml",
     "home-assistant_v2.db*",
     "*.db",
