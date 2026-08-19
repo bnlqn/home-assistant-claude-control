@@ -185,6 +185,13 @@ Use the `/ha-deploy` skill.
 
 Do not independently invent another deployment procedure.
 
+For the custom dashboard panel specifically, build with `./bin/ha panel-build`
+before deploying — editing `panel/src` has no effect until the bundle is rebuilt.
+`panel-build --stamp` also pins a content-hash `?v=` on the panel's `module_url`
+so a deployed change provably busts the browser cache (at the cost of a Core
+restart, since `module_url` lives in `configuration.yaml`). This builds and
+stamps only; the actual push still goes through `/ha-deploy`.
+
 Prefer targeted reloads over Core restart.
 
 A Core restart is appropriate when:

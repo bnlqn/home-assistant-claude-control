@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import crypto from "node:crypto";
 import { execFileSync, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -10,6 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), "..");
 const LOCAL_CONFIG = path.join(ROOT, ".ha-local.json");
 const CONFIG_DIR = path.join(ROOT, "config");
+const PANEL_DIR = path.join(ROOT, "panel");
+const PANEL_ARTIFACT = path.join(CONFIG_DIR, "www", "home-dashboard", "home-dashboard-panel.js");
+const CONFIG_YAML = path.join(CONFIG_DIR, "configuration.yaml");
 
 function die(message, code = 1) {
   console.error(message);
@@ -296,6 +300,56 @@ async function validate(cfg) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
+// Build the custom dashboard panel and, with --stamp, pin a content-hash
+// cache-buster onto its module_url. This kills the "edited panel/src but the
+// browser still serves the old bundle" foot-gun: the built artifact provably
+// changes, and --stamp makes the URL change too. It does NOT deploy — pushing
+// to production stays the user-controlled /ha-deploy step.
+async function panelBuild(cfg, { stamp } = {}) {
+  if (!fs.existsSync(PANEL_DIR)) die("panel/ does not exist.");
+
+  console.log("== Building panel (tsc + vite) ==");
+  const build = spawnSync("npm", ["--prefix", PANEL_DIR, "run", "build"], { stdio: "inherit" });
+  if (build.status !== 0) process.exit(build.status ?? 1);
+
+  if (!fs.existsSync(PANEL_ARTIFACT)) {
+    die(`Build did not produce ${path.relative(ROOT, PANEL_ARTIFACT)}.`);
+  }
+  const bytes = fs.readFileSync(PANEL_ARTIFACT);
+  const hash = crypto.createHash("sha256").update(bytes).digest("hex").slice(0, 12);
+  const sizeKb = (bytes.length / 1000).toFixed(2); // SI kB, to match vite's report
+  console.log(`\nBuilt ${path.relative(ROOT, PANEL_ARTIFACT)} — ${sizeKb} kB, content hash ${hash}`);
+
+  if (!stamp) {
+    console.log(
+      "\nDev loop: hard-reload the browser to serve the new bundle (no restart).\n" +
+        "Prod cut: re-run with --stamp to pin ?v= in configuration.yaml, then deploy via /ha-deploy."
+    );
+    return;
+  }
+
+  // Rewrite (or add) the ?v= query on the panel's module_url line only.
+  const yaml = fs.readFileSync(CONFIG_YAML, "utf8");
+  const re = /(module_url:\s*\/local\/home-dashboard\/home-dashboard-panel\.js)(\?v=[0-9a-f]+)?/;
+  if (!re.test(yaml)) {
+    die(`Could not find the panel module_url line in ${path.relative(ROOT, CONFIG_YAML)}.`);
+  }
+  const stamped = yaml.replace(re, `$1?v=${hash}`);
+  if (stamped === yaml) {
+    console.log(`module_url already stamped with ?v=${hash} — nothing to change.`);
+  } else {
+    fs.writeFileSync(CONFIG_YAML, stamped);
+    console.log(`Stamped module_url with ?v=${hash} in ${path.relative(ROOT, CONFIG_YAML)}.`);
+  }
+  console.log(
+    "\nNOTE: module_url lives in configuration.yaml, so stamping changes the panel\n" +
+      "registration — it needs a Core restart to serve. Deploy + restart via /ha-deploy."
+  );
+
+  console.log("\n== Validating configuration ==");
+  await validate(cfg);
+}
+
 function deploy(cfg, withDelete = false) {
   if (!fs.existsSync(CONFIG_DIR)) die("config/ does not exist.");
 
@@ -421,6 +475,7 @@ Config workflow:
   diff
   validate
   backup [name]
+  panel-build [--stamp]
   deploy [--delete]
   reload-automations
   reload-scripts
@@ -618,6 +673,10 @@ async function main() {
       if (result.status !== 0) process.exit(result.status ?? 1);
       break;
     }
+
+    case "panel-build":
+      await panelBuild(cfg, { stamp: args.includes("--stamp") });
+      break;
 
     case "deploy":
       deploy(cfg, args.includes("--delete"));

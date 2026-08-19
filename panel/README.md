@@ -95,15 +95,20 @@ panel_custom:
 To go live (a user-controlled step — nothing here deploys on its own):
 
 ```bash
-cd panel && npm run build          # writes config/www/home-dashboard/…
+./bin/ha panel-build --stamp       # build + pin ?v=<hash> on module_url
 ./bin/ha diff                      # review the config + bundle change
 # then deploy with the /ha-deploy skill (targeted; a Core restart is only
-# needed the first time panel_custom is added or when it changes)
+# needed the first time panel_custom is added or when module_url changes)
 ```
 
-After deploying the first time, **restart Core** (adding `panel_custom` requires
-it). Later JS-only updates just need a fresh build + `deploy` and a browser
-hard-refresh — see [Troubleshooting](#troubleshooting) for cache-busting.
+`./bin/ha panel-build` runs the production build and prints the bundle's content
+hash. With `--stamp` it also rewrites the `?v=<hash>` cache-buster on `module_url`
+in `configuration.yaml`, so the wall display provably loads the new bundle —
+because a changed `module_url` re-registers the panel, this needs a Core restart
+(which `/ha-deploy` offers). During **development** skip `--stamp`: the bundle
+content changes and a browser hard-refresh (⌘/Ctrl-Shift-R) picks it up with no
+restart. After deploying the first time, **restart Core** regardless (adding
+`panel_custom` requires it).
 
 ## The one file you edit — configuration
 
@@ -295,10 +300,10 @@ The panel never injects invasive global CSS into the rest of Home Assistant.
 
 ## Troubleshooting
 
-- **Panel is blank / old after an update.** Browsers cache the module. Rebuild
-  (`npm run build`), redeploy, then hard-refresh (⌘/Ctrl-Shift-R). For stubborn
-  caches, bump `module_url` with a query string, e.g.
-  `…/home-dashboard-panel.js?v=2`.
+- **Panel is blank / old after an update.** Browsers cache the module. In dev,
+  a hard-refresh (⌘/Ctrl-Shift-R) after a rebuild is enough. For a deploy, use
+  `./bin/ha panel-build --stamp` — it pins a content-hash `?v=` on `module_url`
+  so the URL provably changes (then redeploy + Core restart via `/ha-deploy`).
 - **"Sidebar item didn't appear."** Adding `panel_custom` needs a **Core
   restart**, not just a YAML reload.
 - **A widget shows "Not found".** The `entity` id in `dashboard.config.ts`
