@@ -2,6 +2,7 @@ import { html, nothing, type TemplateResult } from "lit";
 import type { HomeAssistant, HassEntity } from "../types/hass.js";
 import type { WidgetConfig } from "../config/schema.js";
 import type { ServiceCall } from "../home-assistant/service-calls.js";
+import { buildFlowModel, type PowerflowOptions } from "../widgets/powerflow.js";
 import {
   buildClimateFanMode,
   buildClimateHvacMode,
@@ -404,6 +405,34 @@ function energyDetail(ctx: DetailCtx): TemplateResult {
   `;
 }
 
+// ---- Power flow ----------------------------------------------------------
+function powerflowDetail(ctx: DetailCtx): TemplateResult {
+  const o = (ctx.config?.options ?? {}) as PowerflowOptions;
+  const model = buildFlowModel(ctx.hass, o);
+  const cell = (label: string, id?: string) => {
+    const s = id ? ctx.hass.states[id] : undefined;
+    return s
+      ? html`<div class="d-cell"><span class="k">${label}</span><span class="v">${formatState(ctx.hass, s)}</span></div>`
+      : nothing;
+  };
+  return html`
+    <div class="detail-flow"><hd-flow-diagram .model=${model}></hd-flow-diagram></div>
+    <div class="d-section">
+      <span class="d-label">Live values</span>
+      <div class="d-grid">
+        ${cell("Grid", o.gridPower)} ${cell("Solar", o.solarPower)} ${cell("House", o.houseConsumption)}
+        ${cell("Car charger", o.carPower)}
+      </div>
+    </div>
+    ${ctx.trend.length > 1
+      ? html`<div class="d-section">
+          <span class="d-label">Grid power — last 24 hours</span>
+          <div class="detail-trend"><hd-trend .points=${ctx.trend} .summary=${"24 hour grid power"}></hd-trend></div>
+        </div>`
+      : nothing}
+  `;
+}
+
 // ---- Generic -------------------------------------------------------------
 function genericDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const domain = ctx.entityId.split(".")[0];
@@ -451,6 +480,7 @@ export function renderDetailBody(ctx: DetailCtx): TemplateResult {
   const s = ctx.hass.states[ctx.entityId];
   const type = ctx.config?.type;
   if (type === "energy") return energyDetail(ctx);
+  if (type === "powerflow") return powerflowDetail(ctx);
   if (!s) {
     return html`<div class="d-value big">Entity unavailable</div>
       <div class="d-meta">${ctx.entityId || "No entity configured"} was not found in Home Assistant.</div>`;
@@ -480,7 +510,9 @@ export function renderDetailBody(ctx: DetailCtx): TemplateResult {
 
 /** Domains whose detail benefits from lazily-loaded 24h history. */
 export function detailNeedsHistory(entityId: string, config?: WidgetConfig): string | null {
-  if (config?.type === "energy") return (config.options as Record<string, string>)?.gridPower ?? null;
+  if (config?.type === "energy" || config?.type === "powerflow") {
+    return (config.options as Record<string, string>)?.gridPower ?? null;
+  }
   const domain = entityId.split(".")[0];
   return domain === "sensor" ? entityId : null;
 }

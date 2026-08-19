@@ -34,6 +34,22 @@ export class MockHassController {
     this.emit();
   }
 
+  /** Dev helper: create or overwrite an entity (used by the scenario switcher). */
+  setEntity(id: string, state: string, attributes: Record<string, unknown> = {}) {
+    const cur = this.states[id];
+    this.states = {
+      ...this.states,
+      [id]: {
+        entity_id: id,
+        state,
+        attributes: { ...(cur?.attributes ?? {}), ...attributes },
+        last_changed: new Date().toISOString(),
+        last_updated: new Date().toISOString(),
+      },
+    };
+    this.emit();
+  }
+
   private mutate(id: string, fn: (s: HassEntity) => void) {
     const cur = this.states[id];
     if (!cur) return;

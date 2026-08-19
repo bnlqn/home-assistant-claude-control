@@ -218,6 +218,10 @@ export class HdDetail extends LitElement {
     .detail-trend {
       height: 90px;
     }
+    .detail-flow {
+      height: 320px;
+      margin: 4px 0 8px;
+    }
     .fc-row {
       display: flex;
       align-items: center;
@@ -249,8 +253,10 @@ export class HdDetail extends LitElement {
   }
 
   private async _maybeLoad() {
-    if (!this.hass || !this.entityId) return;
-    const key = `${this.entityId}:${this.config?.type ?? ""}`;
+    // Note: entityless detail (energy / powerflow) has no entityId — don't gate
+    // on it, or their 24 h trend would never load.
+    if (!this.hass) return;
+    const key = `${this.entityId}:${this.config?.type ?? ""}:${this.config?.id ?? ""}`;
     if (this._loadedKey === key) return;
     this._loadedKey = key;
     if (this._trend.length) this._trend = [];
@@ -261,7 +267,7 @@ export class HdDetail extends LitElement {
       const pts = await fetchNumericHistory(this.hass, histId, 24);
       this._trend = pts.map((p) => p.value);
     }
-    if (detailNeedsForecast(this.entityId) && this.hass.connected) {
+    if (this.entityId && detailNeedsForecast(this.entityId) && this.hass.connected) {
       await this._loadForecast();
     }
   }
@@ -307,7 +313,9 @@ export class HdDetail extends LitElement {
   }
 
   render() {
-    if (!this.hass || !this.entityId) {
+    // Entityless detail (energy / powerflow) has no entityId but does have a
+    // config; only bail when we have neither.
+    if (!this.hass || (!this.entityId && !this.config)) {
       return html`<hd-surface .open=${this.open} @hd-close=${() => this._close()}></hd-surface>`;
     }
     const vm = normalizeEntity(this.hass, this.entityId, this.config);
@@ -320,7 +328,12 @@ export class HdDetail extends LitElement {
       forecast: this._forecast,
       call: this._call,
     };
-    const subheading = this.config?.type === "energy" ? "Live energy" : vm.displayState;
+    const subheading =
+      this.config?.type === "energy"
+        ? "Live energy"
+        : this.config?.type === "powerflow"
+          ? "Live power flow"
+          : vm.displayState;
     return html`
       <hd-surface
         variant="auto"

@@ -486,17 +486,21 @@ export const dashboardConfig: DashboardConfig = {
       label: "Energy",
       icon: "mdi:lightning-bolt-outline",
       widgets: [
+        // Hero: the live power-flow diagram (Grid ↔ Solar ↔ House ↔ Car). The
+        // stat tiles below are its numeric breakdown.
         {
-          id: "en-live",
-          type: "energy",
-          name: "Live power",
+          id: "en-flow",
+          type: "powerflow",
+          name: "Power flow",
           size: { compact: "2x2", medium: "2x2", wide: "2x2" },
           options: {
-            gridPower: "sensor.p1_meter_power",
+            gridPower: "sensor.p1_meter_power", // signed W: + import / − export (HomeWizard P1)
             solarPower: "sensor.goodwe_pv_power",
-            solarToday: "sensor.goodwe_today_s_pv_generation",
-            forecastEndOfDay: "sensor.energy_forecast_end_of_day",
-            solarForecastRemaining: "sensor.helios_forecast_energy_today_remaining",
+            houseConsumption: "sensor.house_power_consumption",
+            carPower: "sensor.tesla_wall_connector_total_power", // kW, auto-normalized
+            carPowerAlt: "sensor.other_tesla_model_3_charger_power", // kW fallback
+            carActive: "sensor.tesla_wall_connector_status",
+            carActiveAlt: "sensor.other_tesla_model_3_charging",
           },
         },
         {
@@ -506,6 +510,22 @@ export const dashboardConfig: DashboardConfig = {
           name: "Grid now",
           icon: "mdi:transmission-tower",
           size: { compact: "2x1", medium: "2x1", wide: "2x1" },
+        },
+        {
+          id: "en-solar-now",
+          type: "sensor",
+          entity: "sensor.goodwe_pv_power",
+          name: "Solar now",
+          icon: "mdi:solar-power",
+          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+        },
+        {
+          id: "en-house-now",
+          type: "sensor",
+          entity: "sensor.house_power_consumption",
+          name: "House now",
+          icon: "mdi:home-variant",
+          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
         },
         {
           id: "en-solar-today",

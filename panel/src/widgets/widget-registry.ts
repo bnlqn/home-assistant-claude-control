@@ -10,6 +10,7 @@ import "./media.js";
 import "./vacuum.js";
 import "./weather.js";
 import "./energy.js";
+import "./powerflow.js";
 import "./extra.js";
 
 /** Maps a configured widget `type` to its custom-element tag. */
@@ -31,6 +32,7 @@ export const WIDGET_TAGS: Record<WidgetType, string> = {
   camera: "hd-widget-camera",
   weather: "hd-widget-weather",
   energy: "hd-widget-energy",
+  powerflow: "hd-widget-powerflow",
   alarm: "hd-widget-alarm",
   action: "hd-widget-action",
 };
