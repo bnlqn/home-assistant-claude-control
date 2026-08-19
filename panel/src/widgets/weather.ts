@@ -29,23 +29,10 @@ export class WeatherWidget extends EntityWidget {
   }
 
   static styles = css`
-    .now {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .big-icon {
-      color: var(--accent);
-      flex: none;
-    }
     .temp {
       font: var(--text-value-lg);
       font-variant-numeric: tabular-nums;
       color: var(--text-primary);
-    }
-    .cond {
-      font: var(--text-secondary-state);
-      color: var(--text-secondary);
     }
     .metrics {
       display: flex;
@@ -160,10 +147,9 @@ export class WeatherWidget extends EntityWidget {
 
     return html`
       <hd-widget-frame
-        bleed=${false}
         .icon=${weatherIcon(vm.rawState)}
         .name=${vm.name}
-        .stateText=${""}
+        .stateText=${titleCase(vm.rawState)}
         .size=${size}
         .accent=${"accent"}
         .active=${false}
@@ -172,13 +158,7 @@ export class WeatherWidget extends EntityWidget {
         .quickKind=${"none"}
         @hd-activate=${() => this.openDetail()}
       >
-        <div class="now">
-          <hd-icon class="big-icon" .icon=${weatherIcon(vm.rawState)} .size=${size === "1x2" ? 40 : 48}></hd-icon>
-          <div>
-            <div class="temp">${a.temperature != null ? `${formatNumber(a.temperature as number)}°` : "—"}</div>
-            <div class="cond">${titleCase(vm.rawState)}</div>
-          </div>
-        </div>
+        <div class="temp">${a.temperature != null ? `${formatNumber(a.temperature as number)}°` : "—"}</div>
         ${this._metrics()} ${big ? this._forecastStrip() : nothing}
       </hd-widget-frame>
     `;
