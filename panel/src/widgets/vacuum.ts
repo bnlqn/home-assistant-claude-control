@@ -79,7 +79,7 @@ export class VacuumWidget extends EntityWidget {
     </div>`;
   }
 
-  render() {
+  renderContent() {
     const vm = this.vm;
     const size = this.currentSize;
     const caps = vacuumCaps(vm.stateObj);

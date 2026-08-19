@@ -74,7 +74,7 @@ export class SensorWidget extends EntityWidget {
     this._trend = points.map((p) => p.value);
   }
 
-  render() {
+  renderContent() {
     const vm = this.vm;
     const s = vm.stateObj;
     const num = s ? Number(s.state) : NaN;

@@ -1,4 +1,4 @@
-import { LitElement } from "lit";
+import { LitElement, html } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { HomeAssistant } from "../types/hass.js";
 import type { WidgetConfig, WidgetSize } from "../config/schema.js";
@@ -6,6 +6,7 @@ import type { ActionState } from "./widget-frame.js";
 import { execute, type ServiceCall } from "../home-assistant/service-calls.js";
 import { normalizeEntity, type EntityViewModel } from "../home-assistant/entity-adapters/index.js";
 import { requestConfirm, toast } from "../primitives/feedback.js";
+import "./widget-frame.js";
 
 /**
  * Base class for every widget. Provides:
@@ -55,6 +56,44 @@ export abstract class EntityWidget extends LitElement {
     if (prev.connected !== this.hass.connected) return true;
     // Only render if one of our entities' state objects changed by reference.
     return this.relevantEntityIds().some((id) => prev.states[id] !== this.hass!.states[id]);
+  }
+
+  /**
+   * Per-widget error boundary. Subclasses implement `renderContent()` instead of
+   * `render()`; a throw in that content (a bad attribute, a divide-by-zero in a
+   * custom SVG, an unexpected state shape) degrades this one tile to an error
+   * card rather than propagating up and blanking the whole view. This is the
+   * primary safety net for an always-on display; the grid adds a second net for
+   * config/layout throws, and the panel root a best-effort backstop for async
+   * throws neither boundary can see.
+   */
+  protected override render(): unknown {
+    try {
+      return this.renderContent();
+    } catch (err) {
+      const id = this.config?.id ?? this.config?.type ?? this.entityId ?? "?";
+      console.error(`[hd-widget ${id}] render failed:`, err);
+      return this._renderErrorTile();
+    }
+  }
+
+  /** The widget's real render. Was `render()` before the boundary was added. */
+  protected abstract renderContent(): unknown;
+
+  /** Neutral, card-styled fallback shown when `renderContent()` throws. */
+  private _renderErrorTile(): unknown {
+    // Deliberately touches only plain config fields — never `vm`/normalizeEntity,
+    // which could be the very thing that just threw.
+    const name = this.config?.name || this.config?.entity || "Widget";
+    return html`<hd-widget-frame
+      icon="mdi:alert-circle-outline"
+      .name=${name}
+      stateText="Unavailable"
+      secondary="Widget error"
+      accent="alert"
+      .size=${this.currentSize}
+      ?unavailable=${true}
+    ></hd-widget-frame>`;
   }
 
   protected openDetail(): void {

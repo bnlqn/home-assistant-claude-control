@@ -136,7 +136,7 @@ export class ClimateWidget extends EntityWidget {
     </div>`;
   }
 
-  render() {
+  renderContent() {
     const vm = this.vm;
     const size = this.currentSize;
     const caps = climateCaps(vm.stateObj);

@@ -121,7 +121,7 @@ export class MediaWidget extends EntityWidget {
     </div>`;
   }
 
-  render() {
+  renderContent() {
     const vm = this.vm;
     const caps = mediaCaps(vm.stateObj);
     const size = this.currentSize;

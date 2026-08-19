@@ -103,7 +103,7 @@ export class CoverWidget extends EntityWidget {
     </div>`;
   }
 
-  render() {
+  renderContent() {
     const vm = this.vm;
     const caps = coverCaps(vm.stateObj);
     const size = this.currentSize;

@@ -123,7 +123,7 @@ export class LightWidget extends EntityWidget {
     </div>`;
   }
 
-  render() {
+  renderContent() {
     const vm = this.vm;
     const caps = lightCaps(vm.stateObj);
     const size = this.currentSize;

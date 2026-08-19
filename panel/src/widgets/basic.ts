@@ -28,7 +28,7 @@ function frame(w: EntityWidget, opts: { quickKind: "toggle" | "activate" | "none
 // ---- Switch / plug -------------------------------------------------------
 @define("hd-widget-switch")
 export class SwitchWidget extends EntityWidget {
-  render() {
+  renderContent() {
     return frame(this, { quickKind: "toggle", hasDetail: true });
   }
 }
@@ -36,7 +36,7 @@ export class SwitchWidget extends EntityWidget {
 // ---- Lock ----------------------------------------------------------------
 @define("hd-widget-lock")
 export class LockWidget extends EntityWidget {
-  render() {
+  renderContent() {
     return frame(this, { quickKind: "toggle", hasDetail: true });
   }
 }
@@ -44,7 +44,7 @@ export class LockWidget extends EntityWidget {
 // ---- Person / presence ---------------------------------------------------
 @define("hd-widget-person")
 export class PersonWidget extends EntityWidget {
-  render() {
+  renderContent() {
     return frame(this, { quickKind: "none", hasDetail: true });
   }
 }
@@ -52,7 +52,7 @@ export class PersonWidget extends EntityWidget {
 // ---- Binary sensor -------------------------------------------------------
 @define("hd-widget-binary")
 export class BinaryWidget extends EntityWidget {
-  render() {
+  renderContent() {
     return frame(this, { quickKind: "none", hasDetail: true });
   }
 }
@@ -77,7 +77,7 @@ abstract class MomentaryWidget extends EntityWidget {
       /* base already toasted the failure */
     }
   }
-  render() {
+  renderContent() {
     const vm = this.vm;
     return html`<hd-widget-frame
       .icon=${vm.icon}
@@ -148,7 +148,7 @@ export class ActionWidget extends EntityWidget {
     }
   }
 
-  render() {
+  renderContent() {
     const name = this.config.name ?? "Action";
     const icon = this.config.icon ?? "mdi:gesture-tap-button";
     return html`<hd-widget-frame

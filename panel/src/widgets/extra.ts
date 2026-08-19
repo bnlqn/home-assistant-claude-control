@@ -26,7 +26,7 @@ export class FanWidget extends EntityWidget {
     if (final) send();
     else this._debounce = window.setTimeout(send, 200);
   }
-  render() {
+  renderContent() {
     const vm = this.vm;
     const caps = fanCaps(vm.stateObj);
     const size = this.currentSize;
@@ -116,7 +116,7 @@ export class CameraWidget extends EntityWidget {
     super.disconnectedCallback();
     window.clearInterval(this._timer);
   }
-  render() {
+  renderContent() {
     const vm = this.vm;
     const pic = vm.stateObj?.attributes.entity_picture as string | undefined;
     const src = pic ? `${pic}${pic.includes("?") ? "&" : "?"}_=${this._cacheBust}` : undefined;
@@ -177,7 +177,7 @@ export class AlarmWidget extends EntityWidget {
       { errorVerb: "update" },
     );
   }
-  render() {
+  renderContent() {
     const vm = this.vm;
     const st = vm.rawState;
     const accent = st === "triggered" ? "alert" : st.startsWith("armed") ? "warn" : st === "disarmed" ? "eco" : "accent";

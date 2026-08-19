@@ -8,6 +8,7 @@ import type { Breakpoint, ViewConfig, WidgetConfig, WidgetSize } from "../config
 import { widgetTag } from "../widgets/widget-registry.js";
 import { gridMetricsForWidth, resolveWidgetSize, spanForSize, squareUnit } from "./layout.js";
 import "../primitives/entity-icon.js";
+import "../widgets/widget-frame.js";
 
 /**
  * The deterministic square-unit widget grid. Column count, gap, padding and the
@@ -85,17 +86,51 @@ export class HdViewGrid extends LitElement {
   }
 
   private _renderWidget(widget: WidgetConfig, size: WidgetSize, columns: number) {
-    const { colSpan, rowSpan } = spanForSize(size, columns);
-    const tag = unsafeStatic(widgetTag(widget.type));
+    // Grid-level error net: a throw here — an unknown widget type, a bad config,
+    // a span computation gone wrong — degrades this one cell to an error tile
+    // instead of throwing out of render() and blanking the entire view. A
+    // widget's *own* render throw is caught one layer down by EntityWidget.
+    try {
+      const { colSpan, rowSpan } = spanForSize(size, columns);
+      const tag = unsafeStatic(widgetTag(widget.type));
+      const cellStyle = `grid-column: span ${colSpan}; grid-row: span ${rowSpan};`;
+      // Dynamic-tag element with live property bindings.
+      return staticHtml`<${tag}
+        class="cell"
+        style=${cellStyle}
+        .hass=${this.hass}
+        .config=${widget}
+        .currentSize=${size}
+      ></${tag}>`;
+    } catch (err) {
+      console.error(`[hd-view-grid] widget "${widget?.id ?? widget?.type}" failed to render:`, err);
+      return this._errorCell(widget, size, columns);
+    }
+  }
+
+  /** Card-styled fallback for a widget the grid couldn't even construct. */
+  private _errorCell(widget: WidgetConfig, size: WidgetSize, columns: number) {
+    // `spanForSize` may itself have thrown above — fall back to a 1×1 footprint.
+    let colSpan = 1;
+    let rowSpan = 1;
+    try {
+      ({ colSpan, rowSpan } = spanForSize(size, columns));
+    } catch {
+      /* keep the 1×1 fallback */
+    }
     const cellStyle = `grid-column: span ${colSpan}; grid-row: span ${rowSpan};`;
-    // Dynamic-tag element with live property bindings.
-    return staticHtml`<${tag}
+    const name = widget?.name || widget?.entity || "Widget";
+    return html`<hd-widget-frame
       class="cell"
       style=${cellStyle}
-      .hass=${this.hass}
-      .config=${widget}
-      .currentSize=${size}
-    ></${tag}>`;
+      icon="mdi:alert-circle-outline"
+      .name=${name}
+      stateText="Unavailable"
+      secondary="Widget error"
+      accent="alert"
+      .size=${size}
+      ?unavailable=${true}
+    ></hd-widget-frame>`;
   }
 
   render() {

@@ -464,7 +464,7 @@ export class PowerflowWidget extends EntityWidget {
     return true;
   }
 
-  render(): TemplateResult {
+  renderContent(): TemplateResult {
     const model = this.hass ? buildFlowModel(this.hass, this._opts) : undefined;
     const accent = model?.grid.mode === "export" ? "eco" : "accent";
     return html`

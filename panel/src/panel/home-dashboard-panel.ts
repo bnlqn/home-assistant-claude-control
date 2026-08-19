@@ -49,6 +49,14 @@ export class HomeDashboardPanel extends LitElement {
   private _onPop = () => this._syncViewFromLocation();
   private _mqlDark?: MediaQueryList;
   private _onMqlChange = () => this._applyTheme();
+  // Best-effort backstop: the widget and grid boundaries catch synchronous
+  // render throws, but a throw inside a child element's own *async* update
+  // (e.g. the inner flow diagram) surfaces here instead of being swallowed.
+  // Log-only — tile attribution isn't possible at this level.
+  private _onWindowError = (ev: ErrorEvent) =>
+    console.error("[home-dashboard-panel] uncaught error:", ev.error ?? ev.message);
+  private _onRejection = (ev: PromiseRejectionEvent) =>
+    console.error("[home-dashboard-panel] unhandled rejection:", ev.reason);
 
   static styles = [
     designTokens,
@@ -102,6 +110,8 @@ export class HomeDashboardPanel extends LitElement {
     this._mqlDark = window.matchMedia("(prefers-color-scheme: dark)");
     this._mqlDark.addEventListener("change", this._onMqlChange);
     window.addEventListener("popstate", this._onPop);
+    window.addEventListener("error", this._onWindowError);
+    window.addEventListener("unhandledrejection", this._onRejection);
     this._syncViewFromLocation();
     this._applyTheme();
     this._applyKiosk();
@@ -111,6 +121,8 @@ export class HomeDashboardPanel extends LitElement {
     super.disconnectedCallback();
     this._mqlDark?.removeEventListener("change", this._onMqlChange);
     window.removeEventListener("popstate", this._onPop);
+    window.removeEventListener("error", this._onWindowError);
+    window.removeEventListener("unhandledrejection", this._onRejection);
   }
 
   willUpdate(changed: Map<string, unknown>) {

@@ -97,7 +97,7 @@ export class EnergyWidget extends EntityWidget {
     return { value: String(Math.round(abs)), unit: "W" };
   }
 
-  render() {
+  renderContent() {
     const o = this._opts;
     const grid = this._num(o.gridPower);
     const solar = this._num(o.solarPower);

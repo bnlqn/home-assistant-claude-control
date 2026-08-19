@@ -139,7 +139,7 @@ export class WeatherWidget extends EntityWidget {
     </div>`;
   }
 
-  render() {
+  renderContent() {
     const vm = this.vm;
     const a = vm.stateObj?.attributes ?? {};
     const size = this.currentSize;
