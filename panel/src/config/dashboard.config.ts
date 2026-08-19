@@ -529,6 +529,21 @@ export const dashboardConfig: DashboardConfig = {
             deadband: "input_number.tesla_solar_deadband_current_a",
           },
         },
+        // Long-range history from the Statistics API — solar / import / export /
+        // car-charging in kWh, with a Day / Week / Month selector.
+        {
+          id: "en-history",
+          type: "energychart",
+          name: "Energy history",
+          size: { compact: "2x2", medium: "4x2", wide: "4x2" },
+          options: {
+            solar: "sensor.goodwe_total_pv_generation",
+            gridImport: "sensor.p1_meter_energy_import",
+            gridExport: "sensor.p1_meter_energy_export",
+            car: "sensor.tesla_wall_connector_energy",
+            defaultPeriod: "day",
+          },
+        },
         {
           id: "en-grid-now",
           type: "sensor",

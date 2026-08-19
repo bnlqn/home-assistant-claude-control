@@ -205,6 +205,9 @@ export class MockHassController {
       const id = (msg.target as { entity_id: string })?.entity_id;
       return { response: { [id]: { forecast: this.syntheticForecast() } } } as unknown as T;
     }
+    if (msg.type === "recorder/statistics_during_period") {
+      return this.syntheticStatistics(msg) as unknown as T;
+    }
     return {} as T;
   };
 
@@ -231,6 +234,38 @@ export class MockHassController {
       const d = new Date(now.getTime() + (i + 1) * 86400000);
       return { datetime: d.toISOString(), condition: c, temperature: 18 + i, templow: 11 + i };
     });
+  }
+
+  private syntheticEnergy(id: string, t: number): number {
+    // Deterministic per-bucket wobble so the dev chart is stable across renders.
+    const wobble = 0.6 + 0.8 * Math.abs(Math.sin(t / 8.64e7));
+    const day = new Date(t).getDay();
+    if (id.includes("import")) return 5 + 3 * wobble;
+    if (id.includes("export")) return 15 + 10 * wobble;
+    if (id.includes("pv") || id.includes("solar")) return 20 + 14 * wobble;
+    if (id.includes("wall_connector") || id.includes("car")) return day % 3 === 0 ? 10 * wobble : 0.4 * wobble;
+    return 3 * wobble;
+  }
+
+  private syntheticStatistics(msg: Record<string, unknown>) {
+    const ids = (msg.statistic_ids as string[]) ?? [];
+    const period = (msg.period as string) ?? "day";
+    const startMs = Date.parse(String(msg.start_time));
+    const now = Date.now();
+    const stepMs = period === "day" ? 864e5 : period === "week" ? 7 * 864e5 : 30 * 864e5;
+    const scale = period === "day" ? 1 : period === "week" ? 7 : 30;
+    const out: Record<string, Array<{ start: number; end: number; change: number; sum: number }>> = {};
+    for (const id of ids) {
+      const rows: Array<{ start: number; end: number; change: number; sum: number }> = [];
+      let sum = 0;
+      for (let t = startMs; t < now; t += stepMs) {
+        const change = Number((this.syntheticEnergy(id, t) * scale).toFixed(2));
+        sum = Number((sum + change).toFixed(2));
+        rows.push({ start: t, end: t + stepMs, change, sum });
+      }
+      out[id] = rows;
+    }
+    return out;
   }
 
   /** Build a fresh immutable-ish `hass` snapshot for the panel. */

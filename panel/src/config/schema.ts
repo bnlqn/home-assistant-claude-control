@@ -10,11 +10,12 @@
  * Approved widget footprints. The core set is the four base tiles; `3x3` is an
  * "XL" footprint reserved for genuinely diagram-scale widgets (the power-flow
  * hero) whose contents are size-capped and only need more *whitespace* to
- * breathe — not every widget may use it (see SUPPORTED_SIZES).
+ * breathe. `4x2` is a wide banner for width-hungry widgets (the energy chart).
+ * Not every widget may use these (see SUPPORTED_SIZES).
  */
-export type WidgetSize = "1x1" | "2x1" | "1x2" | "2x2" | "3x3";
+export type WidgetSize = "1x1" | "2x1" | "1x2" | "2x2" | "3x3" | "4x2";
 
-export const ALL_SIZES: readonly WidgetSize[] = ["1x1", "2x1", "1x2", "2x2", "3x3"] as const;
+export const ALL_SIZES: readonly WidgetSize[] = ["1x1", "2x1", "1x2", "2x2", "3x3", "4x2"] as const;
 
 /** Responsive breakpoint buckets, resolved against the panel's own width. */
 export type Breakpoint = "compact" | "medium" | "wide";
@@ -49,6 +50,7 @@ export type WidgetType =
   | "energy"
   | "powerflow"
   | "solarcharging"
+  | "energychart"
   | "alarm"
   | "action";
 
@@ -72,6 +74,7 @@ export const ALL_WIDGET_TYPES: readonly WidgetType[] = [
   "energy",
   "powerflow",
   "solarcharging",
+  "energychart",
   "alarm",
   "action",
 ] as const;
@@ -149,9 +152,16 @@ export const SUPPORTED_SIZES: Record<WidgetType, readonly WidgetSize[]> = {
   energy: ["2x1", "1x2", "2x2"],
   powerflow: ["2x2", "3x3"],
   solarcharging: ["2x1", "1x2", "2x2"],
+  energychart: ["2x2", "4x2"],
   alarm: ["1x1", "2x1", "2x2"],
   action: ["1x1", "2x1"],
 };
 
 /** A widget type must supply an `entity` unless it is one of these. */
-export const ENTITYLESS_TYPES: readonly WidgetType[] = ["energy", "powerflow", "solarcharging", "action"];
+export const ENTITYLESS_TYPES: readonly WidgetType[] = [
+  "energy",
+  "powerflow",
+  "solarcharging",
+  "energychart",
+  "action",
+];
