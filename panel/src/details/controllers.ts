@@ -1,0 +1,490 @@
+import { html, nothing, type TemplateResult } from "lit";
+import type { HomeAssistant, HassEntity } from "../types/hass.js";
+import type { WidgetConfig } from "../config/schema.js";
+import type { ServiceCall } from "../home-assistant/service-calls.js";
+import {
+  buildClimateFanMode,
+  buildClimateHvacMode,
+  buildClimatePreset,
+  buildClimateSwing,
+  buildClimateTemperature,
+  buildCoverClose,
+  buildCoverOpen,
+  buildCoverPosition,
+  buildCoverStop,
+  buildLightBrightness,
+  buildLightTurnOn,
+  buildLock,
+  buildMediaMute,
+  buildMediaNext,
+  buildMediaPlayPause,
+  buildMediaPrevious,
+  buildMediaSelectSource,
+  buildMediaVolume,
+  buildToggle,
+  buildTurnOff,
+  buildTurnOn,
+  buildUnlock,
+  buildVacuumFanSpeed,
+  buildVacuumPause,
+  buildVacuumReturn,
+  buildVacuumStart,
+} from "../home-assistant/service-calls.js";
+import {
+  climateCaps,
+  coverCaps,
+  lightCaps,
+  mediaCaps,
+  vacuumCaps,
+} from "../home-assistant/capabilities.js";
+import { formatAttribute, formatState, formatNumber, relativeTime, titleCase } from "../home-assistant/state-formatting.js";
+import type { SegmentOption } from "../primitives/segmented.js";
+import { requestConfirm } from "../primitives/feedback.js";
+
+export interface DetailCtx {
+  hass: HomeAssistant;
+  entityId: string;
+  config?: WidgetConfig;
+  host: HTMLElement;
+  trend: number[];
+  forecast: Array<{ datetime: string; condition?: string; temperature?: number; templow?: number }>;
+  /** Execute a service call (with error feedback handled by the surface). */
+  call: (c: ServiceCall, verb?: string) => Promise<void>;
+}
+
+const COLOR_SWATCHES: Array<[string, [number, number, number]]> = [
+  ["Warm white", [255, 197, 143]],
+  ["Sun", [255, 233, 170]],
+  ["Red", [255, 74, 74]],
+  ["Orange", [255, 145, 48]],
+  ["Green", [86, 200, 90]],
+  ["Teal", [40, 200, 180]],
+  ["Blue", [70, 130, 255]],
+  ["Indigo", [120, 90, 240]],
+  ["Pink", [255, 92, 170]],
+];
+
+// ---- Light ---------------------------------------------------------------
+function lightDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const caps = lightCaps(s);
+  const on = s.state === "on";
+  const brightness = on ? Math.round(((s.attributes.brightness as number) ?? 255) / 2.55) : 0;
+  const min = (s.attributes.min_color_temp_kelvin as number) ?? 2200;
+  const max = (s.attributes.max_color_temp_kelvin as number) ?? 6500;
+  const curTemp = (s.attributes.color_temp_kelvin as number) ?? Math.round((min + max) / 2);
+  const effects = (s.attributes.effect_list as string[] | undefined)?.filter((e) => e && e !== "None") ?? [];
+
+  return html`
+    <div class="d-section d-row-between">
+      <span class="d-label">Power</span>
+      <hd-toggle
+        .checked=${on}
+        label="Toggle light"
+        @hd-toggle=${() => ctx.call(buildToggle(ctx.entityId), "toggle")}
+      ></hd-toggle>
+    </div>
+
+    ${caps.brightness
+      ? html`<div class="d-section">
+          <span class="d-label">Brightness</span>
+          <hd-slider
+            .value=${brightness}
+            .min=${1}
+            .max=${100}
+            .disabled=${!on}
+            .valueText=${on ? `${brightness}%` : "Off"}
+            .color=${"var(--state-light)"}
+            icon="mdi:brightness-6"
+            label="Brightness"
+            @hd-change=${(e: CustomEvent) => ctx.call(buildLightBrightness(ctx.entityId, e.detail.value), "dim")}
+          ></hd-slider>
+        </div>`
+      : nothing}
+
+    ${caps.colorTemp
+      ? html`<div class="d-section">
+          <span class="d-label">Color temperature</span>
+          <hd-slider
+            .value=${curTemp}
+            .min=${min}
+            .max=${max}
+            .step=${50}
+            .disabled=${!on}
+            .color=${"linear-gradient(90deg,#ffb85c,#fff5e8,#cfe0ff)"}
+            label="Color temperature"
+            @hd-change=${(e: CustomEvent) => ctx.call(buildLightTurnOn(ctx.entityId, { colorTempKelvin: e.detail.value }), "set color of")}
+          ></hd-slider>
+        </div>`
+      : nothing}
+
+    ${caps.color
+      ? html`<div class="d-section">
+          <span class="d-label">Color</span>
+          <div class="swatches">
+            ${COLOR_SWATCHES.map(
+              ([name, rgb]) => html`<button
+                class="swatch"
+                style=${`background:rgb(${rgb[0]},${rgb[1]},${rgb[2]})`}
+                aria-label=${name}
+                ?disabled=${!on}
+                @click=${() => ctx.call(buildLightTurnOn(ctx.entityId, { rgbColor: rgb }), "set color of")}
+              ></button>`,
+            )}
+          </div>
+        </div>`
+      : nothing}
+
+    ${caps.effects && effects.length
+      ? html`<div class="d-section">
+          <span class="d-label">Effect</span>
+          <div class="chips">
+            ${effects.slice(0, 12).map(
+              (fx) => html`<button
+                class="chip ${s.attributes.effect === fx ? "active" : ""}"
+                ?disabled=${!on}
+                @click=${() => ctx.call(buildLightTurnOn(ctx.entityId, { effect: fx }), "set effect of")}
+              >
+                ${titleCase(fx)}
+              </button>`,
+            )}
+          </div>
+        </div>`
+      : nothing}
+  `;
+}
+
+// ---- Climate -------------------------------------------------------------
+function climateDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const caps = climateCaps(s);
+  const off = s.state === "off";
+  const target = (s.attributes.temperature as number) ?? 20;
+  const cur = s.attributes.current_temperature as number | undefined;
+  const stepSize = (s.attributes.target_temp_step as number) ?? 0.5;
+  const modes = (s.attributes.hvac_modes as string[]) ?? [];
+  const fanModes = (s.attributes.fan_modes as string[]) ?? [];
+  const swingModes = (s.attributes.swing_modes as string[]) ?? [];
+  const presets = (s.attributes.preset_modes as string[]) ?? [];
+
+  const step = (d: number) => {
+    const minT = (s.attributes.min_temp as number) ?? 7;
+    const maxT = (s.attributes.max_temp as number) ?? 35;
+    const next = Math.min(maxT, Math.max(minT, target + d * stepSize));
+    void ctx.call(buildClimateTemperature(ctx.entityId, Number(next.toFixed(1))), "set temperature for");
+  };
+  const seg = (values: string[]): SegmentOption[] => values.map((v) => ({ value: v, label: titleCase(v) }));
+
+  return html`
+    ${caps.targetTemp
+      ? html`<div class="d-section climate-hero">
+          <hd-icon-button icon="mdi:minus" label="Lower" variant="soft" .disabled=${off} @click=${() => step(-1)}></hd-icon-button>
+          <div class="climate-target">
+            <span class="big">${off ? "—" : `${formatNumber(target)}°`}</span>
+            ${cur != null ? html`<span class="sub">Now ${formatNumber(cur)}°</span>` : nothing}
+          </div>
+          <hd-icon-button icon="mdi:plus" label="Raise" variant="soft" .disabled=${off} @click=${() => step(1)}></hd-icon-button>
+        </div>`
+      : nothing}
+
+    ${modes.length > 1
+      ? html`<div class="d-section">
+          <span class="d-label">Mode</span>
+          <hd-segmented .options=${seg(modes)} .value=${s.state} label="Mode"
+            @hd-select=${(e: CustomEvent) => ctx.call(buildClimateHvacMode(ctx.entityId, e.detail.value), "set mode for")}></hd-segmented>
+        </div>`
+      : nothing}
+    ${caps.fanMode && fanModes.length
+      ? html`<div class="d-section">
+          <span class="d-label">Fan</span>
+          <hd-segmented .options=${seg(fanModes)} .value=${(s.attributes.fan_mode as string) ?? ""} label="Fan mode"
+            @hd-select=${(e: CustomEvent) => ctx.call(buildClimateFanMode(ctx.entityId, e.detail.value), "set fan for")}></hd-segmented>
+        </div>`
+      : nothing}
+    ${caps.swingMode && swingModes.length
+      ? html`<div class="d-section">
+          <span class="d-label">Swing</span>
+          <hd-segmented .options=${seg(swingModes)} .value=${(s.attributes.swing_mode as string) ?? ""} label="Swing mode"
+            @hd-select=${(e: CustomEvent) => ctx.call(buildClimateSwing(ctx.entityId, e.detail.value), "set swing for")}></hd-segmented>
+        </div>`
+      : nothing}
+    ${caps.presetMode && presets.length
+      ? html`<div class="d-section">
+          <span class="d-label">Preset</span>
+          <hd-segmented .options=${seg(presets)} .value=${(s.attributes.preset_mode as string) ?? ""} label="Preset"
+            @hd-select=${(e: CustomEvent) => ctx.call(buildClimatePreset(ctx.entityId, e.detail.value), "set preset for")}></hd-segmented>
+        </div>`
+      : nothing}
+  `;
+}
+
+// ---- Media ---------------------------------------------------------------
+function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const caps = mediaCaps(s);
+  const picture = s.attributes.entity_picture as string | undefined;
+  const title = s.attributes.media_title as string | undefined;
+  const app = s.attributes.app_name as string | undefined;
+  const vol = (s.attributes.volume_level as number) ?? 0;
+  const muted = (s.attributes.is_volume_muted as boolean) ?? false;
+  const sources = (s.attributes.source_list as string[]) ?? [];
+  const off = s.state === "off";
+
+  return html`
+    ${picture
+      ? html`<div class="media-art" style=${`background-image:url("${picture}")`}></div>`
+      : nothing}
+    <div class="media-meta">
+      <div class="d-value">${title ?? formatState(ctx.hass, s)}</div>
+      ${app ? html`<div class="d-sub">${app}</div>` : nothing}
+    </div>
+    <div class="d-section media-transport">
+      ${caps.previous ? html`<hd-icon-button icon="mdi:skip-previous" label="Previous" variant="soft" .disabled=${off} @click=${() => ctx.call(buildMediaPrevious(ctx.entityId), "skip")}></hd-icon-button>` : nothing}
+      <hd-icon-button icon=${s.state === "playing" ? "mdi:pause" : "mdi:play"} label="Play or pause" variant="filled" .disabled=${off} @click=${() => ctx.call(buildMediaPlayPause(ctx.entityId), "control")}></hd-icon-button>
+      ${caps.next ? html`<hd-icon-button icon="mdi:skip-next" label="Next" variant="soft" .disabled=${off} @click=${() => ctx.call(buildMediaNext(ctx.entityId), "skip")}></hd-icon-button>` : nothing}
+    </div>
+    ${caps.volumeSet
+      ? html`<div class="d-section">
+          <span class="d-label">Volume</span>
+          <div class="vol-row">
+            ${caps.mute ? html`<hd-icon-button icon=${muted ? "mdi:volume-off" : "mdi:volume-high"} label="Mute" variant="soft" @click=${() => ctx.call(buildMediaMute(ctx.entityId, !muted), "mute")}></hd-icon-button>` : nothing}
+            <hd-slider style="flex:1" .value=${Math.round(vol * 100)} .valueText=${`${Math.round(vol * 100)}%`} label="Volume"
+              @hd-change=${(e: CustomEvent) => ctx.call(buildMediaVolume(ctx.entityId, e.detail.value / 100), "set volume of")}></hd-slider>
+          </div>
+        </div>`
+      : nothing}
+    ${caps.selectSource && sources.length
+      ? html`<div class="d-section">
+          <span class="d-label">Source</span>
+          <div class="chips">
+            ${sources.slice(0, 16).map(
+              (src) => html`<button class="chip ${s.attributes.source === src ? "active" : ""}" @click=${() => ctx.call(buildMediaSelectSource(ctx.entityId, src), "change source of")}>${src}</button>`,
+            )}
+          </div>
+        </div>`
+      : nothing}
+  `;
+}
+
+// ---- Cover ---------------------------------------------------------------
+function coverDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const caps = coverCaps(s);
+  const pos = (s.attributes.current_position as number) ?? (s.state === "open" ? 100 : 0);
+  return html`
+    ${caps.setPosition
+      ? html`<div class="d-section">
+          <span class="d-label">Position</span>
+          <hd-slider .value=${pos} .valueText=${`${Math.round(pos)}% open`} label="Position"
+            @hd-change=${(e: CustomEvent) => ctx.call(buildCoverPosition(ctx.entityId, e.detail.value), "move")}></hd-slider>
+        </div>`
+      : nothing}
+    <div class="d-section big-buttons">
+      ${caps.open ? html`<button class="bigbtn" @click=${() => ctx.call(buildCoverOpen(ctx.entityId), "open")}><hd-icon icon="mdi:arrow-up" .size=${20}></hd-icon>Open</button>` : nothing}
+      ${caps.stop ? html`<button class="bigbtn" @click=${() => ctx.call(buildCoverStop(ctx.entityId), "stop")}><hd-icon icon="mdi:stop" .size=${20}></hd-icon>Stop</button>` : nothing}
+      ${caps.close ? html`<button class="bigbtn" @click=${() => ctx.call(buildCoverClose(ctx.entityId), "close")}><hd-icon icon="mdi:arrow-down" .size=${20}></hd-icon>Close</button>` : nothing}
+    </div>
+  `;
+}
+
+// ---- Lock ----------------------------------------------------------------
+function lockDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const locked = s.state === "locked";
+  const doUnlock = async () => {
+    const ok = await requestConfirm(ctx.host, { title: `Unlock ${s.attributes.friendly_name ?? "lock"}?`, confirmLabel: "Unlock", destructive: true, icon: "mdi:lock-open-variant" });
+    if (ok) void ctx.call(buildUnlock(ctx.entityId), "unlock");
+  };
+  return html`
+    <div class="d-section big-buttons">
+      <button class="bigbtn ${locked ? "active" : ""}" @click=${() => ctx.call(buildLock(ctx.entityId), "lock")}>
+        <hd-icon icon="mdi:lock" .size=${20}></hd-icon>Lock
+      </button>
+      <button class="bigbtn ${!locked ? "active" : ""}" @click=${doUnlock}>
+        <hd-icon icon="mdi:lock-open-variant" .size=${20}></hd-icon>Unlock
+      </button>
+    </div>
+    <div class="d-meta">Last changed ${relativeTime(s.last_changed)}</div>
+  `;
+}
+
+// ---- Vacuum --------------------------------------------------------------
+function vacuumDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const caps = vacuumCaps(s);
+  const speeds = ((s.attributes.fan_speed_list as string[]) ?? []).filter((x) => !["off", "custom"].includes(x));
+  const battery = s.attributes.battery_level as number | undefined;
+  return html`
+    <div class="d-section big-buttons">
+      <button class="bigbtn" @click=${() => ctx.call(buildVacuumStart(ctx.entityId), "start")}><hd-icon icon="mdi:play" .size=${20}></hd-icon>Start</button>
+      ${caps.pause ? html`<button class="bigbtn" @click=${() => ctx.call(buildVacuumPause(ctx.entityId), "pause")}><hd-icon icon="mdi:pause" .size=${20}></hd-icon>Pause</button>` : nothing}
+      ${caps.returnHome ? html`<button class="bigbtn" @click=${() => ctx.call(buildVacuumReturn(ctx.entityId), "dock")}><hd-icon icon="mdi:home-import-outline" .size=${20}></hd-icon>Dock</button>` : nothing}
+    </div>
+    ${speeds.length
+      ? html`<div class="d-section">
+          <span class="d-label">Suction</span>
+          <hd-segmented .options=${speeds.map((v) => ({ value: v, label: titleCase(v) }))} .value=${(s.attributes.fan_speed as string) ?? ""}
+            @hd-select=${(e: CustomEvent) => ctx.call(buildVacuumFanSpeed(ctx.entityId, e.detail.value), "set suction for")}></hd-segmented>
+        </div>`
+      : nothing}
+    ${battery != null ? html`<div class="d-meta">Battery ${Math.round(battery)}%</div>` : nothing}
+  `;
+}
+
+// ---- Sensor --------------------------------------------------------------
+function sensorDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const num = Number(s.state);
+  const isNumeric = Number.isFinite(num);
+  const trend = ctx.trend;
+  const summary =
+    trend.length > 1
+      ? `Min ${formatNumber(Math.min(...trend))}, max ${formatNumber(Math.max(...trend))}, latest ${formatNumber(trend[trend.length - 1])}`
+      : "";
+  return html`
+    <div class="d-value big">${formatState(ctx.hass, s)}</div>
+    ${isNumeric && trend.length > 1
+      ? html`<div class="d-section">
+          <span class="d-label">Last 24 hours</span>
+          <div class="detail-trend"><hd-trend .points=${trend} .summary=${summary}></hd-trend></div>
+          <div class="d-meta">${summary}</div>
+        </div>`
+      : nothing}
+    ${metaRows(ctx, s)}
+  `;
+}
+
+// ---- Weather -------------------------------------------------------------
+function weatherDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const a = s.attributes;
+  const metrics: Array<[string, string]> = [];
+  if (a.temperature != null) metrics.push(["Temperature", `${formatNumber(a.temperature as number)}°`]);
+  if (a.humidity != null) metrics.push(["Humidity", `${Math.round(a.humidity as number)}%`]);
+  if (a.wind_speed != null) metrics.push(["Wind", `${formatNumber(a.wind_speed as number)} ${a.wind_speed_unit ?? ""}`]);
+  if (a.pressure != null) metrics.push(["Pressure", `${formatNumber(a.pressure as number)} ${a.pressure_unit ?? ""}`]);
+  return html`
+    <div class="d-value big">${titleCase(s.state)}</div>
+    <div class="d-grid">
+      ${metrics.map(([k, v]) => html`<div class="d-cell"><span class="k">${k}</span><span class="v">${v}</span></div>`)}
+    </div>
+    ${ctx.forecast.length
+      ? html`<div class="d-section">
+          <span class="d-label">Forecast</span>
+          ${ctx.forecast.map((f) => {
+            const d = new Date(f.datetime);
+            const day = Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString(undefined, { weekday: "long" });
+            return html`<div class="fc-row">
+              <span class="fc-day">${day}</span>
+              <hd-icon .icon=${weatherIconName(f.condition ?? "")} .size=${20}></hd-icon>
+              <span class="fc-temp">${f.temperature != null ? `${Math.round(f.temperature)}°` : ""}${f.templow != null ? ` / ${Math.round(f.templow)}°` : ""}</span>
+            </div>`;
+          })}
+        </div>`
+      : nothing}
+  `;
+}
+
+// ---- Energy --------------------------------------------------------------
+function energyDetail(ctx: DetailCtx): TemplateResult {
+  const o = (ctx.config?.options ?? {}) as Record<string, string>;
+  const val = (id?: string) => {
+    if (!id) return null;
+    const st = ctx.hass.states[id];
+    return st ? st : null;
+  };
+  const rows = Object.entries(o)
+    .map(([k, id]) => ({ k, st: val(id) }))
+    .filter((r) => r.st);
+  return html`
+    <div class="d-section">
+      <span class="d-label">Live values</span>
+      <div class="d-grid">
+        ${rows.map((r) => html`<div class="d-cell"><span class="k">${titleCase(r.k)}</span><span class="v">${formatState(ctx.hass, r.st!)}</span></div>`)}
+      </div>
+    </div>
+    ${ctx.trend.length > 1
+      ? html`<div class="d-section">
+          <span class="d-label">Grid power — last 24 hours</span>
+          <div class="detail-trend"><hd-trend .points=${ctx.trend} .summary=${"24 hour grid power"}></hd-trend></div>
+        </div>`
+      : nothing}
+  `;
+}
+
+// ---- Generic -------------------------------------------------------------
+function genericDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const domain = ctx.entityId.split(".")[0];
+  const toggleable = ["switch", "input_boolean", "fan", "light", "humidifier", "siren"].includes(domain);
+  return html`
+    <div class="d-value big">${formatState(ctx.hass, s)}</div>
+    ${toggleable
+      ? html`<div class="d-section big-buttons">
+          <button class="bigbtn" @click=${() => ctx.call(buildTurnOn(ctx.entityId), "turn on")}>Turn on</button>
+          <button class="bigbtn" @click=${() => ctx.call(buildTurnOff(ctx.entityId), "turn off")}>Turn off</button>
+        </div>`
+      : nothing}
+    ${metaRows(ctx, s)}
+  `;
+}
+
+function metaRows(ctx: DetailCtx, s: HassEntity): TemplateResult {
+  const keys = ["device_class", "state_class", "unit_of_measurement"].filter((k) => s.attributes[k] != null);
+  return html`<div class="d-grid">
+    ${keys.map(
+      (k) => html`<div class="d-cell"><span class="k">${titleCase(k)}</span><span class="v">${formatAttribute(ctx.hass, s, k)}</span></div>`,
+    )}
+    <div class="d-cell"><span class="k">Last updated</span><span class="v">${relativeTime(s.last_updated)}</span></div>
+  </div>`;
+}
+
+// Local re-export to avoid a circular import with the icons module.
+function weatherIconName(condition: string): string {
+  const map: Record<string, string> = {
+    sunny: "mdi:weather-sunny",
+    "clear-night": "mdi:weather-night",
+    cloudy: "mdi:weather-cloudy",
+    partlycloudy: "mdi:weather-partly-cloudy",
+    rainy: "mdi:weather-rainy",
+    pouring: "mdi:weather-pouring",
+    snowy: "mdi:weather-snowy",
+    fog: "mdi:weather-fog",
+    windy: "mdi:weather-windy",
+  };
+  return map[condition] ?? "mdi:weather-cloudy";
+}
+
+/** Pick the right controller for an entity/config and render it. */
+export function renderDetailBody(ctx: DetailCtx): TemplateResult {
+  const s = ctx.hass.states[ctx.entityId];
+  const type = ctx.config?.type;
+  if (type === "energy") return energyDetail(ctx);
+  if (!s) {
+    return html`<div class="d-value big">Entity unavailable</div>
+      <div class="d-meta">${ctx.entityId || "No entity configured"} was not found in Home Assistant.</div>`;
+  }
+  const domain = ctx.entityId.split(".")[0];
+  switch (domain) {
+    case "light":
+      return lightDetail(ctx, s);
+    case "climate":
+      return climateDetail(ctx, s);
+    case "media_player":
+      return mediaDetail(ctx, s);
+    case "cover":
+      return coverDetail(ctx, s);
+    case "lock":
+      return lockDetail(ctx, s);
+    case "vacuum":
+      return vacuumDetail(ctx, s);
+    case "sensor":
+      return sensorDetail(ctx, s);
+    case "weather":
+      return weatherDetail(ctx, s);
+    default:
+      return genericDetail(ctx, s);
+  }
+}
+
+/** Domains whose detail benefits from lazily-loaded 24h history. */
+export function detailNeedsHistory(entityId: string, config?: WidgetConfig): string | null {
+  if (config?.type === "energy") return (config.options as Record<string, string>)?.gridPower ?? null;
+  const domain = entityId.split(".")[0];
+  return domain === "sensor" ? entityId : null;
+}
+
+export function detailNeedsForecast(entityId: string): boolean {
+  return entityId.split(".")[0] === "weather";
+}

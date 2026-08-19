@@ -1,0 +1,316 @@
+# Home Dashboard Panel
+
+A purpose-built, **Homey-style** custom dashboard for Home Assistant. It is a
+native [custom panel](https://developers.home-assistant.io/docs/frontend/custom-ui/creating-custom-panels/)
+— **not** a Lovelace dashboard. There are no Lovelace cards, no Mushroom, no
+Bubble Card, no card-mod, no HACS card dependencies, and no iframe. Everything
+is a widget, every room is its own route, and the whole thing is one
+self-contained ES module built with **Lit + TypeScript + Vite**.
+
+It runs entirely on your local network: no external CDN, no hosted fonts, no
+remote scripts, no long-lived access token. It talks to Home Assistant through
+the authenticated `hass` object the frontend hands every panel.
+
+<p align="center"><em>Soft neutral canvas · generously rounded widgets · clear
+iconography · active/inactive state that reads at a glance · controls embedded
+right in the widgets · a consistent detail surface for everything else.</em></p>
+
+---
+
+## Contents
+
+- [Quick start](#quick-start)
+- [Commands](#commands)
+- [Install into Home Assistant](#install-into-home-assistant)
+- [The one file you edit — configuration](#the-one-file-you-edit--configuration)
+  - [Add a room](#add-a-room)
+  - [Add a widget](#add-a-widget)
+  - [Placeholder entities](#placeholder-entities)
+- [Widget catalogue](#widget-catalogue)
+- [How it looks & behaves](#how-it-looks--behaves)
+- [Architecture](#architecture)
+- [Testing](#testing)
+- [Kiosk / wall tablets](#kiosk--wall-tablets)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Quick start
+
+```bash
+cd panel
+npm install
+npm run dev        # open the printed http://localhost:5178 URL
+```
+
+`npm run dev` serves the panel with a **mock Home Assistant** (built from a real
+snapshot of this home), so the whole dashboard — routing, widgets, sliders,
+detail sheets, light & dark — works in the browser without a live HA. A small
+"Toggle offline" button (dev only) lets you exercise the disconnected state.
+
+## Commands
+
+| Command             | What it does                                                        |
+| ------------------- | ------------------------------------------------------------------- |
+| `npm run dev`       | Vite dev server with the mock hass harness (hot reload).            |
+| `npm run build`     | Type-check **and** build the production module.                     |
+| `npm run build:fast`| Build without the type-check (faster iteration).                    |
+| `npm test`          | Run the Vitest suite once.                                          |
+| `npm run test:watch`| Vitest in watch mode.                                               |
+| `npm run typecheck` | `tsc --noEmit` only.                                                |
+
+The production build writes a **single file** straight into the Home Assistant
+working mirror:
+
+```
+config/www/home-dashboard/home-dashboard-panel.js   (~68 kB gzipped)
+```
+
+Because it lands under `config/www/`, it ships through the normal
+`./bin/ha deploy` rsync flow and is served at
+`/local/home-dashboard/home-dashboard-panel.js`.
+
+## Install into Home Assistant
+
+The registration is **already added** to `config/configuration.yaml`:
+
+```yaml
+panel_custom:
+  - name: home-dashboard-panel
+    sidebar_title: Home Panel
+    sidebar_icon: mdi:view-dashboard-variant
+    url_path: home-panel # distinct from the existing "home-dashboard" Lovelace dashboard
+    module_url: /local/home-dashboard/home-dashboard-panel.js
+    embed_iframe: false
+    require_admin: false
+    config:
+      default_view: overview
+```
+
+> `name` must equal the custom-element tag (`home-dashboard-panel`). `url_path`
+> is the sidebar route — keep it **distinct** from any Lovelace dashboard key.
+> The panel derives its own base route from `url_path`, so you can rename it
+> freely.
+
+To go live (a user-controlled step — nothing here deploys on its own):
+
+```bash
+cd panel && npm run build          # writes config/www/home-dashboard/…
+./bin/ha diff                      # review the config + bundle change
+# then deploy with the /ha-deploy skill (targeted; a Core restart is only
+# needed the first time panel_custom is added or when it changes)
+```
+
+After deploying the first time, **restart Core** (adding `panel_custom` requires
+it). Later JS-only updates just need a fresh build + `deploy` and a browser
+hard-refresh — see [Troubleshooting](#troubleshooting) for cache-busting.
+
+## The one file you edit — configuration
+
+Every entity id in the whole dashboard lives in **one** strongly-typed file:
+
+```
+panel/src/config/dashboard.config.ts
+```
+
+Widgets never hard-code entities — they receive them from this config. It ships
+pre-populated with **this home's real entities**, grouped by room, so it works
+the moment it is deployed. To point the dashboard at a different Home Assistant,
+edit that file and nothing else.
+
+The config is **validated at startup**. Invalid widget types, unsupported sizes,
+duplicate ids, missing views, and malformed entity ids produce a clear
+developer-facing error banner (and a `console.error`), while the rest of the
+dashboard still renders. Missing entities render an intentional "unavailable"
+state — they never crash the panel or show fabricated values.
+
+### Add a room
+
+Add a `ViewConfig` with `type: "room"`:
+
+```ts
+{
+  id: "garage",              // becomes the route: /home-panel/garage
+  type: "room",
+  label: "Garage",
+  icon: "mdi:garage",
+  widgets: [ /* … */ ],
+}
+```
+
+The room automatically appears in the navigation. **A room is always a full
+view/route — never a card, tile, or widget.**
+
+### Add a widget
+
+Add a `WidgetConfig` to a view's `widgets` array:
+
+```ts
+{
+  id: "garage-door",         // must be unique across the whole dashboard
+  type: "cover",
+  entity: "cover.garage_door",
+  name: "Garage door",        // optional label override
+  icon: "mdi:garage",         // optional icon override (mdi:*)
+  requiresConfirmation: true, // optional — guards the quick action
+  size: { compact: "1x1", medium: "2x1", wide: "2x1" },
+}
+```
+
+- **`size`** is required per breakpoint. Only sizes the widget type genuinely
+  supports are allowed; an unsupported size is rejected at startup with a
+  message telling you which sizes are valid.
+- Breakpoints resolve against the **panel's own width**, not the screen:
+  `compact ≈ phone`, `medium ≈ tablet`, `wide ≈ desktop / wall display`.
+- The same widget may use different approved footprints at different
+  breakpoints.
+
+### Placeholder entities
+
+Any entity id containing `REPLACE_ME` renders a visible "needs configuration"
+state instead of crashing — handy when scaffolding:
+
+```ts
+{ id: "x", type: "light", entity: "light.REPLACE_ME_MAIN",
+  size: { compact: "1x1", medium: "1x1", wide: "1x1" } }
+```
+
+## Widget catalogue
+
+Each type declares the footprints it can render usefully (enforced by
+validation). Sizes are `WIDTH x HEIGHT` in grid units.
+
+| Type            | Sizes                     | Direct control · detail surface                                   |
+| --------------- | ------------------------- | ----------------------------------------------------------------- |
+| `light`         | 1x1 · 2x1 · 1x2 · 2x2     | Toggle; brightness bar (2x1/1x2), + colour temp (2x2). Detail: power, brightness, colour temp, colour swatches, effects. |
+| `switch`        | 1x1 · 2x1                 | Toggle. Generic detail.                                           |
+| `fan`           | 1x1 · 2x1 · 1x2           | Toggle; speed slider when supported.                             |
+| `climate`       | 2x1 · 1x2 · 2x2           | Target-temp stepper; mode selector (2x2). Detail: mode, fan, swing, preset. |
+| `cover`         | 1x1 · 2x1 · 1x2 · 2x2     | Open/stop/close; position slider when supported. Tilt in detail.|
+| `media`         | 2x1 · 2x2                 | Transport; rich artwork tile (2x2). Detail: volume, mute, source.|
+| `sensor`        | 1x1 · 2x1 · 1x2 · 2x2     | Value hero; lazy 24 h trend (2x2). Detail: metadata + history.   |
+| `binary_sensor` | 1x1 · 2x1                 | Glanceable state. Detail.                                        |
+| `person`        | 1x1 · 2x1                 | Home/away presence. Detail.                                      |
+| `lock`          | 1x1 · 2x1                 | Lock/unlock (**unlock always confirmed**).                       |
+| `vacuum`        | 1x1 · 2x1 · 2x2           | Start/pause/dock; suction (2x2).                                 |
+| `camera`        | 2x1 · 2x2                 | Lazy live still, refreshed while visible.                        |
+| `weather`       | 2x1 · 1x2 · 2x2           | Current conditions; forecast strip (1x2/2x2).                    |
+| `energy`        | 2x1 · 1x2 · 2x2           | Composite (reads sensors from `options`); live power + trend.   |
+| `scene`         | 1x1 · 2x1 · 1x2           | Whole-tile activate.                                             |
+| `script`        | 1x1 · 2x1                 | Whole-tile run (confirmable).                                    |
+| `button`        | 1x1 · 2x1                 | Whole-tile press (confirmable).                                  |
+| `action`        | 1x1 · 2x1                 | Entityless — calls a service from `options` (e.g. "All lights off"). |
+| `alarm`         | 1x1 · 2x1 · 2x2           | Arm/disarm (disarm confirmed).                                   |
+
+Composite widgets (`energy`, `action`) take their entities/service via
+`options` instead of `entity`. See the examples in `dashboard.config.ts`.
+
+## How it looks & behaves
+
+- **Two interaction targets, never ambiguous.** The widget's **icon** performs
+  the quick action (toggle / activate); the **title / body** opens the detail
+  surface. Controls (sliders, transport) own their own events. Sensor-style
+  widgets with no direct action use their whole body to open details.
+- **One detail surface for everything.** Bottom sheet on phones, right-side
+  drawer on wide screens — with a drag handle, Escape-to-close, focus trapping,
+  focus restoration to the widget that opened it, and live state while open.
+- **Sensitive actions are confirmed** — unlocking, disarming, or anything you
+  flag `requiresConfirmation`.
+- **Optimistic + reconciled.** Sliders update instantly, debounce service calls
+  during a drag, send a precise final value on release, and reconcile against
+  live state. Failures toast and revert.
+- **Responsive by container.** A deterministic square-unit CSS grid: 2 columns
+  on phones up to 10 on large displays, measured from the panel's own width so
+  it adapts inside a narrowed sidebar or on a wall tablet. Configured widget
+  order is always preserved (no dense packing that would desync keyboard/reader
+  order).
+- **Light & dark**, defaulting to Home Assistant's `darkMode` (falling back to
+  the OS preference), with an in-panel appearance toggle that overrides.
+- **Accessible**: 44 px minimum targets, visible focus, slider/switch/dialog
+  semantics, keyboard-operable navigation and controls, tabular numerals,
+  `prefers-reduced-motion` respected, and state never conveyed by colour alone.
+- **Offline-aware**: on disconnect it keeps the last known values, marks itself
+  offline, pauses state-changing controls, and recovers automatically.
+
+## Architecture
+
+```
+panel/src/
+  panel/            home-dashboard-panel.ts (root) · app-shell · view-grid · router · layout
+  config/           schema · validation · dashboard.config.ts  ← the only place entity ids live
+  design-system/    tokens.ts (light/dark, type, motion) · mdi-paths.ts (tree-shaken icons)
+  home-assistant/   capabilities · service-calls · state-formatting · history · entity-adapters/
+  primitives/       icon · icon-button · toggle · slider · segmented · misc (progress/badge/skeleton/trend)
+                    · surface (sheet/drawer/dialog) · confirm-dialog · toast · feedback bus · registry
+  widgets/          widget-frame · base-widget · widget-registry · one module per domain
+  details/          detail-surface.ts · controllers.ts (per-domain detail bodies)
+  dev/              mock-hass.ts · main.ts (dev harness — never shipped)
+  testing/          fixtures + Vitest setup
+```
+
+Key ideas:
+
+- **Adapters normalise, components render.** Visual components never parse raw
+  domain quirks — an `EntityViewModel` from `entity-adapters/` gives them name,
+  icon, state, colour accent, active flag, level, and a safe quick action.
+- **Capability-driven.** Brightness, colour, fan mode, tilt, source, etc. are
+  only offered when the entity's `supported_features` / attributes advertise
+  them (`home-assistant/capabilities.ts`).
+- **Performance.** Each widget re-renders only when a **referenced** entity's
+  state object changes by reference (or connectivity/size changes) — the
+  frequently-changing full `hass` object doesn't re-render the whole grid.
+  History, forecasts, camera stills, and trend charts load lazily and only when
+  visible.
+- **Icons** are bundled from `@mdi/js`, tree-shaken to just the ~170 glyphs used
+  — no icon font, no CDN. Unknown icons fall back to HA's `<ha-icon>` when
+  present, else a neutral dot.
+- **Self-contained bundle.** Lit and everything else is inlined into the single
+  output module.
+
+## Testing
+
+`npm test` runs 60+ Vitest cases covering config validation, widget-size
+validation, entity-adapter normalisation, capability detection, service-payload
+construction, missing/unavailable entities, responsive size selection, routing,
+the shipped config's validity, slider keyboard semantics, the quick-action vs.
+open-detail split, the confirmation bus, and reduced-motion tokens.
+
+The dev harness (`npm run dev`) is the manual visual-verification surface across
+phone, tablet, laptop, and desktop widths, in light and dark.
+
+## Kiosk / wall tablets
+
+Off by default. Opt in per install in `dashboard.config.ts`:
+
+```ts
+kiosk: {
+  enabled: true,
+  hideHomeAssistantSidebar: false,  // documented; requires HA-side config, not forced here
+  preventScreenSelection: true,     // disables text selection during touch control
+}
+```
+
+The panel never injects invasive global CSS into the rest of Home Assistant.
+
+## Troubleshooting
+
+- **Panel is blank / old after an update.** Browsers cache the module. Rebuild
+  (`npm run build`), redeploy, then hard-refresh (⌘/Ctrl-Shift-R). For stubborn
+  caches, bump `module_url` with a query string, e.g.
+  `…/home-dashboard-panel.js?v=2`.
+- **"Sidebar item didn't appear."** Adding `panel_custom` needs a **Core
+  restart**, not just a YAML reload.
+- **A widget shows "Not found".** The `entity` id in `dashboard.config.ts`
+  doesn't match a live entity (typo, disabled entity, or integration not
+  loaded). Check with `./bin/ha states <entity_id>`.
+- **Config error banner at the top.** Validation found a bad widget type/size or
+  a duplicate id — the banner and the browser console list exactly which
+  `views[..].widgets[..]` path is wrong.
+- **Route collision.** `url_path` must differ from every Lovelace dashboard key.
+  This install uses `home-panel` because `home-dashboard` is the existing
+  Lovelace dashboard.
+- **Icons missing for a custom `icon:`.** If you use an `mdi:*` glyph that isn't
+  in the bundled set, it falls back to HA's `<ha-icon>` at runtime (fine inside
+  HA). To bundle it, add the name to the generator list and rebuild the icon
+  map.
+```

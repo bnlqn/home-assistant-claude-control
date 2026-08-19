@@ -1,0 +1,40 @@
+import type { WidgetType } from "../config/schema.js";
+
+// Side-effect imports register every widget custom element.
+import "./light.js";
+import "./basic.js";
+import "./sensor.js";
+import "./climate.js";
+import "./cover.js";
+import "./media.js";
+import "./vacuum.js";
+import "./weather.js";
+import "./energy.js";
+import "./extra.js";
+
+/** Maps a configured widget `type` to its custom-element tag. */
+export const WIDGET_TAGS: Record<WidgetType, string> = {
+  light: "hd-widget-light",
+  switch: "hd-widget-switch",
+  fan: "hd-widget-fan",
+  climate: "hd-widget-climate",
+  cover: "hd-widget-cover",
+  media: "hd-widget-media",
+  sensor: "hd-widget-sensor",
+  binary_sensor: "hd-widget-binary",
+  person: "hd-widget-person",
+  scene: "hd-widget-scene",
+  script: "hd-widget-script",
+  button: "hd-widget-button",
+  lock: "hd-widget-lock",
+  vacuum: "hd-widget-vacuum",
+  camera: "hd-widget-camera",
+  weather: "hd-widget-weather",
+  energy: "hd-widget-energy",
+  alarm: "hd-widget-alarm",
+  action: "hd-widget-action",
+};
+
+export function widgetTag(type: WidgetType): string {
+  return WIDGET_TAGS[type] ?? "hd-widget-sensor";
+}

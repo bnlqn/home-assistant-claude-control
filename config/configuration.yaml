@@ -16,6 +16,22 @@ lovelace:
       show_in_sidebar: true
       require_admin: false
 
+# Homey-style custom dashboard panel (native custom panel, NOT Lovelace).
+# Source lives in `panel/`; the built module is committed to
+# `config/www/home-dashboard/` and served at `/local/home-dashboard/…`.
+# Uses url_path `home-panel` to avoid colliding with the Lovelace
+# `home-dashboard` dashboard above. See panel/README.md.
+panel_custom:
+  - name: home-dashboard-panel
+    sidebar_title: Home Panel
+    sidebar_icon: mdi:view-dashboard-variant
+    url_path: home-panel
+    module_url: /local/home-dashboard/home-dashboard-panel.js
+    embed_iframe: false
+    require_admin: false
+    config:
+      default_view: overview
+
 automation: !include_dir_merge_list automation
 script: !include scripts.yaml
 scene: !include scenes.yaml
