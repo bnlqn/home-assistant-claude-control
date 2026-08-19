@@ -190,9 +190,9 @@ validation). Sizes are `WIDTH x HEIGHT` in grid units.
 | `light`         | 1x1 · 2x1 · 1x2 · 2x2     | Toggle; brightness bar (2x1/1x2), + colour temp (2x2). Detail: power, brightness, colour temp, colour swatches, effects. |
 | `switch`        | 1x1 · 2x1                 | Toggle. Generic detail.                                           |
 | `fan`           | 1x1 · 2x1 · 1x2           | Toggle; speed slider when supported.                             |
-| `climate`       | 2x1 · 1x2 · 2x2           | Target-temp stepper; mode selector (2x2). Detail: mode, fan, swing, preset. |
+| `climate`       | 2x1 · 1x2 · 2x2           | Target-temp stepper; mode selector (2x2). Detail: mode, fan, swing, preset, plus any extra device switches listed in `options.switches` (e.g. the Airco's powerful / economy / quiet-fan / human-detection toggles). |
 | `cover`         | 1x1 · 2x1 · 1x2 · 2x2     | Open/stop/close; position slider when supported. Tilt in detail.|
-| `media`         | 2x1 · 2x2                 | Transport; rich artwork tile (2x2). Detail: volume, mute, source.|
+| `media`         | 2x1 · 2x2                 | Transport; rich artwork tile (2x2). Detail: volume, mute, sound mode, source. |
 | `sensor`        | 1x1 · 2x1 · 1x2 · 2x2     | Value hero; lazy 24 h trend (2x2). Detail: metadata + history.   |
 | `binary_sensor` | 1x1 · 2x1                 | Glanceable state. Detail.                                        |
 | `person`        | 1x1 · 2x1                 | Home/away presence. Detail.                                      |

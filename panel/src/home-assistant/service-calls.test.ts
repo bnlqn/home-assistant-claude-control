@@ -4,6 +4,7 @@ import {
   buildCoverPosition,
   buildLightBrightness,
   buildLightTurnOn,
+  buildMediaSelectSoundMode,
   buildMediaVolume,
   buildNumberSet,
   buildSceneActivate,
@@ -35,6 +36,14 @@ describe("service payload construction", () => {
   it("light turn_on maps color temp + rgb + effect", () => {
     const call = buildLightTurnOn("light.a", { colorTempKelvin: 3000.4, rgbColor: [1, 2, 3], effect: "fire" });
     expect(call.data).toMatchObject({ color_temp_kelvin: 3000, rgb_color: [1, 2, 3], effect: "fire" });
+  });
+
+  it("media select_sound_mode carries the entity + sound_mode", () => {
+    expect(buildMediaSelectSoundMode("media_player.ht", "Cinema")).toMatchObject({
+      domain: "media_player",
+      service: "select_sound_mode",
+      data: { entity_id: "media_player.ht", sound_mode: "Cinema" },
+    });
   });
 
   it("number set_value routes input_number vs number by domain", () => {

@@ -135,6 +135,9 @@ export function buildMediaMute(entityId: string, muted: boolean): ServiceCall {
 export function buildMediaSelectSource(entityId: string, source: string): ServiceCall {
   return { domain: "media_player", service: "select_source", data: withEntity(entityId, { source }) };
 }
+export function buildMediaSelectSoundMode(entityId: string, soundMode: string): ServiceCall {
+  return { domain: "media_player", service: "select_sound_mode", data: withEntity(entityId, { sound_mode: soundMode }) };
+}
 
 // ---- Vacuum --------------------------------------------------------------
 export function buildVacuumStart(entityId: string): ServiceCall {

@@ -621,6 +621,34 @@ export const DEMO_STATES: Record<string, HassEntity> = {
     "last_changed": "2026-08-18T08:57:12.381113+00:00",
     "last_updated": "2026-08-18T08:57:12.381113+00:00"
   },
+  "switch.ec3a56bc6527_powerful": {
+    "entity_id": "switch.ec3a56bc6527_powerful",
+    "state": "off",
+    "attributes": { "friendly_name": "Airco Powerful" },
+    "last_changed": "2026-08-19T09:00:00+00:00",
+    "last_updated": "2026-08-19T09:00:00+00:00"
+  },
+  "switch.ec3a56bc6527_economy_mode": {
+    "entity_id": "switch.ec3a56bc6527_economy_mode",
+    "state": "on",
+    "attributes": { "friendly_name": "Airco Economy mode" },
+    "last_changed": "2026-08-19T09:00:00+00:00",
+    "last_updated": "2026-08-19T09:00:00+00:00"
+  },
+  "switch.ec3a56bc6527_quiet_fan": {
+    "entity_id": "switch.ec3a56bc6527_quiet_fan",
+    "state": "on",
+    "attributes": { "friendly_name": "Airco Quiet fan" },
+    "last_changed": "2026-08-19T09:00:00+00:00",
+    "last_updated": "2026-08-19T09:00:00+00:00"
+  },
+  "switch.ec3a56bc6527_human_detection": {
+    "entity_id": "switch.ec3a56bc6527_human_detection",
+    "state": "off",
+    "attributes": { "friendly_name": "Airco Human detection" },
+    "last_changed": "2026-08-19T09:00:00+00:00",
+    "last_updated": "2026-08-19T09:00:00+00:00"
+  },
   "climate.ec3a56bc6527": {
     "entity_id": "climate.ec3a56bc6527",
     "state": "cool",

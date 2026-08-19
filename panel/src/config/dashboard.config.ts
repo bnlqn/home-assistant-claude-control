@@ -342,6 +342,15 @@ export const dashboardConfig: DashboardConfig = {
           entity: "climate.ec3a56bc6527",
           name: "Airco",
           size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+          // Extra device switches surfaced in the climate detail.
+          options: {
+            switches: [
+              { entity: "switch.ec3a56bc6527_powerful", name: "Powerful" },
+              { entity: "switch.ec3a56bc6527_economy_mode", name: "Economy" },
+              { entity: "switch.ec3a56bc6527_quiet_fan", name: "Quiet fan" },
+              { entity: "switch.ec3a56bc6527_human_detection", name: "Human detection" },
+            ],
+          },
         },
         {
           id: "of-main",

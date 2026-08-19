@@ -22,6 +22,7 @@ import {
   buildMediaPlayPause,
   buildMediaPrevious,
   buildMediaSelectSource,
+  buildMediaSelectSoundMode,
   buildMediaVolume,
   buildNumberSet,
   buildToggle,
@@ -167,6 +168,11 @@ function climateDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const fanModes = (s.attributes.fan_modes as string[]) ?? [];
   const swingModes = (s.attributes.swing_modes as string[]) ?? [];
   const presets = (s.attributes.preset_modes as string[]) ?? [];
+  // Extra device switches surfaced from config (e.g. the Airco's powerful /
+  // economy / quiet-fan / human-detection toggles), each a real switch entity.
+  const controls = ((ctx.config?.options?.switches as Array<{ entity: string; name: string }>) ?? []).filter(
+    (c) => ctx.hass.states[c.entity],
+  );
 
   const step = (d: number) => {
     const minT = (s.attributes.min_temp as number) ?? 7;
@@ -216,6 +222,18 @@ function climateDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
             @hd-select=${(e: CustomEvent) => ctx.call(buildClimatePreset(ctx.entityId, e.detail.value), "set preset for")}></hd-segmented>
         </div>`
       : nothing}
+
+    ${controls.map((c) => {
+      const on = ctx.hass.states[c.entity]!.state === "on";
+      return html`<div class="d-section d-row-between">
+        <span class="d-label">${c.name}</span>
+        <hd-toggle
+          .checked=${on}
+          label=${c.name}
+          @hd-toggle=${() => ctx.call(buildToggle(c.entity), `toggle ${c.name.toLowerCase()}`)}
+        ></hd-toggle>
+      </div>`;
+    })}
   `;
 }
 
@@ -228,6 +246,7 @@ function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const vol = (s.attributes.volume_level as number) ?? 0;
   const muted = (s.attributes.is_volume_muted as boolean) ?? false;
   const sources = (s.attributes.source_list as string[]) ?? [];
+  const soundModes = (s.attributes.sound_mode_list as string[]) ?? [];
   const off = s.state === "off";
 
   return html`
@@ -250,6 +269,16 @@ function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
             ${caps.mute ? html`<hd-icon-button icon=${muted ? "mdi:volume-off" : "mdi:volume-high"} label="Mute" variant="soft" @click=${() => ctx.call(buildMediaMute(ctx.entityId, !muted), "mute")}></hd-icon-button>` : nothing}
             <hd-slider style="flex:1" .value=${Math.round(vol * 100)} .valueText=${`${Math.round(vol * 100)}%`} label="Volume"
               @hd-change=${(e: CustomEvent) => ctx.call(buildMediaVolume(ctx.entityId, e.detail.value / 100), "set volume of")}></hd-slider>
+          </div>
+        </div>`
+      : nothing}
+    ${caps.selectSoundMode && soundModes.length
+      ? html`<div class="d-section">
+          <span class="d-label">Sound mode</span>
+          <div class="chips">
+            ${soundModes.map(
+              (m) => html`<button class="chip ${s.attributes.sound_mode === m ? "active" : ""}" @click=${() => ctx.call(buildMediaSelectSoundMode(ctx.entityId, m), "set sound mode of")}>${m}</button>`,
+            )}
           </div>
         </div>`
       : nothing}
