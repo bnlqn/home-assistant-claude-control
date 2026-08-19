@@ -2,6 +2,7 @@ import { css, html, nothing } from "lit";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { mediaCaps } from "../home-assistant/capabilities.js";
+import { appIcon } from "../home-assistant/media-apps.js";
 import {
   buildMediaNext,
   buildMediaPlayPause,
@@ -79,6 +80,52 @@ export class MediaWidget extends EntityWidget {
     .overlay hd-icon-button {
       color: #fff;
     }
+
+    /* 2x1 "now playing" bar: leading poster thumbnail + meta + transport. */
+    .np-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+    }
+    .np-art {
+      flex: none;
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--surface-subtle);
+      display: grid;
+      place-items: center;
+      color: var(--text-secondary);
+    }
+    .np-meta {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .np-app {
+      font: var(--text-meta);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-tertiary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .np-title {
+      font: var(--text-widget-title);
+      font-weight: 600;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   `;
 
   private _playPauseIcon(): string {
@@ -129,6 +176,13 @@ export class MediaWidget extends EntityWidget {
     const app = vm.stateObj?.attributes.app_name as string | undefined;
     const title = vm.stateObj?.attributes.media_title as string | undefined;
 
+    // When the running app hides its artwork (Infuse, Netflix, …) fall back to
+    // the app's own icon so the tile still shows what's on.
+    const artIcon = app ? appIcon(app) : undefined;
+    // Something is on when the player reports an app or media — off/idle tiles
+    // keep the plain frame.
+    const hasMedia = !!(picture || app || title);
+
     if (size === "2x2") {
       const bg = picture ? `background-image:url("${picture}")` : "";
       return html`
@@ -144,7 +198,7 @@ export class MediaWidget extends EntityWidget {
           @hd-activate=${() => this.openDetail()}
         >
           <div class="art-tile" style=${bg}>
-            ${picture ? nothing : html`<div class="no-art"><hd-icon icon="mdi:music-note" .size=${44}></hd-icon></div>`}
+            ${picture ? nothing : html`<div class="no-art"><hd-icon icon=${artIcon ?? "mdi:music-note"} .size=${64}></hd-icon></div>`}
             <div class="scrim"></div>
             <div class="overlay">
               <div class="meta">
@@ -153,6 +207,36 @@ export class MediaWidget extends EntityWidget {
               </div>
               ${this._transport(caps, true)}
             </div>
+          </div>
+        </hd-widget-frame>
+      `;
+    }
+
+    // 2x1 (and 1x2): show a compact now-playing bar with the poster thumbnail
+    // when something is on, so the room-view tile shows the art too — not just
+    // the detail drawer. Falls back to the app icon when the app hides its art.
+    if ((size === "2x1" || size === "1x2") && hasMedia) {
+      const bg = picture ? `background-image:url("${picture}")` : "";
+      return html`
+        <hd-widget-frame
+          bleed
+          .size=${size}
+          .accent=${vm.accent}
+          .active=${vm.active}
+          .unavailable=${!vm.available}
+          .hasDetail=${true}
+          .quickKind=${"none"}
+          @hd-activate=${() => this.openDetail()}
+        >
+          <div class="np-row">
+            <div class="np-art" style=${bg}>
+              ${picture ? nothing : html`<hd-icon icon=${artIcon ?? "mdi:television-classic"} .size=${26}></hd-icon>`}
+            </div>
+            <div class="np-meta">
+              <div class="np-app">${app ?? vm.name}</div>
+              <div class="np-title">${title ?? vm.displayState}</div>
+            </div>
+            ${this._transport(caps, false)}
           </div>
         </hd-widget-frame>
       `;

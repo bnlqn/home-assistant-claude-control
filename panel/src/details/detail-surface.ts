@@ -113,9 +113,20 @@ export class HdDetail extends LitElement {
       font-weight: 600;
       min-height: 40px;
     }
+    .chip.with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .chip.with-icon hd-icon {
+      opacity: 0.85;
+    }
     .chip.active {
       background: var(--accent);
       color: var(--text-on-accent);
+    }
+    .chip.active.with-icon hd-icon {
+      opacity: 1;
     }
     .chip:focus-visible {
       outline: none;
@@ -180,8 +191,44 @@ export class HdDetail extends LitElement {
       background-position: center;
       background-color: var(--surface-sunken);
     }
+    .media-art-fallback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-secondary);
+      background: linear-gradient(135deg, var(--surface-subtle), var(--surface-sunken));
+    }
+    .media-art-fallback span {
+      font: var(--text-widget-title);
+      font-weight: 650;
+      letter-spacing: 0.02em;
+    }
     .media-meta {
       margin-top: 12px;
+    }
+    .media-progress {
+      gap: 6px;
+    }
+    .media-progress-bar {
+      height: 6px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-subtle);
+      overflow: hidden;
+    }
+    .media-progress-bar span {
+      display: block;
+      height: 100%;
+      border-radius: var(--radius-pill);
+      background: var(--accent);
+    }
+    .media-progress-time {
+      display: flex;
+      justify-content: space-between;
+      font: var(--text-meta);
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
     }
     .media-transport {
       flex-direction: row;

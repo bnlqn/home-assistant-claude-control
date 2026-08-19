@@ -41,7 +41,8 @@ import {
   mediaCaps,
   vacuumCaps,
 } from "../home-assistant/capabilities.js";
-import { formatAttribute, formatState, formatNumber, relativeTime, titleCase } from "../home-assistant/state-formatting.js";
+import { formatAttribute, formatState, formatNumber, formatDuration, relativeTime, titleCase } from "../home-assistant/state-formatting.js";
+import { appIcon, isAppLauncher } from "../home-assistant/media-apps.js";
 import type { SegmentOption } from "../primitives/segmented.js";
 import { requestConfirm } from "../primitives/feedback.js";
 
@@ -268,6 +269,27 @@ function climateDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 }
 
 // ---- Media ---------------------------------------------------------------
+/**
+ * Playback progress from media_position/duration, advancing the reported
+ * position by the time elapsed since it was last updated (as HA's own media
+ * card does). Returns null when the player exposes no usable duration.
+ */
+function mediaProgress(s: HassEntity): { pct: number; elapsed: string; total: string } | null {
+  const duration = s.attributes.media_duration as number | undefined;
+  if (!duration || duration <= 0) return null;
+  let position = (s.attributes.media_position as number) ?? 0;
+  const updated = s.attributes.media_position_updated_at as string | undefined;
+  if (s.state === "playing" && updated) {
+    position += (Date.now() - new Date(updated).getTime()) / 1000;
+  }
+  position = Math.max(0, Math.min(position, duration));
+  return {
+    pct: (position / duration) * 100,
+    elapsed: formatDuration(position),
+    total: formatDuration(duration),
+  };
+}
+
 function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const caps = mediaCaps(s);
   const picture = s.attributes.entity_picture as string | undefined;
@@ -278,16 +300,37 @@ function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const sources = (s.attributes.source_list as string[]) ?? [];
   const soundModes = (s.attributes.sound_mode_list as string[]) ?? [];
   const off = s.state === "off";
+  // Treat the source list as an app launcher when any entry is a known app
+  // (Apple TV & friends); then a tap powers the device on before launching.
+  const isApps = caps.selectSource && isAppLauncher(sources);
+  // Some apps (Infuse, Netflix, …) play without handing the Apple TV a title or
+  // artwork. Fall back to the running app's icon + name so the surface still
+  // says what's on, rather than showing a blank poster.
+  const playing = !off && s.state !== "idle" && s.state !== "standby";
+  const artIcon = app ? appIcon(app) : undefined;
+  const progress = mediaProgress(s);
 
   return html`
     ${picture
       ? html`<div class="media-art" style=${`background-image:url("${picture}")`}></div>`
-      : nothing}
+      : playing && (artIcon || app)
+        ? html`<div class="media-art media-art-fallback">
+            <hd-icon icon=${artIcon ?? "mdi:television-classic"} .size=${56}></hd-icon>
+            ${app ? html`<span>${app}</span>` : nothing}
+          </div>`
+        : nothing}
     <div class="media-meta">
-      <div class="d-value">${title ?? formatState(ctx.hass, s)}</div>
-      ${app ? html`<div class="d-sub">${app}</div>` : nothing}
+      <div class="d-value">${title ?? app ?? formatState(ctx.hass, s)}</div>
+      ${app && title ? html`<div class="d-sub">${app}</div>` : nothing}
     </div>
+    ${progress
+      ? html`<div class="d-section media-progress">
+          <div class="media-progress-bar"><span style=${`width:${progress.pct}%`}></span></div>
+          <div class="media-progress-time"><span>${progress.elapsed}</span><span>${progress.total}</span></div>
+        </div>`
+      : nothing}
     <div class="d-section media-transport">
+      ${caps.power ? html`<hd-icon-button icon="mdi:power" label=${off ? "Turn on" : "Turn off"} variant=${off ? "soft" : "filled"} @click=${() => ctx.call(buildToggle(ctx.entityId), off ? "turn on" : "turn off")}></hd-icon-button>` : nothing}
       ${caps.previous ? html`<hd-icon-button icon="mdi:skip-previous" label="Previous" variant="soft" .disabled=${off} @click=${() => ctx.call(buildMediaPrevious(ctx.entityId), "skip")}></hd-icon-button>` : nothing}
       <hd-icon-button icon=${s.state === "playing" ? "mdi:pause" : "mdi:play"} label="Play or pause" variant="filled" .disabled=${off} @click=${() => ctx.call(buildMediaPlayPause(ctx.entityId), "control")}></hd-icon-button>
       ${caps.next ? html`<hd-icon-button icon="mdi:skip-next" label="Next" variant="soft" .disabled=${off} @click=${() => ctx.call(buildMediaNext(ctx.entityId), "skip")}></hd-icon-button>` : nothing}
@@ -314,11 +357,23 @@ function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
       : nothing}
     ${caps.selectSource && sources.length
       ? html`<div class="d-section">
-          <span class="d-label">Source</span>
+          <span class="d-label">${isApps ? "Apps" : "Source"}</span>
           <div class="chips">
-            ${sources.slice(0, 16).map(
-              (src) => html`<button class="chip ${s.attributes.source === src ? "active" : ""}" @click=${() => ctx.call(buildMediaSelectSource(ctx.entityId, src), "change source of")}>${src}</button>`,
-            )}
+            ${sources.slice(0, 24).map((src) => {
+              const active = s.attributes.source === src;
+              const icon = isApps ? (appIcon(src) ?? "mdi:apps") : undefined;
+              return html`<button
+                class="chip ${icon ? "with-icon" : ""} ${active ? "active" : ""}"
+                @click=${async () => {
+                  // Launching an app should wake a sleeping Apple TV, so power
+                  // on first, then select the source.
+                  if (off) await ctx.call(buildTurnOn(ctx.entityId), "turn on");
+                  await ctx.call(buildMediaSelectSource(ctx.entityId, src), isApps ? "launch" : "change source of");
+                }}
+              >
+                ${icon ? html`<hd-icon icon=${icon} .size=${18}></hd-icon>` : nothing}<span>${src}</span>
+              </button>`;
+            })}
           </div>
         </div>`
       : nothing}
