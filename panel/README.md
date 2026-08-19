@@ -196,7 +196,7 @@ validation). Sizes are `WIDTH x HEIGHT` in grid units.
 | `camera`        | 2x1 · 2x2                 | Lazy live still, refreshed while visible.                        |
 | `weather`       | 2x1 · 1x2 · 2x2           | Current conditions; forecast strip (1x2/2x2).                    |
 | `energy`        | 2x1 · 1x2 · 2x2           | Composite (reads sensors from `options`); live power + trend.   |
-| `powerflow`     | 2x2                       | Animated Grid ↔ Solar ↔ House ↔ Car flow diagram (composite; reads sensors from `options`). Detail: larger diagram + live values + 24h grid trend. |
+| `powerflow`     | 2x2 · 3x3                 | Animated Grid ↔ Solar ↔ House ↔ Car flow diagram (composite; reads sensors from `options`). `3x3` is an XL footprint for tablet/desktop where the size-capped nodes gain whitespace; phones stay full-width 2x2. Detail: larger diagram + live values + 24h grid trend. |
 | `scene`         | 1x1 · 2x1 · 1x2           | Whole-tile activate.                                             |
 | `script`        | 1x1 · 2x1                 | Whole-tile run (confirmable).                                    |
 | `button`        | 1x1 · 2x1                 | Whole-tile press (confirmable).                                  |

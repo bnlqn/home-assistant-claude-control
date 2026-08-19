@@ -492,7 +492,9 @@ export const dashboardConfig: DashboardConfig = {
           id: "en-flow",
           type: "powerflow",
           name: "Power flow",
-          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+          // Full-width 2x2 on a phone; the roomier XL square on tablet/desktop,
+          // where the size-capped nodes stay put and the gaps open up.
+          size: { compact: "2x2", medium: "3x3", wide: "3x3" },
           options: {
             gridPower: "sensor.p1_meter_power", // signed W: + import / − export (HomeWizard P1)
             solarPower: "sensor.goodwe_pv_power",

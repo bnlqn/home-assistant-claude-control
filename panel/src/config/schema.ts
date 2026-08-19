@@ -6,10 +6,15 @@
  * different Home Assistant, edit `dashboard.config.ts`; touch nothing else.
  */
 
-/** The four — and only four — approved widget footprints. */
-export type WidgetSize = "1x1" | "2x1" | "1x2" | "2x2";
+/**
+ * Approved widget footprints. The core set is the four base tiles; `3x3` is an
+ * "XL" footprint reserved for genuinely diagram-scale widgets (the power-flow
+ * hero) whose contents are size-capped and only need more *whitespace* to
+ * breathe — not every widget may use it (see SUPPORTED_SIZES).
+ */
+export type WidgetSize = "1x1" | "2x1" | "1x2" | "2x2" | "3x3";
 
-export const ALL_SIZES: readonly WidgetSize[] = ["1x1", "2x1", "1x2", "2x2"] as const;
+export const ALL_SIZES: readonly WidgetSize[] = ["1x1", "2x1", "1x2", "2x2", "3x3"] as const;
 
 /** Responsive breakpoint buckets, resolved against the panel's own width. */
 export type Breakpoint = "compact" | "medium" | "wide";
@@ -140,7 +145,7 @@ export const SUPPORTED_SIZES: Record<WidgetType, readonly WidgetSize[]> = {
   camera: ["2x1", "2x2"],
   weather: ["2x1", "1x2", "2x2"],
   energy: ["2x1", "1x2", "2x2"],
-  powerflow: ["2x2"],
+  powerflow: ["2x2", "3x3"],
   alarm: ["1x1", "2x1", "2x2"],
   action: ["1x1", "2x1"],
 };

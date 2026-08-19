@@ -59,11 +59,15 @@ const N: Record<"grid" | "solar" | "house" | "car", Pt> = {
   house: [50, 50],
   car: [50, 80],
 };
-// The car control point bows the House→Car connector to the right so it clears
-// the House's centered value + "% solar" caption below the hub disc.
-const CTRL = { grid: [25, 50] as Pt, solar: [75, 50] as Pt, car: [67, 64] as Pt };
-const SAT_R = 12;
-const HUB_R = 15.5;
+// Grid/Solar controls sit near the chord to the hub so each source flow exits
+// the disc's inner edge and travels *beside* the value label (which sits
+// directly below the disc) instead of straight down through it. The car control
+// bows the House→Car connector right to clear the House value + "% solar" caption.
+const CTRL = { grid: [40, 40] as Pt, solar: [60, 40] as Pt, car: [67, 64] as Pt };
+// Trim radii ≈ the disc radii in this 0..100 space, so arrow/flow ends land on
+// the disc edge rather than floating out into the label.
+const SAT_R = 10;
+const HUB_R = 13;
 
 function unit(dx: number, dy: number): [number, number] {
   const l = Math.hypot(dx, dy) || 1;
@@ -110,13 +114,16 @@ export class HdFlowDiagram extends LitElement {
       height: 100%;
       min-height: 210px;
     }
+    /* inset (not host padding): an absolutely-positioned child ignores host
+       padding, so inset the centered square directly to get card breathing room
+       around the pill and nodes while keeping the square lock. */
     .stage {
       position: absolute;
-      inset: 0;
+      inset: 14px;
       margin: auto;
       aspect-ratio: 1;
-      max-width: 100%;
-      max-height: 100%;
+      max-width: calc(100% - 28px);
+      max-height: calc(100% - 28px);
       container-type: size;
     }
     /* Soft depth behind the hub. */

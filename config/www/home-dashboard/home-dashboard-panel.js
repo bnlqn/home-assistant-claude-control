@@ -1206,7 +1206,9 @@ const yi = _`
           id: "en-flow",
           type: "powerflow",
           name: "Power flow",
-          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+          // Full-width 2x2 on a phone; the roomier XL square on tablet/desktop,
+          // where the size-capped nodes stay put and the gaps open up.
+          size: { compact: "2x2", medium: "3x3", wide: "3x3" },
           options: {
             gridPower: "sensor.p1_meter_power",
             // signed W: + import / − export (HomeWizard P1)
@@ -1287,7 +1289,7 @@ const yi = _`
       ]
     }
   ]
-}, Re = ["1x1", "2x1", "1x2", "2x2"], $i = ["compact", "medium", "wide"], Ci = [
+}, Re = ["1x1", "2x1", "1x2", "2x2", "3x3"], $i = ["compact", "medium", "wide"], Ci = [
   "light",
   "switch",
   "fan",
@@ -1326,7 +1328,7 @@ const yi = _`
   camera: ["2x1", "2x2"],
   weather: ["2x1", "1x2", "2x2"],
   energy: ["2x1", "1x2", "2x2"],
-  powerflow: ["2x2"],
+  powerflow: ["2x2", "3x3"],
   alarm: ["1x1", "2x1", "2x2"],
   action: ["1x1", "2x1"]
 }, xi = ["energy", "powerflow", "action"], Ai = /^[a-z_]+\.[a-z0-9_]+$/;
@@ -5358,7 +5360,7 @@ const I = {
   solar: [75, 26],
   house: [50, 50],
   car: [50, 80]
-}, yt = { grid: [25, 50], solar: [75, 50], car: [67, 64] }, _t = 12, wt = 15.5;
+}, yt = { grid: [40, 40], solar: [60, 40], car: [67, 64] }, _t = 10, wt = 13;
 function de(t, e) {
   const i = Math.hypot(t, e) || 1;
   return [t / i, e / i];
@@ -5469,13 +5471,16 @@ St.styles = _`
       height: 100%;
       min-height: 210px;
     }
+    /* inset (not host padding): an absolutely-positioned child ignores host
+       padding, so inset the centered square directly to get card breathing room
+       around the pill and nodes while keeping the square lock. */
     .stage {
       position: absolute;
-      inset: 0;
+      inset: 14px;
       margin: auto;
       aspect-ratio: 1;
-      max-width: 100%;
-      max-height: 100%;
+      max-width: calc(100% - 28px);
+      max-height: calc(100% - 28px);
       container-type: size;
     }
     /* Soft depth behind the hub. */
