@@ -54,8 +54,8 @@ function powerText(watts: number): string {
 // Sources across the top, House the dominant centre, loads below.
 type Pt = readonly [number, number];
 const N: Record<"grid" | "solar" | "house" | "car", Pt> = {
-  grid: [25, 22],
-  solar: [75, 22],
+  grid: [25, 26],
+  solar: [75, 26],
   house: [50, 50],
   car: [50, 80],
 };
@@ -132,14 +132,14 @@ export class HdFlowDiagram extends LitElement {
 
     .status {
       position: absolute;
-      top: 3%;
+      top: 0;
       left: 50%;
       transform: translateX(-50%);
       z-index: 4;
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 5px 12px;
+      gap: 6px;
+      padding: 3px 10px;
       border-radius: var(--radius-pill);
       background: var(--surface-subtle);
       box-shadow: var(--shadow-widget);
@@ -149,8 +149,8 @@ export class HdFlowDiagram extends LitElement {
       white-space: nowrap;
     }
     .status .dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--status-color, var(--text-tertiary));
     }
