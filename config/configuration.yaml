@@ -26,7 +26,7 @@ panel_custom:
     sidebar_title: Home Panel
     sidebar_icon: mdi:view-dashboard-variant
     url_path: home-panel
-    module_url: /local/home-dashboard/home-dashboard-panel.js
+    module_url: /local/home-dashboard/home-dashboard-panel.js?v=da9a1a7ed7ab
     embed_iframe: false
     require_admin: false
     config:
