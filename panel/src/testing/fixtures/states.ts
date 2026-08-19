@@ -935,6 +935,94 @@ export const DEMO_STATES: Record<string, HassEntity> = {
     "last_changed": "2026-08-18T21:57:17.360090+00:00",
     "last_updated": "2026-08-18T21:57:17.360090+00:00"
   },
+  "input_boolean.tesla_solar_charging_active": {
+    "entity_id": "input_boolean.tesla_solar_charging_active",
+    "state": "on",
+    "attributes": { "friendly_name": "Tesla solar charging active", "icon": "mdi:solar-power" },
+    "last_changed": "2026-08-19T09:12:00+00:00",
+    "last_updated": "2026-08-19T09:12:00+00:00"
+  },
+  "binary_sensor.tesla_wall_connector_vehicle_connected": {
+    "entity_id": "binary_sensor.tesla_wall_connector_vehicle_connected",
+    "state": "on",
+    "attributes": { "device_class": "plug", "friendly_name": "Wall Connector Vehicle connected" },
+    "last_changed": "2026-08-19T09:10:00+00:00",
+    "last_updated": "2026-08-19T09:10:00+00:00"
+  },
+  "sensor.other_tesla_model_3_charging": {
+    "entity_id": "sensor.other_tesla_model_3_charging",
+    "state": "charging",
+    "attributes": {
+      "options": ["starting", "charging", "stopped", "complete", "disconnected", "no_power"],
+      "device_class": "enum",
+      "friendly_name": "Tesla Model 3 Charging"
+    },
+    "last_changed": "2026-08-19T09:12:30+00:00",
+    "last_updated": "2026-08-19T09:12:30+00:00"
+  },
+  "sensor.tesla_wall_connector_total_power": {
+    "entity_id": "sensor.tesla_wall_connector_total_power",
+    "state": "3.24",
+    "attributes": { "state_class": "measurement", "unit_of_measurement": "kW", "device_class": "power", "friendly_name": "Wall Connector Power" },
+    "last_changed": "2026-08-19T09:20:00+00:00",
+    "last_updated": "2026-08-19T09:20:00+00:00"
+  },
+  "number.other_tesla_model_3_charge_limit": {
+    "entity_id": "number.other_tesla_model_3_charge_limit",
+    "state": "80",
+    "attributes": { "min": 50, "max": 100, "step": 1, "mode": "auto", "unit_of_measurement": "%", "device_class": "battery", "friendly_name": "Tesla Model 3 Charge limit" },
+    "last_changed": "2026-08-19T07:00:00+00:00",
+    "last_updated": "2026-08-19T07:00:00+00:00"
+  },
+  "sensor.tesla_wall_connector_session_energy": {
+    "entity_id": "sensor.tesla_wall_connector_session_energy",
+    "state": "4.63",
+    "attributes": { "state_class": "total_increasing", "unit_of_measurement": "kWh", "device_class": "energy", "friendly_name": "Wall Connector Session energy" },
+    "last_changed": "2026-08-19T09:20:00+00:00",
+    "last_updated": "2026-08-19T09:20:00+00:00"
+  },
+  "sensor.other_tesla_model_3_charge_rate": {
+    "entity_id": "sensor.other_tesla_model_3_charge_rate",
+    "state": "22",
+    "attributes": { "state_class": "measurement", "unit_of_measurement": "km/h", "device_class": "speed", "friendly_name": "Tesla Model 3 Charge rate" },
+    "last_changed": "2026-08-19T09:20:00+00:00",
+    "last_updated": "2026-08-19T09:20:00+00:00"
+  },
+  "number.other_tesla_model_3_charge_current": {
+    "entity_id": "number.other_tesla_model_3_charge_current",
+    "state": "7",
+    "attributes": { "min": 0, "max": 16, "step": 1, "mode": "auto", "unit_of_measurement": "A", "device_class": "current", "friendly_name": "Tesla Model 3 Charge current" },
+    "last_changed": "2026-08-19T09:19:00+00:00",
+    "last_updated": "2026-08-19T09:19:00+00:00"
+  },
+  "input_number.tesla_solar_grid_start_threshold_w": {
+    "entity_id": "input_number.tesla_solar_grid_start_threshold_w",
+    "state": "-1300.0",
+    "attributes": { "min": -5000, "max": -500, "step": 50, "mode": "slider", "unit_of_measurement": "W", "friendly_name": "Tesla solar grid start threshold" },
+    "last_changed": "2026-08-18T20:00:00+00:00",
+    "last_updated": "2026-08-18T20:00:00+00:00"
+  },
+  "input_number.tesla_solar_grid_stop_threshold_w": {
+    "entity_id": "input_number.tesla_solar_grid_stop_threshold_w",
+    "state": "200.0",
+    "attributes": { "min": 0, "max": 2000, "step": 50, "mode": "slider", "unit_of_measurement": "W", "friendly_name": "Tesla solar grid stop threshold" },
+    "last_changed": "2026-08-18T20:00:00+00:00",
+    "last_updated": "2026-08-18T20:00:00+00:00"
+  },
+  "input_number.tesla_solar_min_charge_current": {
+    "entity_id": "input_number.tesla_solar_min_charge_current",
+    "state": "5.0",
+    "attributes": { "min": 5, "max": 10, "step": 1, "mode": "slider", "unit_of_measurement": "A", "friendly_name": "Tesla solar min charge current" },
+    "last_changed": "2026-08-18T20:00:00+00:00",
+    "last_updated": "2026-08-18T20:00:00+00:00"
+  },
+  "input_number.tesla_solar_deadband_current_a": {
+    "entity_id": "input_number.tesla_solar_deadband_current_a",
+    "state": "1.0",
+    "attributes": { "min": 1, "max": 5, "step": 1, "mode": "slider", "unit_of_measurement": "A", "friendly_name": "Tesla solar deadband current" },
+    "last_changed": "2026-08-18T20:00:00+00:00",
+    "last_updated": "2026-08-18T20:00:00+00:00"
+  },
   "sensor.next_collection": {
     "entity_id": "sensor.next_collection",
     "state": "PMD in 0d",

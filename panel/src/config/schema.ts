@@ -48,6 +48,7 @@ export type WidgetType =
   | "weather"
   | "energy"
   | "powerflow"
+  | "solarcharging"
   | "alarm"
   | "action";
 
@@ -70,6 +71,7 @@ export const ALL_WIDGET_TYPES: readonly WidgetType[] = [
   "weather",
   "energy",
   "powerflow",
+  "solarcharging",
   "alarm",
   "action",
 ] as const;
@@ -146,9 +148,10 @@ export const SUPPORTED_SIZES: Record<WidgetType, readonly WidgetSize[]> = {
   weather: ["2x1", "1x2", "2x2"],
   energy: ["2x1", "1x2", "2x2"],
   powerflow: ["2x2", "3x3"],
+  solarcharging: ["2x1", "1x2", "2x2"],
   alarm: ["1x1", "2x1", "2x2"],
   action: ["1x1", "2x1"],
 };
 
 /** A widget type must supply an `entity` unless it is one of these. */
-export const ENTITYLESS_TYPES: readonly WidgetType[] = ["energy", "powerflow", "action"];
+export const ENTITYLESS_TYPES: readonly WidgetType[] = ["energy", "powerflow", "solarcharging", "action"];

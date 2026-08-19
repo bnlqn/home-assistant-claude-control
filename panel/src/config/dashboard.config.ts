@@ -505,6 +505,30 @@ export const dashboardConfig: DashboardConfig = {
             carActiveAlt: "sensor.other_tesla_model_3_charging",
           },
         },
+        // Bespoke: the solar-only EV-charging control system (master arm, live
+        // charge status, and the grid-power start/stop thresholds as sliders).
+        {
+          id: "en-solar-charging",
+          type: "solarcharging",
+          name: "Solar charging",
+          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+          options: {
+            master: "input_boolean.tesla_solar_charging_active",
+            vehicleConnected: "binary_sensor.tesla_wall_connector_vehicle_connected",
+            chargingState: "sensor.other_tesla_model_3_charging",
+            wallStatus: "sensor.tesla_wall_connector_status",
+            chargePower: "sensor.tesla_wall_connector_total_power", // kW
+            battery: "sensor.other_tesla_model_3_battery_level",
+            chargeLimit: "number.other_tesla_model_3_charge_limit",
+            sessionEnergy: "sensor.tesla_wall_connector_session_energy",
+            chargeRate: "sensor.other_tesla_model_3_charge_rate",
+            chargeCurrent: "number.other_tesla_model_3_charge_current",
+            startThreshold: "input_number.tesla_solar_grid_start_threshold_w",
+            stopThreshold: "input_number.tesla_solar_grid_stop_threshold_w",
+            minCurrent: "input_number.tesla_solar_min_charge_current",
+            deadband: "input_number.tesla_solar_deadband_current_a",
+          },
+        },
         {
           id: "en-grid-now",
           type: "sensor",
@@ -559,14 +583,6 @@ export const dashboardConfig: DashboardConfig = {
           entity: "sensor.p1_meter_energy_export",
           name: "Exported",
           icon: "mdi:transmission-tower-export",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-        },
-        {
-          id: "en-car-charger",
-          type: "sensor",
-          entity: "sensor.tesla_wall_connector_status",
-          name: "EV charger",
-          icon: "mdi:ev-station",
           size: { compact: "1x1", medium: "1x1", wide: "1x1" },
         },
       ],

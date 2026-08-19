@@ -5,6 +5,7 @@ import {
   buildLightBrightness,
   buildLightTurnOn,
   buildMediaVolume,
+  buildNumberSet,
   buildSceneActivate,
   buildToggle,
   buildTurnOff,
@@ -34,6 +35,15 @@ describe("service payload construction", () => {
   it("light turn_on maps color temp + rgb + effect", () => {
     const call = buildLightTurnOn("light.a", { colorTempKelvin: 3000.4, rgbColor: [1, 2, 3], effect: "fire" });
     expect(call.data).toMatchObject({ color_temp_kelvin: 3000, rgb_color: [1, 2, 3], effect: "fire" });
+  });
+
+  it("number set_value routes input_number vs number by domain", () => {
+    expect(buildNumberSet("input_number.threshold", -1300)).toMatchObject({
+      domain: "input_number",
+      service: "set_value",
+      data: { entity_id: "input_number.threshold", value: -1300 },
+    });
+    expect(buildNumberSet("number.charge_limit", 80).domain).toBe("number");
   });
 
   it("climate set_temperature carries the entity + temperature", () => {

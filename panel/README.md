@@ -202,6 +202,7 @@ validation). Sizes are `WIDTH x HEIGHT` in grid units.
 | `weather`       | 2x1 · 1x2 · 2x2           | Current conditions; forecast strip (1x2/2x2).                    |
 | `energy`        | 2x1 · 1x2 · 2x2           | Composite (reads sensors from `options`); live power + trend.   |
 | `powerflow`     | 2x2 · 3x3                 | Animated Grid ↔ Solar ↔ House ↔ Car flow diagram (composite; reads sensors from `options`). `3x3` is an XL footprint for tablet/desktop where the size-capped nodes gain whitespace; phones stay full-width 2x2. Detail: larger diagram + live values + 24h grid trend. |
+| `solarcharging` | 2x1 · 1x2 · 2x2           | Bespoke Tesla solar-charging control (composite; reads helpers/sensors from `options`). Icon quick-toggles the solar-charging master; tile shows live charge status + battery-to-target bar. Detail: master toggle, live status grid, and the grid-power start/stop + min-current thresholds as sliders. |
 | `scene`         | 1x1 · 2x1 · 1x2           | Whole-tile activate.                                             |
 | `script`        | 1x1 · 2x1                 | Whole-tile run (confirmable).                                    |
 | `button`        | 1x1 · 2x1                 | Whole-tile press (confirmable).                                  |

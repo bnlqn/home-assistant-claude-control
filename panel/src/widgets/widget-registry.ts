@@ -11,6 +11,7 @@ import "./vacuum.js";
 import "./weather.js";
 import "./energy.js";
 import "./powerflow.js";
+import "./solarcharging.js";
 import "./extra.js";
 
 /** Maps a configured widget `type` to its custom-element tag. */
@@ -33,6 +34,7 @@ export const WIDGET_TAGS: Record<WidgetType, string> = {
   weather: "hd-widget-weather",
   energy: "hd-widget-energy",
   powerflow: "hd-widget-powerflow",
+  solarcharging: "hd-widget-solarcharging",
   alarm: "hd-widget-alarm",
   action: "hd-widget-action",
 };

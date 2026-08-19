@@ -170,6 +170,13 @@ export function buildButtonPress(entityId: string): ServiceCall {
   return { domain: "button", service: "press", data: withEntity(entityId) };
 }
 
+// ---- Number helpers (input_number / number) ------------------------------
+/** Set an `input_number` or `number` helper to an exact value. */
+export function buildNumberSet(entityId: string, value: number): ServiceCall {
+  const domain = domainOf(entityId) === "number" ? "number" : "input_number";
+  return { domain, service: "set_value", data: withEntity(entityId, { value }) };
+}
+
 // ---- Fan -----------------------------------------------------------------
 export function buildFanPercentage(entityId: string, percentage: number): ServiceCall {
   return {

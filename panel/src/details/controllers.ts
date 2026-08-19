@@ -3,6 +3,7 @@ import type { HomeAssistant, HassEntity } from "../types/hass.js";
 import type { WidgetConfig } from "../config/schema.js";
 import type { ServiceCall } from "../home-assistant/service-calls.js";
 import { buildFlowModel, type PowerflowOptions } from "../widgets/powerflow.js";
+import { buildSolarChargingModel, type SolarChargingOptions } from "../widgets/solarcharging.js";
 import {
   buildClimateFanMode,
   buildClimateHvacMode,
@@ -22,6 +23,7 @@ import {
   buildMediaPrevious,
   buildMediaSelectSource,
   buildMediaVolume,
+  buildNumberSet,
   buildToggle,
   buildTurnOff,
   buildTurnOn,
@@ -433,6 +435,73 @@ function powerflowDetail(ctx: DetailCtx): TemplateResult {
   `;
 }
 
+// ---- Solar charging ------------------------------------------------------
+function solarChargingDetail(ctx: DetailCtx): TemplateResult {
+  const o = (ctx.config?.options ?? {}) as SolarChargingOptions;
+  const m = buildSolarChargingModel(ctx.hass, o);
+  const toneVar =
+    m.tone === "eco" ? "var(--state-eco)" : m.tone === "accent" ? "var(--accent)" : "var(--text-secondary)";
+
+  const cell = (label: string, value: string | null) =>
+    value != null ? html`<div class="d-cell"><span class="k">${label}</span><span class="v">${value}</span></div>` : nothing;
+
+  // A grid-power threshold slider that reads its own range from the helper.
+  const threshold = (
+    id: string | undefined,
+    label: string,
+    fmt: (v: number) => string,
+    fallback: { min: number; max: number; step: number },
+  ) => {
+    const s = id ? ctx.hass.states[id] : undefined;
+    if (!id || !s) return nothing;
+    const v = Number(s.state);
+    const min = (s.attributes.min as number) ?? fallback.min;
+    const max = (s.attributes.max as number) ?? fallback.max;
+    const step = (s.attributes.step as number) ?? fallback.step;
+    return html`<div class="d-section">
+      <span class="d-label">${label}</span>
+      <hd-slider
+        .value=${Number.isFinite(v) ? v : min}
+        .min=${min}
+        .max=${max}
+        .step=${step}
+        .valueText=${Number.isFinite(v) ? fmt(v) : "—"}
+        label=${label}
+        @hd-change=${(e: CustomEvent) => ctx.call(buildNumberSet(id, e.detail.value), `set ${label.toLowerCase()}`)}
+      ></hd-slider>
+    </div>`;
+  };
+
+  return html`
+    <div class="d-section d-row-between">
+      <span class="d-label">Solar charging</span>
+      <hd-toggle
+        .checked=${m.armed}
+        label="Toggle solar charging"
+        @hd-toggle=${() => (o.master ? ctx.call(buildToggle(o.master), "toggle solar charging") : undefined)}
+      ></hd-toggle>
+    </div>
+
+    <div class="d-section">
+      <span class="d-label">Status</span>
+      <div class="d-value big" style=${`color:${toneVar}`}>${m.label}</div>
+      <div class="d-grid">
+        ${cell("Battery", m.batteryPct != null ? `${Math.round(m.batteryPct)}%` : null)}
+        ${cell("Target", m.limitPct != null ? `${Math.round(m.limitPct)}%` : null)}
+        ${cell("Power", m.powerKw != null ? `${formatNumber(m.powerKw)} kW` : null)}
+        ${cell("Current", m.currentA != null ? `${Math.round(m.currentA)} A` : null)}
+        ${cell("Rate", m.rateKmh != null ? `${Math.round(m.rateKmh)} km/h` : null)}
+        ${cell("Session", m.sessionKwh != null ? `${formatNumber(m.sessionKwh)} kWh` : null)}
+      </div>
+    </div>
+
+    ${threshold(o.startThreshold, "Start above export", (v) => `${Math.abs(Math.round(v))} W export`, { min: -5000, max: -500, step: 50 })}
+    ${threshold(o.stopThreshold, "Stop above import", (v) => `${Math.round(v)} W import`, { min: 0, max: 2000, step: 50 })}
+    ${threshold(o.minCurrent, "Min charge current", (v) => `${Math.round(v)} A`, { min: 5, max: 10, step: 1 })}
+    ${threshold(o.deadband, "Current deadband", (v) => `${Math.round(v)} A`, { min: 1, max: 5, step: 1 })}
+  `;
+}
+
 // ---- Generic -------------------------------------------------------------
 function genericDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const domain = ctx.entityId.split(".")[0];
@@ -481,6 +550,7 @@ export function renderDetailBody(ctx: DetailCtx): TemplateResult {
   const type = ctx.config?.type;
   if (type === "energy") return energyDetail(ctx);
   if (type === "powerflow") return powerflowDetail(ctx);
+  if (type === "solarcharging") return solarChargingDetail(ctx);
   if (!s) {
     return html`<div class="d-value big">Entity unavailable</div>
       <div class="d-meta">${ctx.entityId || "No entity configured"} was not found in Home Assistant.</div>`;
