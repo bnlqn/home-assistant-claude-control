@@ -68,6 +68,24 @@ const COLOR_SWATCHES: Array<[string, [number, number, number]]> = [
   ["Pink", [255, 92, 170]],
 ];
 
+/** RGB (0..255) → [hue 0..360, saturation 0..100], for seeding the colour wheel. */
+function rgbToHs(rgb: [number, number, number]): [number, number] {
+  const [r, g, b] = rgb.map((v) => v / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h = h * 60;
+    if (h < 0) h += 360;
+  }
+  const sat = max === 0 ? 0 : (d / max) * 100;
+  return [Math.round(h), Math.round(sat)];
+}
+
 // ---- Light ---------------------------------------------------------------
 function lightDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const caps = lightCaps(s);
@@ -77,6 +95,9 @@ function lightDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const max = (s.attributes.max_color_temp_kelvin as number) ?? 6500;
   const curTemp = (s.attributes.color_temp_kelvin as number) ?? Math.round((min + max) / 2);
   const effects = (s.attributes.effect_list as string[] | undefined)?.filter((e) => e && e !== "None") ?? [];
+  const hs = s.attributes.hs_color as [number, number] | undefined;
+  const rgbCur = s.attributes.rgb_color as [number, number, number] | undefined;
+  const [wheelHue, wheelSat] = hs ? [hs[0], hs[1]] : rgbCur ? rgbToHs(rgbCur) : [0, 0];
 
   return html`
     <div class="d-section d-row-between">
@@ -124,6 +145,15 @@ function lightDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
     ${caps.color
       ? html`<div class="d-section">
           <span class="d-label">Color</span>
+          <div class="color-wheel-wrap">
+            <hd-color-wheel
+              .hue=${wheelHue}
+              .sat=${wheelSat}
+              .disabled=${!on}
+              @hd-color=${(e: CustomEvent) =>
+                ctx.call(buildLightTurnOn(ctx.entityId, { hsColor: [e.detail.hue, e.detail.sat] }), "set color of")}
+            ></hd-color-wheel>
+          </div>
           <div class="swatches">
             ${COLOR_SWATCHES.map(
               ([name, rgb]) => html`<button

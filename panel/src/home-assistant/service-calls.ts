@@ -56,6 +56,7 @@ export interface LightOptions {
   brightnessPct?: number; // 0..100
   colorTempKelvin?: number;
   rgbColor?: [number, number, number];
+  hsColor?: [number, number]; // hue 0..360, saturation 0..100
   effect?: string;
   transition?: number;
 }
@@ -65,6 +66,7 @@ export function buildLightTurnOn(entityId: string, opts: LightOptions = {}): Ser
   if (opts.brightnessPct != null) data.brightness_pct = clamp(Math.round(opts.brightnessPct), 0, 100);
   if (opts.colorTempKelvin != null) data.color_temp_kelvin = Math.round(opts.colorTempKelvin);
   if (opts.rgbColor) data.rgb_color = opts.rgbColor;
+  if (opts.hsColor) data.hs_color = [clamp(opts.hsColor[0], 0, 360), clamp(opts.hsColor[1], 0, 100)];
   if (opts.effect) data.effect = opts.effect;
   if (opts.transition != null) data.transition = opts.transition;
   return { domain: "light", service: "turn_on", data: withEntity(entityId, data) };

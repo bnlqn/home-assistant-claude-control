@@ -187,7 +187,7 @@ validation). Sizes are `WIDTH x HEIGHT` in grid units.
 
 | Type            | Sizes                     | Direct control · detail surface                                   |
 | --------------- | ------------------------- | ----------------------------------------------------------------- |
-| `light`         | 1x1 · 2x1 · 1x2 · 2x2     | Toggle; brightness bar (2x1/1x2), + colour temp (2x2). Detail: power, brightness, colour temp, colour swatches, effects. |
+| `light`         | 1x1 · 2x1 · 1x2 · 2x2     | Toggle; brightness bar (2x1/1x2), + colour temp (2x2). Detail: power, brightness, colour temp, an HS colour wheel (lazy-loaded for colour-capable lights) + quick swatches, effects. |
 | `switch`        | 1x1 · 2x1                 | Toggle. Generic detail.                                           |
 | `fan`           | 1x1 · 2x1 · 1x2           | Toggle; speed slider when supported.                             |
 | `climate`       | 2x1 · 1x2 · 2x2           | Target-temp stepper; mode selector (2x2). Detail: mode, fan, swing, preset, plus any extra device switches listed in `options.switches` (e.g. the Airco's powerful / economy / quiet-fan / human-detection toggles). |

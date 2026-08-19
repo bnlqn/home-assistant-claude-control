@@ -38,6 +38,12 @@ describe("service payload construction", () => {
     expect(call.data).toMatchObject({ color_temp_kelvin: 3000, rgb_color: [1, 2, 3], effect: "fire" });
   });
 
+  it("light turn_on maps and clamps hs_color", () => {
+    expect(buildLightTurnOn("light.a", { hsColor: [146, 84] }).data?.hs_color).toEqual([146, 84]);
+    // hue clamps to 0..360, saturation to 0..100
+    expect(buildLightTurnOn("light.a", { hsColor: [400, 130] }).data?.hs_color).toEqual([360, 100]);
+  });
+
   it("media select_sound_mode carries the entity + sound_mode", () => {
     expect(buildMediaSelectSoundMode("media_player.ht", "Cinema")).toMatchObject({
       domain: "media_player",

@@ -72,6 +72,9 @@ export class HdDetail extends LitElement {
       color: var(--text-tertiary);
       margin-top: 8px;
     }
+    .color-wheel-wrap {
+      min-height: 240px;
+    }
     .swatches {
       display: flex;
       gap: 10px;
@@ -261,6 +264,15 @@ export class HdDetail extends LitElement {
     this._loadedKey = key;
     if (this._trend.length) this._trend = [];
     if (this._forecast.length) this._forecast = [];
+
+    // Lazy-load the colour wheel only when a colour-capable light opens — it
+    // stays out of the initial bundle path until first needed.
+    if (this.entityId.startsWith("light.")) {
+      const scm = this.hass.states[this.entityId]?.attributes.supported_color_modes as string[] | undefined;
+      if (scm?.some((m) => ["hs", "xy", "rgb", "rgbw", "rgbww", "rgbwww"].includes(m))) {
+        void import("../primitives/color-wheel.js");
+      }
+    }
 
     const histId = detailNeedsHistory(this.entityId, this.config);
     if (histId && this.hass.connected) {
