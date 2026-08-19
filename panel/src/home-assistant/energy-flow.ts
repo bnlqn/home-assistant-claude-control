@@ -51,6 +51,8 @@ export interface FlowModel {
     solarHouse: FlowPath;
     houseCar: FlowPath;
   };
+  /** Share of total consumption (house + car) currently supplied by solar, 0..100. */
+  selfSufficiency: number;
 }
 
 export interface FlowInput {
@@ -115,12 +117,16 @@ export function computeFlows(input: FlowInput): FlowModel {
     source: !carFlowing ? "grid" : exportW > FLOW_DEADBAND_W ? "solar" : solar > carW ? "solar" : "grid",
   };
 
+  const load = house + carW;
+  const selfSufficiency = load > 0 ? Math.round((Math.min(solar, load) / load) * 100) : solar > 0 ? 100 : 0;
+
   return {
     grid: { watts: Math.abs(grid), active: gridActive, mode: gridMode },
     solar: { watts: solar, active: solarActive },
     house: { watts: house, active: house > FLOW_DEADBAND_W },
     car: { watts: carW, active: carFlowing, connected: input.carConnected ?? input.carActive },
     paths: { gridHouse, solarHouse, houseCar },
+    selfSufficiency,
   };
 }
 

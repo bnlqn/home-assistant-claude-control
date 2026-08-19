@@ -1,15 +1,15 @@
 import { LitElement, css, html, svg, nothing, type TemplateResult } from "lit";
-import { property } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import type { HomeAssistant } from "../types/hass.js";
 import {
+  FLOW_DEADBAND_W,
   computeFlows,
   isCarActive,
   isCarConnected,
   toWatts,
   type FlowModel,
-  type FlowPath,
 } from "../home-assistant/energy-flow.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
 import "./widget-frame.js";
@@ -50,41 +50,57 @@ function powerText(watts: number): string {
   return abs >= 1000 ? `${formatNumber(abs / 1000)} kW` : `${Math.round(abs)} W`;
 }
 
-// Node positions in the 0..100 diagram space (square). House is the hub.
-const NODE = {
-  house: [50, 50] as const,
-  solar: [50, 14] as const,
-  grid: [18, 82] as const,
-  car: [82, 82] as const,
+// ---- Diagram geometry (0..100 square space) ------------------------------
+// Sources across the top, House the dominant centre, loads below.
+type Pt = readonly [number, number];
+const N: Record<"grid" | "solar" | "house" | "car", Pt> = {
+  grid: [25, 22],
+  solar: [75, 22],
+  house: [50, 50],
+  car: [50, 80],
 };
+// The car control point bows the House→Car connector to the right so it clears
+// the House's centered value + "% solar" caption below the hub disc.
+const CTRL = { grid: [25, 50] as Pt, solar: [75, 50] as Pt, car: [67, 64] as Pt };
+const SAT_R = 12;
+const HUB_R = 15.5;
 
-// Trim line endpoints back to the disc edges so dots/arrows don't hide under nodes.
-function seg(a: readonly [number, number], b: readonly [number, number], ta: number, tb: number) {
-  const dx = b[0] - a[0];
-  const dy = b[1] - a[1];
-  const len = Math.hypot(dx, dy) || 1;
-  const ux = dx / len;
-  const uy = dy / len;
-  return {
-    x1: a[0] + ux * ta,
-    y1: a[1] + uy * ta,
-    x2: b[0] - ux * tb,
-    y2: b[1] - uy * tb,
-  };
+function unit(dx: number, dy: number): [number, number] {
+  const l = Math.hypot(dx, dy) || 1;
+  return [dx / l, dy / l];
 }
 
-const HUB_TRIM = 15;
-const SAT_TRIM = 13;
+/** A quadratic curve from `start` to `end` (bowed through `control`), trimmed to disc edges, plus a direction chevron at the end. */
+function curve(start: Pt, control: Pt, end: Pt, rStart: number, rEnd: number) {
+  const [uax, uay] = unit(control[0] - start[0], control[1] - start[1]);
+  const s: [number, number] = [start[0] + uax * rStart, start[1] + uay * rStart];
+  const [ubx, uby] = unit(control[0] - end[0], control[1] - end[1]);
+  const e: [number, number] = [end[0] + ubx * rEnd, end[1] + uby * rEnd];
+  const d = `M ${s[0].toFixed(2)} ${s[1].toFixed(2)} Q ${control[0]} ${control[1]} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`;
+  const [tx, ty] = unit(e[0] - control[0], e[1] - control[1]); // travel direction at end
+  const sz = 3.1;
+  const back: [number, number] = [e[0] - tx * sz, e[1] - ty * sz];
+  const px = -ty * sz * 0.6;
+  const py = tx * sz * 0.6;
+  const chevron = `${e[0].toFixed(2)},${e[1].toFixed(2)} ${(back[0] + px).toFixed(2)},${(back[1] + py).toFixed(2)} ${(back[0] - px).toFixed(2)},${(back[1] - py).toFixed(2)}`;
+  return { d, chevron };
+}
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
 /**
- * Self-contained power-flow diagram. Reused by the widget body and the detail
- * surface (both pass a `FlowModel`). Paths animate marching dots in the true
- * flow direction, with a static arrowhead that also serves as the
- * reduced-motion direction cue.
+ * Self-contained, polished power-flow diagram. Sources top, House centre, Car
+ * below; curved luminous flows over faint idle tracks; crisp ring-and-icon
+ * nodes; tweened numbers. Reused by the widget body and the detail surface.
  */
 @define("hd-flow-diagram")
 export class HdFlowDiagram extends LitElement {
   @property({ attribute: false }) model?: FlowModel;
+
+  // Tweened display watts for smooth number transitions.
+  @state() private _shown = { grid: 0, solar: 0, house: 0, car: 0 };
+  private _raf = 0;
 
   static styles = css`
     :host {
@@ -93,57 +109,106 @@ export class HdFlowDiagram extends LitElement {
       width: 100%;
       height: 100%;
       min-height: 210px;
+    }
+    .stage {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      aspect-ratio: 1;
+      max-width: 100%;
+      max-height: 100%;
       container-type: size;
     }
-    .status {
+    /* Soft depth behind the hub. */
+    .stage::before {
+      content: "";
       position: absolute;
-      top: 12px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font: var(--text-secondary-state);
-      font-weight: 600;
-      color: var(--text-secondary);
-      z-index: 3;
+      inset: 8%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 46%, var(--surface-subtle), transparent 62%);
+      opacity: 0.9;
       pointer-events: none;
     }
-    .status .val {
-      color: var(--flow-status, var(--text-primary));
+
+    .status {
+      position: absolute;
+      top: 3%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-subtle);
+      box-shadow: var(--shadow-widget);
+      font: var(--text-meta);
+      font-weight: 650;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .status .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--status-color, var(--text-tertiary));
+    }
+    .status .txt {
+      color: var(--status-color, var(--text-secondary));
       font-variant-numeric: tabular-nums;
     }
+
     svg.paths {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       z-index: 1;
+      overflow: visible;
     }
     .track {
       fill: none;
-      stroke: var(--border-strong);
-      stroke-width: 1.5;
+      stroke: var(--border-subtle);
+      stroke-width: 1.4;
       vector-effect: non-scaling-stroke;
+    }
+    .band {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+      filter: drop-shadow(0 0 2px var(--pc));
+      opacity: 0;
+      transition: opacity var(--motion-content) var(--ease-standard);
+    }
+    .band.on {
+      opacity: 0.32;
     }
     .flow {
       fill: none;
+      stroke-width: 2.6;
       stroke-linecap: round;
-      stroke-dasharray: 0.5 8;
+      stroke-dasharray: 0.5 6;
       vector-effect: non-scaling-stroke;
-      animation: march 0.9s linear infinite;
+      animation: march 1.4s linear infinite;
     }
     @keyframes march {
       to {
-        stroke-dashoffset: -25.5;
+        stroke-dashoffset: -13;
       }
+    }
+    .chevron {
+      opacity: 0;
+      transition: opacity var(--motion-content) var(--ease-standard);
+    }
+    .chevron.on {
+      opacity: 0.9;
     }
     @media (prefers-reduced-motion: reduce) {
       .flow {
-        animation: none;
-        stroke-dasharray: none;
+        display: none;
       }
-    }
-    .arrow {
-      vector-effect: non-scaling-stroke;
     }
 
     .node {
@@ -152,35 +217,51 @@ export class HdFlowDiagram extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       z-index: 2;
       transition: opacity var(--motion-state) var(--ease-standard);
     }
     .node.idle {
-      opacity: 0.5;
+      opacity: 0.45;
     }
     .disc {
-      width: clamp(46px, 22cqmin, 68px);
-      height: clamp(46px, 22cqmin, 68px);
+      width: clamp(46px, 20cqmin, 62px);
+      height: clamp(46px, 20cqmin, 62px);
       border-radius: 50%;
       display: grid;
       place-items: center;
       background: var(--surface);
       color: var(--idle-fg);
+      border: 2px solid var(--border-strong);
       box-shadow: var(--shadow-widget);
-      border: 1.5px solid var(--border-subtle);
-      transition: background var(--motion-state) var(--ease-standard),
-        color var(--motion-state) var(--ease-standard), border-color var(--motion-state) var(--ease-standard);
+      transition: color var(--motion-state) var(--ease-standard),
+        border-color var(--motion-state) var(--ease-standard), box-shadow var(--motion-state) var(--ease-standard);
     }
     .node.active .disc {
-      background: var(--n-bg, var(--accent-soft));
-      color: var(--n-fg, var(--accent-text));
-      border-color: color-mix(in srgb, var(--n-fg, var(--accent)) 40%, transparent);
+      color: var(--n-fg);
+      border-color: var(--n-fg);
+      box-shadow: var(--shadow-widget), 0 5px 18px -4px color-mix(in srgb, var(--n-fg) 55%, transparent);
     }
     .node.hub .disc {
-      background: var(--surface-inverse);
-      color: var(--canvas);
-      border: none;
+      width: clamp(58px, 27cqmin, 82px);
+      height: clamp(58px, 27cqmin, 82px);
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 2px solid var(--border-strong);
+      box-shadow: var(--shadow-raised);
+    }
+    .node.hub.active .disc {
+      animation: hub 3.4s ease-in-out infinite;
+    }
+    @keyframes hub {
+      50% {
+        box-shadow: var(--shadow-raised), 0 0 0 6px color-mix(in srgb, var(--text-primary) 6%, transparent);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .node.hub.active .disc {
+        animation: none;
+      }
     }
     .label {
       font: var(--text-secondary-state);
@@ -188,6 +269,9 @@ export class HdFlowDiagram extends LitElement {
       color: var(--text-primary);
       font-variant-numeric: tabular-nums;
       line-height: 1;
+    }
+    .node.hub .label {
+      font-size: 16px;
     }
     .name {
       font: var(--text-meta);
@@ -197,83 +281,112 @@ export class HdFlowDiagram extends LitElement {
     .node.idle .label {
       color: var(--text-tertiary);
     }
+    .autarky {
+      font: var(--text-meta);
+      font-weight: 650;
+      color: var(--state-eco);
+      line-height: 1;
+    }
   `;
 
-  private _pathColor(p: FlowPath): string {
-    if (!p.active) return "var(--border-strong)";
-    return p.source === "solar" ? "var(--state-eco)" : "var(--accent)";
+  willUpdate(changed: Map<string, unknown>) {
+    if (changed.has("model")) this._retween();
   }
 
-  private _pathWidth(p: FlowPath): number {
-    const kw = p.watts / 1000;
-    return Math.min(5, Math.max(2.5, 2 + kw * 0.9));
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    cancelAnimationFrame(this._raf);
   }
 
-  /** Render one connecting path: base track + (if active) a directional flow line + arrowhead. */
-  private _renderPath(
-    from: readonly [number, number],
-    to: readonly [number, number],
-    path: FlowPath,
-    reversed: boolean,
+  private _retween() {
+    const m = this.model;
+    if (!m) return;
+    const target = { grid: m.grid.watts, solar: m.solar.watts, house: m.house.watts, car: m.car.watts };
+    const reduce =
+      typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      this._shown = target;
+      return;
+    }
+    const from = { ...this._shown };
+    const t0 = performance.now();
+    const dur = 420;
+    cancelAnimationFrame(this._raf);
+    const step = (now: number) => {
+      const p = Math.min(1, (now - t0) / dur);
+      const e = easeOut(p);
+      this._shown = {
+        grid: lerp(from.grid, target.grid, e),
+        solar: lerp(from.solar, target.solar, e),
+        house: lerp(from.house, target.house, e),
+        car: lerp(from.car, target.car, e),
+      };
+      if (p < 1) this._raf = requestAnimationFrame(step);
+    };
+    this._raf = requestAnimationFrame(step);
+  }
+
+  private _speed(watts: number): number {
+    // Higher power → faster dots.
+    return Math.min(2.4, Math.max(0.7, 2.6 - watts / 2500));
+  }
+
+  private _conn(
+    dir: { d: string; chevron: string },
+    track: { d: string },
+    active: boolean,
+    color: string,
+    watts: number,
   ) {
-    // Order endpoints along the true flow direction so dots + arrowhead point right.
-    const a = reversed ? to : from;
-    const b = reversed ? from : to;
-    const line = seg(a, b, a === NODE.house ? HUB_TRIM : SAT_TRIM, b === NODE.house ? HUB_TRIM : SAT_TRIM);
-    const track = seg(from, to, from === NODE.house ? HUB_TRIM : SAT_TRIM, to === NODE.house ? HUB_TRIM : SAT_TRIM);
-    const color = this._pathColor(path);
-    const width = this._pathWidth(path);
-    // Arrowhead near the destination end.
-    const ux = line.x2 - line.x1;
-    const uy = line.y2 - line.y1;
-    const len = Math.hypot(ux, uy) || 1;
-    const nx = ux / len;
-    const ny = uy / len;
-    const tipX = line.x2 - nx * 2;
-    const tipY = line.y2 - ny * 2;
-    const size = 3.4;
-    const backX = tipX - nx * size;
-    const backY = tipY - ny * size;
-    const perpX = -ny * size * 0.62;
-    const perpY = nx * size * 0.62;
-    const arrow = `${tipX},${tipY} ${backX + perpX},${backY + perpY} ${backX - perpX},${backY - perpY}`;
-
     return svg`
-      <line class="track" x1=${track.x1} y1=${track.y1} x2=${track.x2} y2=${track.y2}></line>
+      <path class="track" d=${track.d}></path>
+      <path class="band ${active ? "on" : ""}" d=${dir.d} style=${`stroke:${color};--pc:${color}`}></path>
       ${
-        path.active
-          ? svg`
-        <line class="flow" x1=${line.x1} y1=${line.y1} x2=${line.x2} y2=${line.y2}
-          style=${`stroke:${color};stroke-width:${width}`}></line>
-        <polygon class="arrow" points=${arrow} style=${`fill:${color}`}></polygon>`
+        active
+          ? svg`<path class="flow" d=${dir.d} style=${`stroke:${color};animation-duration:${this._speed(watts)}s`}></path>`
           : nothing
       }
+      <polygon class="chevron ${active ? "on" : ""}" points=${dir.chevron} style=${`fill:${color}`}></polygon>
     `;
   }
 
   private _node(
-    key: "house" | "solar" | "grid" | "car",
+    key: "grid" | "solar" | "house" | "car",
     icon: string,
     name: string,
-    node: { watts: number; active: boolean },
-    tint: { bg: string; fg: string },
+    active: boolean,
+    fg: string,
+    caption?: TemplateResult | typeof nothing,
   ) {
-    const [x, y] = NODE[key];
+    const [x, y] = N[key];
     const isHub = key === "house";
-    const cls = `node ${isHub ? "hub" : node.active ? "active" : "idle"}`;
-    const vars = isHub ? "" : `--n-bg:${tint.bg};--n-fg:${tint.fg}`;
-    return html`<div class="${cls}" style=${`left:${x}%;top:${y}%;${vars}`}>
-      <div class="disc"><hd-icon .icon=${icon} .size=${24}></hd-icon></div>
-      <div class="label">${powerText(node.watts)}</div>
-      <div class="name">${name}</div>
+    const cls = `node ${isHub ? "hub " : ""}${active ? "active" : "idle"}`;
+    return html`<div class="${cls}" style=${`left:${x}%;top:${y}%;--n-fg:${fg}`}>
+      <div class="disc"><hd-icon .icon=${icon} .size=${isHub ? 26 : 22}></hd-icon></div>
+      <div class="label">${powerText(this._shown[key])}</div>
+      ${caption ?? html`<div class="name">${name}</div>`}
     </div>`;
   }
 
   render() {
     const m = this.model;
     if (!m) return nothing;
-    const statusColor =
-      m.grid.mode === "export" ? "var(--state-eco)" : m.grid.mode === "import" ? "var(--accent-text)" : "var(--text-secondary)";
+    const eco = "var(--state-eco)";
+    const blue = "var(--accent)";
+
+    const importing = m.grid.mode !== "export";
+    const gridColor = m.grid.mode === "export" ? eco : blue;
+    const carColor = m.paths.houseCar.source === "solar" ? eco : blue;
+
+    // Connection geometry (directional for band/dots, plain for track).
+    const ghDir = importing
+      ? curve(N.grid, CTRL.grid, N.house, SAT_R, HUB_R)
+      : curve(N.house, CTRL.grid, N.grid, HUB_R, SAT_R);
+    const ghTrack = curve(N.grid, CTRL.grid, N.house, SAT_R, HUB_R);
+    const shDir = curve(N.solar, CTRL.solar, N.house, SAT_R, HUB_R);
+    const hcDir = curve(N.house, CTRL.car, N.car, HUB_R, SAT_R);
+
+    const statusColor = m.grid.mode === "export" ? eco : m.grid.mode === "import" ? blue : "var(--text-tertiary)";
     const statusText =
       m.grid.mode === "export"
         ? `Exporting ${powerText(m.grid.watts)}`
@@ -281,42 +394,46 @@ export class HdFlowDiagram extends LitElement {
           ? `Importing ${powerText(m.grid.watts)}`
           : "Grid balanced";
 
+    const showAutarky = m.solar.watts > FLOW_DEADBAND_W;
+
     return html`
-      <div class="status">
-        <span class="val" style=${`--flow-status:${statusColor}`}>${statusText}</span>
+      <div class="stage">
+        <div class="status" style=${`--status-color:${statusColor}`}>
+          <span class="dot"></span><span class="txt">${statusText}</span>
+        </div>
+
+        <svg class="paths" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          ${this._conn(shDir, shDir, m.paths.solarHouse.active, eco, m.paths.solarHouse.watts)}
+          ${this._conn(ghDir, ghTrack, m.paths.gridHouse.active, gridColor, m.paths.gridHouse.watts)}
+          ${this._conn(hcDir, hcDir, m.paths.houseCar.active, carColor, m.paths.houseCar.watts)}
+        </svg>
+
+        ${this._node("solar", "mdi:solar-power", "Solar", m.solar.active, eco)}
+        ${this._node(
+          "grid",
+          m.grid.mode === "export" ? "mdi:transmission-tower-export" : "mdi:transmission-tower",
+          m.grid.mode === "export" ? "Export" : "Grid",
+          m.grid.active,
+          gridColor,
+        )}
+        ${this._node(
+          "car",
+          m.car.connected ? "mdi:car-electric" : "mdi:car-electric-outline",
+          "Car",
+          m.car.active,
+          carColor,
+        )}
+        ${this._node(
+          "house",
+          "mdi:home-variant",
+          "House",
+          m.house.active,
+          "var(--text-primary)",
+          showAutarky
+            ? html`<div class="autarky">${m.selfSufficiency}% solar</div>`
+            : html`<div class="name">House</div>`,
+        )}
       </div>
-      <svg class="paths" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        ${this._renderPath(NODE.solar, NODE.house, m.paths.solarHouse, false)}
-        ${this._renderPath(NODE.grid, NODE.house, m.paths.gridHouse, m.grid.mode === "export")}
-        ${this._renderPath(NODE.house, NODE.car, m.paths.houseCar, false)}
-      </svg>
-      ${this._node("solar", "mdi:solar-power", "Solar", m.solar, {
-        bg: "var(--state-eco-soft)",
-        fg: "var(--state-eco)",
-      })}
-      ${this._node(
-        "grid",
-        m.grid.mode === "export" ? "mdi:transmission-tower-export" : "mdi:transmission-tower",
-        m.grid.mode === "export" ? "Export" : "Grid",
-        m.grid,
-        m.grid.mode === "export"
-          ? { bg: "var(--state-eco-soft)", fg: "var(--state-eco)" }
-          : { bg: "var(--accent-soft)", fg: "var(--accent-text)" },
-      )}
-      ${this._node(
-        "car",
-        m.car.connected ? "mdi:car-electric" : "mdi:car-electric-outline",
-        "Car",
-        m.car,
-        // Match the incoming path: green when charging on solar, blue on grid.
-        m.paths.houseCar.source === "solar"
-          ? { bg: "var(--state-eco-soft)", fg: "var(--state-eco)" }
-          : { bg: "var(--accent-soft)", fg: "var(--accent-text)" },
-      )}
-      ${this._node("house", "mdi:home-variant", "House", m.house, {
-        bg: "var(--surface-inverse)",
-        fg: "var(--canvas)",
-      })}
     `;
   }
 }

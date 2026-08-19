@@ -37,6 +37,7 @@ describe("computeFlows", () => {
     expect(m.paths.gridHouse.source).toBe("grid");
     expect(m.solar.active).toBe(false);
     expect(m.house.watts).toBe(500);
+    expect(m.selfSufficiency).toBe(0); // running entirely on grid
   });
 
   it("export with solar — the live −192 W / 542 W case (house ≈ 350)", () => {
@@ -48,6 +49,7 @@ describe("computeFlows", () => {
     expect(m.paths.solarHouse.active).toBe(true);
     expect(m.paths.solarHouse.watts).toBe(542);
     expect(m.house.watts).toBe(350);
+    expect(m.selfSufficiency).toBe(100); // solar fully covers the house while exporting
   });
 
   it("car charging on solar surplus", () => {
