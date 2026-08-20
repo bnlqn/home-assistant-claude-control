@@ -4719,9 +4719,13 @@ var ci, li, ui = t((() => {
       display: block;
       height: 100%;
     }
+    /* Resting tile: the "tap to play" affordance anchors to the bottom-right,
+       diagonally opposite the top-left header — a deliberate composition that
+       matches the device tiles rather than a stray button under a void. */
     .transport {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       gap: 6px;
     }
 
