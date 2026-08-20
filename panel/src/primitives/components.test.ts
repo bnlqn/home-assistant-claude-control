@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import "./slider.js";
 import "./toggle.js";
-import "../widgets/widget-frame.js";
+import { HdWidgetFrame } from "../widgets/widget-frame.js";
 import { requestConfirm } from "./feedback.js";
 import { designTokens } from "../design-system/tokens.js";
 import type { HdSlider } from "./slider.js";
@@ -75,6 +75,13 @@ describe("hd-widget-frame interaction targets", () => {
     expect(quick).toBe(1);
     expect(activate).toBe(1);
     el.remove();
+  });
+
+  it("declares the minimum touch-target height for each shared title control", () => {
+    const styles = HdWidgetFrame.styles.cssText;
+    expect(styles).toMatch(/\.titles\s*{[\s\S]*?min-height:\s*44px/);
+    expect(styles).toMatch(/\.tile-foot\s*{[\s\S]*?min-height:\s*44px/);
+    expect(styles).toMatch(/\.val-main\s*{[\s\S]*?min-height:\s*44px/);
   });
 });
 

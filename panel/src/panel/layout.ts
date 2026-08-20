@@ -121,7 +121,11 @@ export function sectionColumns(variant: SectionKind, width: number): number {
     case "media":
       return w < 900 ? 1 : 2;
     case "devices":
-      return w < 600 ? 3 : w < 900 ? 4 : w < 1200 ? 6 : 8;
+      // The section is measured after the page's compact padding is applied.
+      // Below 354px, three columns would leave each device tile too narrow for
+      // its icon, accessory and two-line title, so narrow phones fall back to
+      // two columns. A 390px viewport still has room for the intended three.
+      return w < 354 ? 2 : w < 600 ? 3 : w < 900 ? 4 : w < 1200 ? 6 : 8;
     case "sensors":
       return w < 600 ? 2 : w < 900 ? 3 : w < 1200 ? 4 : 6;
     case "energy":

@@ -322,6 +322,11 @@ export class HdAppShell extends LitElement {
     return this.views.find((v) => v.id === this.currentViewId) ?? this.views[0];
   }
 
+  /** Reset the view canvas owned by this shell after an in-panel navigation. */
+  scrollToTop(): void {
+    this.renderRoot.querySelector<HTMLElement>(".content")?.scrollTo({ top: 0 });
+  }
+
   private _appearanceIcon(): string {
     return this.appearance === "dark" ? "mdi:weather-night" : this.appearance === "light" ? "mdi:weather-sunny" : "mdi:theme-light-dark";
   }

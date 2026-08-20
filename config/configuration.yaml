@@ -28,6 +28,8 @@ panel_custom:
     url_path: home-panel
     module_url: /local/home-dashboard/home-dashboard-panel.js?v=70b3df70805b
     embed_iframe: false
+    # This panel applies env(safe-area-inset-*) in its own shell.
+    handle_safe_area: true
     require_admin: false
     config:
       default_view: overview

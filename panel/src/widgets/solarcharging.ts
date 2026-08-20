@@ -355,8 +355,8 @@ export class SolarChargingWidget extends EntityWidget {
       appearance: none;
       border: none;
       cursor: pointer;
-      height: 42px;
-      min-width: 42px;
+      height: 44px;
+      min-width: 44px;
       padding: 0 16px;
       border-radius: var(--radius-pill);
       background: rgba(255, 255, 255, 0.17);

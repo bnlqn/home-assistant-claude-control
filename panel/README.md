@@ -4,8 +4,9 @@ A purpose-built, **Homey-style** custom dashboard for Home Assistant. It is a
 native [custom panel](https://developers.home-assistant.io/docs/frontend/custom-ui/creating-custom-panels/)
 — **not** a Lovelace dashboard. There are no Lovelace cards, no Mushroom, no
 Bubble Card, no card-mod, no HACS card dependencies, and no iframe. Everything
-is a widget, every room is its own route, and the whole thing is one
-self-contained ES module built with **Lit + TypeScript + Vite**.
+is a widget and every room is its own route. The panel code is one bundled ES
+module, accompanied by local animation assets, built with **Lit + TypeScript +
+Vite**.
 
 It runs entirely on your local network: no external CDN, no hosted fonts, no
 remote scripts, no long-lived access token. It talks to Home Assistant through
@@ -29,6 +30,7 @@ right in the widgets · a consistent detail surface for everything else.</em></p
 - [Widget catalogue](#widget-catalogue)
 - [How it looks & behaves](#how-it-looks--behaves)
 - [Architecture](#architecture)
+- [Build baseline and budgets](#build-baseline-and-budgets)
 - [Testing](#testing)
 - [Kiosk / wall tablets](#kiosk--wall-tablets)
 - [Troubleshooting](#troubleshooting)
@@ -39,8 +41,8 @@ right in the widgets · a consistent detail surface for everything else.</em></p
 
 ```bash
 cd panel
-npm install
-npm run dev        # open the printed http://localhost:5178 URL
+npm ci
+npm run dev        # open the local URL printed by Vite
 ```
 
 `npm run dev` serves the panel with a **mock Home Assistant** (built from a real
@@ -59,12 +61,17 @@ detail sheets, light & dark — works in the browser without a live HA. A small
 | `npm run test:watch`| Vitest in watch mode.                                               |
 | `npm run typecheck` | `tsc --noEmit` only.                                                |
 
-The production build writes a **single file** straight into the Home Assistant
-working mirror:
+The production build writes the bundled panel module and its local animation
+assets into the Home Assistant working mirror:
 
 ```
-config/www/home-dashboard/home-dashboard-panel.js   (~68 kB gzipped)
+config/www/home-dashboard/home-dashboard-panel.js
+config/www/home-dashboard/flows/**/*.webp
 ```
+
+The 2026-08-20 baseline is 505 kB JavaScript (204 kB gzip) and approximately
+3.2 MiB / 453 files for the complete deployable directory. Of those files, 452
+are WebP animation frames. See [Build baseline and budgets](#build-baseline-and-budgets).
 
 Because it lands under `config/www/`, it ships through the normal
 `./bin/ha deploy` rsync flow and is served at
@@ -82,6 +89,7 @@ panel_custom:
     url_path: home-panel # distinct from the existing "home-dashboard" Lovelace dashboard
     module_url: /local/home-dashboard/home-dashboard-panel.js
     embed_iframe: false
+    handle_safe_area: true # the panel applies its own safe-area insets
     require_admin: false
     config:
       default_view: overview
@@ -272,16 +280,38 @@ Key ideas:
 - **Icons** are bundled from `@mdi/js`, tree-shaken to just the ~170 glyphs used
   — no icon font, no CDN. Unknown icons fall back to HA's `<ha-icon>` when
   present, else a neutral dot.
-- **Self-contained bundle.** Lit and everything else is inlined into the single
-  output module.
+- **Local-only runtime.** Lit and all executable dependencies are inlined into
+  the panel module. Animation frames are separate same-origin files under
+  `/local/home-dashboard/flows/`; nothing requires an external network.
+
+## Build baseline and budgets
+
+These budgets prevent quiet regressions while the animation and embedded-image
+work is improved. The current values are warning ceilings, not performance
+targets to grow into.
+
+| Resource | 2026-08-20 baseline | Warning ceiling | Direction |
+| --- | ---: | ---: | --- |
+| Entry module, raw | 505 kB | 550 kB | Reduce by extracting raster data URLs. |
+| Entry module, gzip | 204 kB | 225 kB | Keep framework/application growth bounded. |
+| Complete deploy directory | 3.2 MiB | 3.5 MiB | Reduce animation transfer size. |
+| Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
+| Energy animation frame requests | Up to 452 | 452 temporary maximum | Replace frame-per-file loading; target 16 or fewer. |
+| Decoded Energy animation memory | Not yet enforced | 256 MiB target | Measure on the wall tablet before release. |
+
+A production build prints raw and gzip module sizes. Check the complete output
+with `du -sh config/www/home-dashboard` and count its files before accepting a
+material asset change. CI enforcement and wall-tablet memory profiling remain
+Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 60+ Vitest cases covering config validation, widget-size
+`npm test` runs 125+ Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
-the shipped config's validity, slider keyboard semantics, the quick-action vs.
-open-detail split, the confirmation bus, and reduced-motion tokens.
+the shipped config's validity, shell scroll ownership, slider keyboard semantics,
+the quick-action vs. open-detail split, the confirmation bus, and reduced-motion
+tokens.
 
 The dev harness (`npm run dev`) is the manual visual-verification surface across
 phone, tablet, laptop, and desktop widths, in light and dark.

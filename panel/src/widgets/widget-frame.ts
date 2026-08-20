@@ -161,6 +161,9 @@ export class HdWidgetFrame extends LitElement {
       gap: 2px;
       color: inherit;
       border-radius: 8px;
+      min-height: 44px;
+      box-sizing: border-box;
+      justify-content: center;
     }
     button.titles {
       cursor: pointer;
@@ -223,6 +226,12 @@ export class HdWidgetFrame extends LitElement {
       justify-content: space-between;
       gap: 10px;
     }
+    :host([data-size="1x1"]) .card.tile {
+      /* A compact square still contains two 44px+ interaction targets. Keep
+         the spacing lean enough that neither target nor padding is clipped. */
+      --pad: 10px;
+      gap: 0;
+    }
     .tile-top {
       display: flex;
       align-items: flex-start;
@@ -255,6 +264,9 @@ export class HdWidgetFrame extends LitElement {
       color: inherit;
       border-radius: 8px;
       min-width: 0;
+      min-height: 44px;
+      box-sizing: border-box;
+      justify-content: flex-end;
     }
     button.tile-foot {
       cursor: pointer;
@@ -291,6 +303,9 @@ export class HdWidgetFrame extends LitElement {
       margin: 0;
       color: inherit;
       border-radius: 8px;
+      min-height: 44px;
+      box-sizing: border-box;
+      justify-content: center;
     }
     button.val-main {
       cursor: pointer;

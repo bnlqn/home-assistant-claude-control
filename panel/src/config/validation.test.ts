@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { validateConfig, isPlaceholderEntity } from "./validation.js";
-import type { DashboardConfig } from "./schema.js";
+import type { DashboardConfig, WidgetConfig } from "./schema.js";
 
 const okConfig: DashboardConfig = {
   defaultView: "overview",
@@ -57,6 +57,7 @@ describe("validateConfig", () => {
     const r = validateConfig(bad);
     expect(r.ok).toBe(false);
     expect(r.issues.some((i) => i.message.includes('does not support size "2x2"'))).toBe(true);
+    expect(r.sanitized.views[0].widgets).toHaveLength(0);
   });
 
   it("flags duplicate widget ids", () => {
@@ -73,11 +74,24 @@ describe("validateConfig", () => {
     expect(r.issues.some((i) => i.message.includes("Duplicate view id"))).toBe(true);
   });
 
+  it("drops an invalid view and chooses a surviving default", () => {
+    const bad = structuredClone(okConfig);
+    // @ts-expect-error intentionally invalid
+    bad.views[0].type = "nonsense";
+
+    const r = validateConfig(bad);
+
+    expect(r.ok).toBe(false);
+    expect(r.sanitized.views.map((view) => view.id)).toEqual(["room1"]);
+    expect(r.sanitized.defaultView).toBe("room1");
+  });
+
   it("requires an entity for entity-backed widgets", () => {
     const bad = structuredClone(okConfig);
     delete bad.views[0].widgets[0].entity;
     const r = validateConfig(bad);
     expect(r.issues.some((i) => i.message.includes("requires an `entity`"))).toBe(true);
+    expect(r.sanitized.views[0].widgets).toHaveLength(0);
   });
 
   it("does not require an entity for composite types (energy/action)", () => {
@@ -102,6 +116,7 @@ describe("validateConfig", () => {
     bad.views[0].widgets[0].entity = "not-an-entity";
     const r = validateConfig(bad);
     expect(r.issues.some((i) => i.message.includes("not a valid entity_id"))).toBe(true);
+    expect(r.sanitized.views[0].widgets).toHaveLength(0);
   });
 
   it("validates children of an explicit group container", () => {
@@ -133,6 +148,44 @@ describe("validateConfig", () => {
     };
     const r = validateConfig(cfg);
     expect(r.issues.some((i) => i.path.includes("options.children[0]") && i.message.includes("requires an `entity`"))).toBe(true);
+    // The only child is invalid, so the now-empty group is also removed.
+    expect(r.sanitized.views[0].widgets).toHaveLength(0);
+  });
+
+  it("keeps a group while stripping only its invalid children", () => {
+    const cfg: DashboardConfig = {
+      defaultView: "overview",
+      views: [
+        {
+          id: "overview",
+          type: "overview",
+          label: "Home",
+          icon: "mdi:home",
+          widgets: [
+            {
+              id: "g",
+              type: "group",
+              size: { compact: "4x2", medium: "4x2", wide: "4x2" },
+              options: {
+                label: "Devices",
+                variant: "devices",
+                children: [
+                  { id: "good", type: "light", entity: "light.good", size: { compact: "1x1", medium: "1x1", wide: "1x1" } },
+                  { id: "bad", type: "light", size: { compact: "1x1", medium: "1x1", wide: "1x1" } },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const r = validateConfig(cfg);
+    const group = r.sanitized.views[0].widgets[0];
+    const children = (group.options as { children: WidgetConfig[] }).children;
+
+    expect(r.ok).toBe(false);
+    expect(children.map((child) => child.id)).toEqual(["good"]);
   });
 
   it("requires a group to have a non-empty children array", () => {

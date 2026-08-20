@@ -110,7 +110,10 @@ describe("section classification", () => {
 });
 
 describe("section columns reflow to the container's own width", () => {
-  it("devices go 3 → 4 → 6 → 8", () => {
+  it("devices go 2 → 3 → 4 → 6 → 8 without cramped narrow-phone cells", () => {
+    expect(sectionColumns("devices", 320)).toBe(2);
+    expect(sectionColumns("devices", 353)).toBe(2);
+    expect(sectionColumns("devices", 354)).toBe(3);
     expect(sectionColumns("devices", 375)).toBe(3);
     expect(sectionColumns("devices", 768)).toBe(4);
     expect(sectionColumns("devices", 1100)).toBe(6);

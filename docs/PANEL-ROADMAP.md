@@ -134,6 +134,22 @@ Exit criteria:
 - production build size is measured and documented;
 - all automated checks run from one CI workflow.
 
+Progress — 2026-08-20, first correctness slice:
+
+- completed narrow-phone device reflow, shared/branded 44 px controls, scroll
+  ownership, explicit Home Assistant safe-area ownership, and strict sanitized
+  configuration results;
+- added unit regressions for responsive columns, validation sanitization,
+  shared control sizing, and shell scroll reset;
+- verified 320×568 and 390×844 in a real browser, including internal card
+  overflow and rendered control dimensions;
+- documented the measured 505 kB raw / 204 kB gzip entry module, 3.2 MiB
+  deploy directory, and initial warning budgets in `panel/README.md`;
+- still to do in Phase 0: extract embedded rasters, replace frame-per-file
+  animation loading, upgrade Vite/Vitest, add lint/dependency automation and
+  CI, automate browser screenshots/accessibility checks, and profile the wall
+  tablet's decoded image memory.
+
 ### Phase 1 — Unified widget contract
 
 Goal: make a widget a genuinely reusable unit before changing dashboard layout.

@@ -7,7 +7,7 @@ import type { DashboardConfig, ViewConfig } from "../config/schema.js";
 import { dashboardConfig } from "../config/dashboard.config.js";
 import { validateConfig, type ValidationIssue } from "../config/validation.js";
 import { navigate, pathForView, viewIdFromRoute } from "./router.js";
-import type { NavView } from "./app-shell.js";
+import type { HdAppShell, NavView } from "./app-shell.js";
 import type { WidgetConfig } from "../config/schema.js";
 import type { ConfirmOptions, ToastOptions } from "../primitives/feedback.js";
 
@@ -179,8 +179,11 @@ export class HomeDashboardPanel extends LitElement {
     if (viewId === this._viewId) return;
     this._viewId = viewId;
     navigate(pathForView(this._base, viewId, this._cfg.config.defaultView));
-    // Reset scroll to top of the new view.
-    this.renderRoot.querySelector(".content")?.scrollTo?.({ top: 0 });
+    // The scroll container lives inside the shell's shadow root. Wait for the
+    // new view to render, then ask the owning component to reset it.
+    void this.updateComplete.then(() =>
+      this.renderRoot.querySelector<HdAppShell>("hd-app-shell")?.scrollToTop(),
+    );
   }
 
   // ---- Theme -------------------------------------------------------------
