@@ -205,9 +205,16 @@ Progress — 2026-08-20:
   contains 137 tests;
 - kept the registry metadata layer free of UI-controller imports after a cycle
   audit, with detail bodies selected by a typed controller key;
-- still to do in Phase 1: migrate the remaining catalogue, replace loose option
-  records with a discriminated configuration union, split the domain detail
-  controller, and introduce the reusable HA/async/profile controllers.
+- introduced a discriminated `WidgetConfig` union for light, climate, and the
+  composite Energy family (`energy`, `powerflow`, `solarcharging`,
+  `energychart`, and `electricitytotal`), with dependency-free option contracts
+  and compile-time rejection fixtures;
+- replaced widget/detail option casts for that first group with explicit type
+  narrowing, while preserving a per-type legacy branch for the unmigrated
+  catalogue; the runtime suite now contains 138 tests;
+- still to do in Phase 1: migrate the remaining catalogue and its loose option
+  records, split the domain detail controller, and introduce the reusable
+  HA/async/profile controllers.
 
 ### Phase 2 — Shared responsive grid engine
 
@@ -331,8 +338,8 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 Complete the Phase 1 contract before changing placement semantics:
 
-1. convert the loose `WidgetConfig` options into a discriminated union, starting
-   with the migrated light/climate definitions and composite energy widgets;
+1. expand the discriminated option union and definitions through the remaining
+   device, media, sensor, and action widget families;
 2. split `details/controllers.ts` into domain modules and move registered detail
    ownership beside each widget definition;
 3. migrate the remaining catalogue in small domain groups with footprint and

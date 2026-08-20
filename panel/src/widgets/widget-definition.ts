@@ -1,10 +1,11 @@
 import type {
   SectionKind,
-  WidgetConfig,
+  WidgetConfigOf,
   WidgetSize,
   WidgetSizeSet,
   WidgetType,
 } from "../config/schema.js";
+import type { ClimateSwitchOption } from "../config/widget-options.js";
 
 export interface WidgetOptionIssue {
   /** Path relative to `options`, such as `switches[0].entity`. */
@@ -23,8 +24,8 @@ export type WidgetDetailRenderer = "light" | "climate";
  * remains in the widget module itself; this object describes how the dashboard
  * hosts it at every viewport size.
  */
-export interface WidgetDefinition {
-  type: WidgetType;
+export interface WidgetDefinition<Type extends WidgetType = WidgetType> {
+  type: Type;
   tag: string;
   label: string;
   icon: string;
@@ -35,21 +36,20 @@ export interface WidgetDefinition {
   section: SectionKind;
   quickAction: WidgetQuickAction;
   hasDetail: boolean;
-  dependencyIds: (config: WidgetConfig) => string[];
-  validateOptions?: (options: Record<string, unknown> | undefined) => WidgetOptionIssue[];
+  dependencyIds: (config: WidgetConfigOf<Type>) => string[];
+  validateOptions?: (options: unknown) => WidgetOptionIssue[];
   /** Controller key resolved by the detail layer, keeping this metadata pure. */
   detailRenderer?: WidgetDetailRenderer;
 }
 
-interface ClimateSwitchOption {
-  entity: string;
-  name: string;
-}
-
 const ENTITY_ID_RE = /^[a-z_]+\.[a-z0-9_]+$/;
 
-function climateSwitches(options: Record<string, unknown> | undefined): ClimateSwitchOption[] {
-  const switches = options?.switches;
+function isOptionRecord(options: unknown): options is Record<string, unknown> {
+  return !!options && typeof options === "object" && !Array.isArray(options);
+}
+
+function climateSwitches(options: unknown): ClimateSwitchOption[] {
+  const switches = isOptionRecord(options) ? options.switches : undefined;
   if (!Array.isArray(switches)) return [];
   return switches.filter(
     (item): item is ClimateSwitchOption =>
@@ -60,14 +60,15 @@ function climateSwitches(options: Record<string, unknown> | undefined): ClimateS
   );
 }
 
-function validateClimateOptions(options: Record<string, unknown> | undefined): WidgetOptionIssue[] {
-  if (options?.switches === undefined) return [];
-  if (!Array.isArray(options.switches)) {
+function validateClimateOptions(options: unknown): WidgetOptionIssue[] {
+  const switches = isOptionRecord(options) ? options.switches : undefined;
+  if (switches === undefined) return [];
+  if (!Array.isArray(switches)) {
     return [{ path: "switches", message: "Climate `switches` must be an array." }];
   }
 
   const issues: WidgetOptionIssue[] = [];
-  options.switches.forEach((item, index) => {
+  switches.forEach((item, index) => {
     const value = item && typeof item === "object"
       ? item as Record<string, unknown>
       : undefined;
@@ -105,7 +106,7 @@ export const LIGHT_WIDGET_DEFINITION = {
   hasDetail: true,
   dependencyIds: (config) => config.entity ? [config.entity] : [],
   detailRenderer: "light",
-} satisfies WidgetDefinition;
+} satisfies WidgetDefinition<"light">;
 
 export const CLIMATE_WIDGET_DEFINITION = {
   type: "climate",
@@ -125,19 +126,23 @@ export const CLIMATE_WIDGET_DEFINITION = {
   ],
   validateOptions: validateClimateOptions,
   detailRenderer: "climate",
-} satisfies WidgetDefinition;
+} satisfies WidgetDefinition<"climate">;
 
 type MigratedWidgetType = "light" | "climate";
 type WidgetDefinitionMap = {
-  [Type in MigratedWidgetType]: WidgetDefinition & { type: Type };
+  [Type in MigratedWidgetType]: WidgetDefinition<Type>;
 };
 const DEFINITIONS = {
   light: LIGHT_WIDGET_DEFINITION,
   climate: CLIMATE_WIDGET_DEFINITION,
 } satisfies WidgetDefinitionMap;
 
-export const WIDGET_DEFINITIONS: Readonly<Partial<Record<WidgetType, WidgetDefinition>>> = DEFINITIONS;
+type AnyWidgetDefinitionMap = {
+  [Type in WidgetType]: WidgetDefinition<Type>;
+};
 
-export function widgetDefinition(type: WidgetType): WidgetDefinition | undefined {
+export const WIDGET_DEFINITIONS: Readonly<Partial<AnyWidgetDefinitionMap>> = DEFINITIONS;
+
+export function widgetDefinition<Type extends WidgetType>(type: Type): WidgetDefinition<Type> | undefined {
   return WIDGET_DEFINITIONS[type];
 }

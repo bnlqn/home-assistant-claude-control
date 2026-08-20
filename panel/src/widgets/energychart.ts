@@ -10,20 +10,13 @@ import {
   type StatPeriod,
 } from "../home-assistant/statistics.js";
 import type { BarSeries } from "../primitives/bar-chart.js";
+import type { EnergyChartWidgetOptions } from "../config/widget-options.js";
 import "./widget-frame.js";
 import "../primitives/bar-chart.js";
 import "../primitives/segmented.js";
 
-interface EnergyChartOptions {
-  gridImport?: string;
-  gridExport?: string;
-  solar?: string;
-  car?: string;
-  defaultPeriod?: StatPeriod;
-}
-
 /** Series definitions in draw order, mapped to option ids at render time. */
-const SERIES: Array<{ key: keyof EnergyChartOptions; label: string; color: string }> = [
+const SERIES: Array<{ key: keyof EnergyChartWidgetOptions; label: string; color: string }> = [
   { key: "solar", label: "Solar", color: "#f4b740" },
   { key: "gridImport", label: "Import", color: "var(--accent)" },
   { key: "gridExport", label: "Export", color: "var(--state-eco)" },
@@ -46,8 +39,8 @@ export class EnergyChartWidget extends EntityWidget {
   @state() private _periodInit = false;
   private _fetchKey = "";
 
-  private get _opts(): EnergyChartOptions {
-    return (this.config.options ?? {}) as EnergyChartOptions;
+  private get _opts(): EnergyChartWidgetOptions {
+    return this.config.type === "energychart" ? this.config.options ?? {} : {};
   }
 
   // The chart is periodic history, not live state — don't re-render on every

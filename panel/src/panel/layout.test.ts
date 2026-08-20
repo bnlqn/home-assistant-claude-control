@@ -66,6 +66,16 @@ describe("hero break-out from uniform tile grids", () => {
     const hero: WidgetConfig = { ...branded, options: { hero: true } };
     expect(breakoutSizeFor(hero, "wide")).toBe("2x2");
   });
+  it("preserves typed solar-charging brand breakouts", () => {
+    const tesla: WidgetConfig = {
+      id: "solar-charge",
+      type: "solarcharging",
+      size: { compact: "1x1", medium: "2x2", wide: "2x2" },
+      options: { brand: "tesla", master: "input_boolean.solar_charging" },
+    };
+    expect(breakoutSizeFor(tesla, "compact")).toBeNull();
+    expect(breakoutSizeFor(tesla, "medium")).toBe("2x2");
+  });
 });
 
 describe("span parsing", () => {

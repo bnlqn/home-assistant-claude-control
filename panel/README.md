@@ -73,7 +73,7 @@ config/www/home-dashboard/home-dashboard-panel.js
 config/www/home-dashboard/assets/**/*.webp
 ```
 
-The optimized 2026-08-20 baseline is 357 kB JavaScript (95 kB gzip) and
+The optimized 2026-08-20 baseline is 358 kB JavaScript (95 kB gzip) and
 approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
 flows are five packed animated WebPs plus reduced-motion stills. See
 [Build baseline and budgets](#build-baseline-and-budgets).
@@ -182,6 +182,9 @@ Add a `WidgetConfig` to a view's `widgets` array:
   `compact ≈ phone`, `medium ≈ tablet`, `wide ≈ desktop / wall display`.
 - The same widget may use different approved footprints at different
   breakpoints.
+- Widget-specific options are discriminated by `type`. Light accepts no option
+  bag; climate and the composite Energy family expose only their documented
+  keys, so TypeScript rejects options copied from an incompatible widget.
 
 ### Placeholder entities
 
@@ -258,7 +261,7 @@ Composite widgets (`energy`, `action`) take their entities/service via
 ```
 panel/src/
   panel/            home-dashboard-panel.ts (root) · app-shell · view-grid · router · layout · assets
-  config/           schema · validation · dashboard.config.ts  ← the only place entity ids live
+  config/           schema · widget-options · validation · dashboard.config.ts  ← entity bindings live here
   design-system/    tokens.ts (light/dark, type, motion) · mdi-paths.ts (tree-shaken icons)
   home-assistant/   capabilities · service-calls · state-formatting · history · entity-adapters/
   primitives/       icon · icon-button · toggle · slider · segmented · misc (progress/badge/skeleton/trend)
@@ -301,7 +304,7 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 357 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, raw | 358 kB | 390 kB | Keep raster assets external and application growth bounded. |
 | Entry module, gzip | 95 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
@@ -315,7 +318,7 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 137 Vitest cases covering config validation, widget-size
+`npm test` runs 138 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,
@@ -330,6 +333,10 @@ matches the source build. Dependabot groups panel development updates weekly
 and checks GitHub Actions monthly. Home Assistant configuration validation
 still requires the authenticated live-instance workflow (`./bin/ha validate`)
 and is intentionally not attempted by public CI.
+
+`schema.typecheck.ts` adds compile-time contract fixtures to that check. It
+proves incompatible widget options are rejected without adding runtime code to
+the production bundle.
 
 The dev harness (`npm run dev`) is the manual visual-verification surface across
 phone, tablet, laptop, and desktop widths, in light and dark.

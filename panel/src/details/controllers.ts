@@ -3,8 +3,8 @@ import type { HomeAssistant, HassEntity } from "../types/hass.js";
 import type { WidgetConfig } from "../config/schema.js";
 import type { WidgetDetailRenderer } from "../widgets/widget-definition.js";
 import type { ServiceCall } from "../home-assistant/service-calls.js";
-import { buildFlowModel, type PowerflowOptions } from "../widgets/powerflow.js";
-import { buildSolarChargingModel, type SolarChargingOptions } from "../widgets/solarcharging.js";
+import { buildFlowModel } from "../widgets/powerflow.js";
+import { buildSolarChargingModel } from "../widgets/solarcharging.js";
 import {
   buildClimateFanMode,
   buildClimateHvacMode,
@@ -205,7 +205,7 @@ function climateDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const presets = (s.attributes.preset_modes as string[]) ?? [];
   // Extra device switches surfaced from config (e.g. the Airco's powerful /
   // economy / quiet-fan / human-detection toggles), each a real switch entity.
-  const controls = ((ctx.config?.options?.switches as Array<{ entity: string; name: string }>) ?? []).filter(
+  const controls = (ctx.config?.type === "climate" ? ctx.config.options?.switches ?? [] : []).filter(
     (c) => ctx.hass.states[c.entity],
   );
 
@@ -542,7 +542,7 @@ function weatherDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 
 // ---- Energy --------------------------------------------------------------
 function energyDetail(ctx: DetailCtx): TemplateResult {
-  const o = (ctx.config?.options ?? {}) as Record<string, string>;
+  const o = ctx.config?.type === "energy" ? ctx.config.options ?? {} : {};
   const val = (id?: string) => {
     if (!id) return null;
     const st = ctx.hass.states[id];
@@ -569,7 +569,7 @@ function energyDetail(ctx: DetailCtx): TemplateResult {
 
 // ---- Power flow ----------------------------------------------------------
 function powerflowDetail(ctx: DetailCtx): TemplateResult {
-  const o = (ctx.config?.options ?? {}) as PowerflowOptions;
+  const o = ctx.config?.type === "powerflow" ? ctx.config.options ?? {} : {};
   const model = buildFlowModel(ctx.hass, o);
   const cell = (label: string, id?: string) => {
     const s = id ? ctx.hass.states[id] : undefined;
@@ -597,7 +597,7 @@ function powerflowDetail(ctx: DetailCtx): TemplateResult {
 
 // ---- Solar charging ------------------------------------------------------
 function solarChargingDetail(ctx: DetailCtx): TemplateResult {
-  const o = (ctx.config?.options ?? {}) as SolarChargingOptions;
+  const o = ctx.config?.type === "solarcharging" ? ctx.config.options ?? {} : {};
   const m = buildSolarChargingModel(ctx.hass, o);
   const toneVar =
     m.tone === "eco" ? "var(--state-eco)" : m.tone === "accent" ? "var(--accent)" : "var(--text-secondary)";
@@ -740,9 +740,8 @@ export function renderDetailBody(ctx: DetailCtx): TemplateResult {
 
 /** Domains whose detail benefits from lazily-loaded 24h history. */
 export function detailNeedsHistory(entityId: string, config?: WidgetConfig): string | null {
-  if (config?.type === "energy" || config?.type === "powerflow") {
-    return (config.options as Record<string, string>)?.gridPower ?? null;
-  }
+  if (config?.type === "energy") return config.options?.gridPower ?? null;
+  if (config?.type === "powerflow") return config.options?.gridPower ?? null;
   const domain = entityId.split(".")[0];
   return domain === "sensor" ? entityId : null;
 }

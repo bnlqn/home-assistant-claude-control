@@ -6,6 +6,26 @@
  * different Home Assistant, edit `dashboard.config.ts`; touch nothing else.
  */
 
+import type {
+  ClimateWidgetOptions,
+  ElectricityTotalWidgetOptions,
+  EnergyChartWidgetOptions,
+  EnergyWidgetOptions,
+  PowerflowWidgetOptions,
+  SolarChargingWidgetOptions,
+} from "./widget-options.js";
+
+export type {
+  ClimateSwitchOption,
+  ClimateWidgetOptions,
+  ElectricityTotalWidgetOptions,
+  EnergyChartPeriod,
+  EnergyChartWidgetOptions,
+  EnergyWidgetOptions,
+  PowerflowWidgetOptions,
+  SolarChargingWidgetOptions,
+} from "./widget-options.js";
+
 /**
  * Approved widget footprints. The core set is the four base tiles; `3x3` is an
  * "XL" footprint reserved for genuinely diagram-scale widgets (the power-flow
@@ -111,10 +131,10 @@ export interface GroupOptions {
   children?: WidgetConfig[];
 }
 
-export interface WidgetConfig {
+interface WidgetConfigBase<Type extends WidgetType> {
   /** Stable, unique id (used for keying, focus restoration, deep links). */
   id: string;
-  type: WidgetType;
+  type: Type;
   /** Primary entity the widget represents. Optional for composite widgets. */
   entity?: string;
   /** Optional override of the entity's friendly name. */
@@ -124,13 +144,72 @@ export interface WidgetConfig {
   size: WidgetSizeSet;
   /** Require a confirmation dialog before the widget's quick action runs. */
   requiresConfirmation?: boolean;
-  /**
-   * Widget-specific extras (e.g. an energy widget's related sensors, a media
-   * widget's paired receiver). Kept loose on purpose; each widget documents
-   * the keys it reads.
-   */
-  options?: Record<string, unknown>;
 }
+
+export interface LightWidgetConfig extends WidgetConfigBase<"light"> {
+  options?: never;
+}
+
+export interface ClimateWidgetConfig extends WidgetConfigBase<"climate"> {
+  options?: ClimateWidgetOptions;
+}
+
+export interface EnergyWidgetConfig extends WidgetConfigBase<"energy"> {
+  options?: EnergyWidgetOptions;
+}
+
+export interface PowerflowWidgetConfig extends WidgetConfigBase<"powerflow"> {
+  options?: PowerflowWidgetOptions;
+}
+
+export interface SolarChargingWidgetConfig extends WidgetConfigBase<"solarcharging"> {
+  options?: SolarChargingWidgetOptions;
+}
+
+export interface EnergyChartWidgetConfig extends WidgetConfigBase<"energychart"> {
+  options?: EnergyChartWidgetOptions;
+}
+
+export interface ElectricityTotalWidgetConfig extends WidgetConfigBase<"electricitytotal"> {
+  options?: ElectricityTotalWidgetOptions;
+}
+
+export type TypedOptionsWidgetType =
+  | "light"
+  | "climate"
+  | "energy"
+  | "powerflow"
+  | "solarcharging"
+  | "energychart"
+  | "electricitytotal";
+
+export type LooseOptionsWidgetType = Exclude<WidgetType, TypedOptionsWidgetType>;
+
+/** One discriminated configuration variant per not-yet-migrated widget type. */
+export type LegacyWidgetConfig = {
+  [Type in LooseOptionsWidgetType]: WidgetConfigBase<Type> & {
+    /** Retained only until this widget type receives a typed option contract. */
+    options?: Record<string, unknown>;
+  };
+}[LooseOptionsWidgetType];
+
+/**
+ * Widget configuration is discriminated by `type`. Migrated widgets reject
+ * options belonging to another widget at compile time; the legacy branch is
+ * deliberately restricted to widget types not yet migrated.
+ */
+export type WidgetConfig =
+  | LightWidgetConfig
+  | ClimateWidgetConfig
+  | EnergyWidgetConfig
+  | PowerflowWidgetConfig
+  | SolarChargingWidgetConfig
+  | EnergyChartWidgetConfig
+  | ElectricityTotalWidgetConfig
+  | LegacyWidgetConfig;
+
+/** Retrieve the strongly typed configuration variant for a widget type. */
+export type WidgetConfigOf<Type extends WidgetType> = Extract<WidgetConfig, { type: Type }>;
 
 /**
  * A page-level hero rendered above a view's widget grid. Unlike a widget, it is

@@ -3,6 +3,7 @@ import { property, state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import type { HomeAssistant } from "../types/hass.js";
+import type { PowerflowWidgetOptions } from "../config/widget-options.js";
 import {
   FLOW_DEADBAND_W,
   computeFlows,
@@ -15,15 +16,7 @@ import { formatNumber } from "../home-assistant/state-formatting.js";
 import "./widget-frame.js";
 import "../primitives/entity-icon.js";
 
-export interface PowerflowOptions {
-  gridPower?: string;
-  solarPower?: string;
-  houseConsumption?: string;
-  carPower?: string;
-  carPowerAlt?: string;
-  carActive?: string;
-  carActiveAlt?: string;
-}
+export type PowerflowOptions = PowerflowWidgetOptions;
 
 /** Build a FlowModel from live hass state + the widget's configured options. */
 export function buildFlowModel(hass: HomeAssistant, options: PowerflowOptions): FlowModel {
@@ -453,7 +446,7 @@ export class HdFlowDiagram extends LitElement {
 @define("hd-widget-powerflow")
 export class PowerflowWidget extends EntityWidget {
   private get _opts(): PowerflowOptions {
-    return (this.config.options ?? {}) as PowerflowOptions;
+    return this.config.type === "powerflow" ? this.config.options ?? {} : {};
   }
 
   protected override relevantEntityIds(): string[] {

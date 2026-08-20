@@ -4,13 +4,7 @@ import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { fetchStatistics, statisticsRange, type StatBucket } from "../home-assistant/statistics.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
-
-interface ElectricityTotalOptions {
-  /** `total_increasing` grid-import energy sensor (kWh). */
-  importEnergy?: string;
-  /** `total_increasing` grid-export energy sensor (kWh). */
-  exportEnergy?: string;
-}
+import type { ElectricityTotalWidgetOptions } from "../config/widget-options.js";
 
 /**
  * Homey-style "Electricity Total" breakdown: today's `Imported − Exported =
@@ -25,8 +19,8 @@ export class ElectricityTotalWidget extends EntityWidget {
   @state() private _ready = false;
   private _timer = 0;
 
-  private get _opts(): ElectricityTotalOptions {
-    return (this.config.options ?? {}) as ElectricityTotalOptions;
+  private get _opts(): ElectricityTotalWidgetOptions {
+    return this.config.type === "electricitytotal" ? this.config.options ?? {} : {};
   }
 
   // Periodic history, not live state — never re-render on meter ticks.

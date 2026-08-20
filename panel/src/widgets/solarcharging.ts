@@ -5,6 +5,7 @@ import { buildToggle } from "../home-assistant/service-calls.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
 import { panelAssetUrl } from "../panel/assets.js";
 import type { HomeAssistant } from "../types/hass.js";
+import type { SolarChargingWidgetOptions } from "../config/widget-options.js";
 import "./widget-frame.js";
 import "../primitives/misc.js";
 import "../primitives/entity-icon.js";
@@ -19,36 +20,7 @@ const TESLA_RED = "#E82127";
  * Entity map for the bespoke Tesla solar-charging control system. Every id is
  * optional so the widget degrades gracefully when one sensor is missing.
  */
-export interface SolarChargingOptions {
-  /** input_boolean master arm for the solar-charging automation. */
-  master?: string;
-  /** binary_sensor — is the car plugged into the wall connector. */
-  vehicleConnected?: string;
-  /** sensor (enum) — car's own charging state. */
-  chargingState?: string;
-  /** sensor (enum) — wall connector status. */
-  wallStatus?: string;
-  /** sensor (kW) — live charge power. */
-  chargePower?: string;
-  /** sensor (%) — car battery level. */
-  battery?: string;
-  /** number (%) — target charge limit. */
-  chargeLimit?: string;
-  /** sensor (kWh) — energy delivered this session. */
-  sessionEnergy?: string;
-  /** sensor (km/h) — charge rate. */
-  chargeRate?: string;
-  /** number (A) — commanded charge current. */
-  chargeCurrent?: string;
-  /** input_number (W, negative) — start when grid export exceeds this. */
-  startThreshold?: string;
-  /** input_number (W) — stop when grid import exceeds this. */
-  stopThreshold?: string;
-  /** input_number (A) — minimum charge current. */
-  minCurrent?: string;
-  /** input_number (A) — current deadband. */
-  deadband?: string;
-}
+export type SolarChargingOptions = SolarChargingWidgetOptions;
 
 export type SolarPhase = "unplugged" | "charging" | "complete" | "waiting" | "off";
 
@@ -144,11 +116,11 @@ export function buildSolarChargingModel(
 @define("hd-widget-solarcharging")
 export class SolarChargingWidget extends EntityWidget {
   private get _opts(): SolarChargingOptions {
-    return (this.config.options ?? {}) as SolarChargingOptions;
+    return this.config.type === "solarcharging" ? this.config.options ?? {} : {};
   }
 
   private get _branded(): boolean {
-    const o = this.config.options ?? {};
+    const o = this._opts;
     return o.brand === "tesla" || o.branded === true;
   }
 

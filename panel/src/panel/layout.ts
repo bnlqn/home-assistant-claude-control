@@ -44,8 +44,11 @@ export function resolveWidgetSize(widget: WidgetConfig, bucket: Breakpoint): Wid
  * breakpoints the widget collapses back to a plain tile.
  */
 export function breakoutSizeFor(widget: WidgetConfig, bucket: Breakpoint): WidgetSize | null {
-  const o = widget.options ?? {};
-  const optsIn = o.hero === true || typeof o.brand === "string";
+  const options: unknown = widget.options;
+  const optsIn = !!options && typeof options === "object" && !Array.isArray(options) && (
+    ("hero" in options && options.hero === true) ||
+    ("brand" in options && typeof options.brand === "string")
+  );
   if (!optsIn) return null;
   const size = resolveWidgetSize(widget, bucket);
   return size === "1x1" ? null : size;

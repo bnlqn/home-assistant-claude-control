@@ -4,16 +4,9 @@ import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { fetchNumericHistory } from "../home-assistant/history.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
+import type { EnergyWidgetOptions } from "../config/widget-options.js";
 import "./widget-frame.js";
 import "../primitives/misc.js";
-
-interface EnergyOptions {
-  gridPower?: string;
-  solarPower?: string;
-  solarToday?: string;
-  forecastEndOfDay?: string;
-  solarForecastRemaining?: string;
-}
 
 /**
  * Composite energy widget (entityless — reads sensors from `options`). Shows
@@ -29,8 +22,8 @@ export class EnergyWidget extends EntityWidget {
     return true;
   }
 
-  private get _opts(): EnergyOptions {
-    return (this.config.options ?? {}) as EnergyOptions;
+  private get _opts(): EnergyWidgetOptions {
+    return this.config.type === "energy" ? this.config.options ?? {} : {};
   }
 
   protected override relevantEntityIds(): string[] {

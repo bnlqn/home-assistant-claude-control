@@ -208,7 +208,7 @@ function validateWidget(
   // An explicit `group` container validates its children with the same rules,
   // sharing the id-uniqueness set. (Synthetic groups from `sectioniseView` are
   // built after validation from already-validated widgets.)
-  if (type === "group") {
+  if (widget.type === "group") {
     const children = (widget.options as GroupOptions | undefined)?.children;
     if (!Array.isArray(children) || children.length === 0) {
       err(`${wpath}.options.children`, `Group "${widget.id}" must have a non-empty \`children\` array.`);
