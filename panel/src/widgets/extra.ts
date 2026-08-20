@@ -2,72 +2,9 @@ import { css, html, nothing } from "lit";
 import { state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
-import { fanCaps } from "../home-assistant/capabilities.js";
-import { buildFanPercentage } from "../home-assistant/service-calls.js";
 import { requestConfirm } from "../primitives/feedback.js";
 import { titleCase } from "../home-assistant/state-formatting.js";
 import "./widget-frame.js";
-import "../primitives/slider.js";
-import "../primitives/icon-button.js";
-
-// ---- Fan -----------------------------------------------------------------
-@define("hd-widget-fan")
-export class FanWidget extends EntityWidget {
-  private _debounce = 0;
-  static styles = css`
-    .vert {
-      flex: 1;
-      min-height: 120px;
-    }
-  `;
-  private _setPct(pct: number, final: boolean) {
-    window.clearTimeout(this._debounce);
-    const send = () => this.entityId && this.callService(buildFanPercentage(this.entityId, pct), { errorVerb: "set speed for" });
-    if (final) send();
-    else this._debounce = window.setTimeout(send, 200);
-  }
-  renderContent() {
-    const vm = this.vm;
-    const caps = fanCaps(vm.stateObj);
-    const size = this.currentSize;
-    const vertical = size === "1x2";
-    const showSlider = caps.speed && (size === "2x1" || size === "1x2") && vm.active;
-    const pct = (vm.stateObj?.attributes.percentage as number) ?? 0;
-    return html`<hd-widget-frame
-      .icon=${vm.icon}
-      .name=${vm.name}
-      .stateText=${vm.displayState}
-      .secondary=${vm.secondary ?? ""}
-      .size=${size}
-      .accent=${vm.accent}
-      .active=${vm.active}
-      .unavailable=${!vm.available}
-      .hasDetail=${true}
-      .quickKind=${"toggle"}
-      .quickLabel=${vm.quickAction.label}
-      .actionState=${this.actionState}
-      @hd-quick=${() => this.runQuick()}
-      @hd-activate=${() => this.openDetail()}
-    >
-      ${showSlider
-        ? html`<hd-slider
-            class=${vertical ? "vert" : ""}
-            .vertical=${vertical}
-            .value=${pct}
-            .valueText=${`${Math.round(pct)}%`}
-            icon="mdi:fan"
-            label=${`Speed of ${vm.name}`}
-            @hd-input=${(e: CustomEvent) => this._setPct(e.detail.value, false)}
-            @hd-change=${(e: CustomEvent) => this._setPct(e.detail.value, true)}
-          ></hd-slider>`
-        : nothing}
-    </hd-widget-frame>`;
-  }
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    window.clearTimeout(this._debounce);
-  }
-}
 
 // ---- Camera --------------------------------------------------------------
 @define("hd-widget-camera")
@@ -209,7 +146,6 @@ export class AlarmWidget extends EntityWidget {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "hd-widget-fan": FanWidget;
     "hd-widget-camera": CameraWidget;
     "hd-widget-alarm": AlarmWidget;
   }

@@ -223,6 +223,10 @@ Progress — 2026-08-20:
   removing their size/tag/section/detail metadata from the legacy tables;
   vacuum hero options are now typed and `hero: true` consistently controls both
   grid breakout and full-bleed rendering, with the suite at 151 tests;
+- isolated switch, lock, and fan into independently loaded widget modules, with
+  a shared plain-widget frame helper; the fan now forwards its container layout
+  consistently, and deferred-registration/layout coverage brings the suite to
+  153 tests;
 - still to do in Phase 1: migrate the remaining catalogue and its loose option
   records and introduce the reusable HA/async/profile controllers.
 
@@ -350,11 +354,9 @@ Complete the Phase 1 contract before changing placement semantics:
 
 1. expand the discriminated option union and definitions through the remaining
    media, sensor, and action widget families;
-2. split the grouped `basic.ts` and `extra.ts` implementations so each migrated
-   widget can load as an independent module;
-3. introduce the reusable HA/async/profile controllers and finish contract
+2. introduce the reusable HA/async/profile controllers and finish contract
    coverage for the remaining catalogue;
-4. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix
+3. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix
    before removing the legacy section grids.
 
 This keeps the architecture boundary testable while avoiding a simultaneous

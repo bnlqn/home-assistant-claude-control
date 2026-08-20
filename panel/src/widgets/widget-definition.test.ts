@@ -187,6 +187,12 @@ describe("widget definitions", () => {
     expect(VACUUM_WIDGET_DEFINITION.dependencyIds(vacuumConfig)).toEqual(["vacuum.test"]);
   });
 
+  it("keeps split device elements unloaded until their definition is requested", () => {
+    expect(customElements.get(SWITCH_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(FAN_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(LOCK_WIDGET_DEFINITION.tag)).toBeUndefined();
+  });
+
   it("validates climate-specific options at the definition boundary", () => {
     expect(CLIMATE_WIDGET_DEFINITION.validateOptions?.(climateConfig.options)).toEqual([]);
     expect(CLIMATE_WIDGET_DEFINITION.validateOptions?.({ switches: "switch.eco" })).toEqual([
@@ -258,5 +264,27 @@ describe("widget definitions", () => {
     await element.updateComplete;
 
     expect(element.shadowRoot?.querySelector(".hero")).not.toBeNull();
+  });
+
+  it("forwards the container layout through the independent fan module", async () => {
+    await FAN_WIDGET_DEFINITION.load();
+    const element = document.createElement("hd-widget-fan") as LitElement & {
+      hass: HomeAssistant;
+      config: WidgetConfig;
+      currentSize: WidgetSize;
+      layout: "row" | "tile" | "value";
+    };
+    element.hass = hass();
+    element.config = fanConfig;
+    element.currentSize = "2x1";
+    element.layout = "tile";
+    document.body.appendChild(element);
+
+    await element.updateComplete;
+
+    const frame = element.shadowRoot?.querySelector("hd-widget-frame") as HTMLElement & {
+      layout: string;
+    };
+    expect(frame.layout).toBe("tile");
   });
 });

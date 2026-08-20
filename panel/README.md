@@ -323,7 +323,7 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 151 Vitest cases covering config validation, widget-size
+`npm test` runs 153 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,

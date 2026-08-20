@@ -2,51 +2,14 @@ import { html } from "lit";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { requestConfirm, toast } from "../primitives/feedback.js";
+import { renderPlainWidgetFrame } from "./plain-widget-frame.js";
 import "./widget-frame.js";
-
-/** Shared frame render for a plain, non-composite widget. */
-function frame(w: EntityWidget, opts: { quickKind: "toggle" | "activate" | "none"; hasDetail: boolean }) {
-  const vm = w.vm;
-  return html`<hd-widget-frame
-    .icon=${vm.icon}
-    .name=${vm.name}
-    .stateText=${vm.displayState}
-    .secondary=${vm.secondary ?? ""}
-    .size=${(w as unknown as { currentSize: string }).currentSize as never}
-    .layout=${w.layout}
-    .accent=${vm.accent}
-    .active=${vm.active}
-    .unavailable=${!vm.available}
-    .hasDetail=${opts.hasDetail}
-    .quickKind=${opts.quickKind}
-    .quickLabel=${vm.quickAction.label}
-    .actionState=${(w as unknown as { actionState: string }).actionState as never}
-    @hd-quick=${() => (w as unknown as { runQuick(): void }).runQuick()}
-    @hd-activate=${() => (w as unknown as { openDetail(): void }).openDetail()}
-  ></hd-widget-frame>`;
-}
-
-// ---- Switch / plug -------------------------------------------------------
-@define("hd-widget-switch")
-export class SwitchWidget extends EntityWidget {
-  renderContent() {
-    return frame(this, { quickKind: "toggle", hasDetail: true });
-  }
-}
-
-// ---- Lock ----------------------------------------------------------------
-@define("hd-widget-lock")
-export class LockWidget extends EntityWidget {
-  renderContent() {
-    return frame(this, { quickKind: "toggle", hasDetail: true });
-  }
-}
 
 // ---- Person / presence ---------------------------------------------------
 @define("hd-widget-person")
 export class PersonWidget extends EntityWidget {
   renderContent() {
-    return frame(this, { quickKind: "none", hasDetail: true });
+    return renderPlainWidgetFrame(this, { quickKind: "none", hasDetail: true });
   }
 }
 
@@ -54,7 +17,7 @@ export class PersonWidget extends EntityWidget {
 @define("hd-widget-binary")
 export class BinaryWidget extends EntityWidget {
   renderContent() {
-    return frame(this, { quickKind: "none", hasDetail: true });
+    return renderPlainWidgetFrame(this, { quickKind: "none", hasDetail: true });
   }
 }
 
@@ -172,8 +135,6 @@ export class ActionWidget extends EntityWidget {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "hd-widget-switch": SwitchWidget;
-    "hd-widget-lock": LockWidget;
     "hd-widget-person": PersonWidget;
     "hd-widget-binary": BinaryWidget;
     "hd-widget-scene": SceneWidget;
