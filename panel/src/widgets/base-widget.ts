@@ -10,6 +10,7 @@ import "./widget-frame.js";
 import { HassDependencyController } from "../controllers/hass-dependency-controller.js";
 import { widgetDependencies } from "./widget-definition.js";
 import type { DisplayProfile } from "../panel/layout.js";
+import type { EnergyPeriodContext } from "../energy/energy-period.js";
 
 /**
  * Base class for every widget. Provides:
@@ -33,6 +34,8 @@ export abstract class EntityWidget extends LitElement {
   @property({ type: String }) layout: "row" | "tile" | "value" = "row";
   /** Shape-aware profile resolved once by the panel and shared with all widgets. */
   @property({ attribute: false }) displayProfile: DisplayProfile = "desktop";
+  /** Optional page-level Energy selection and its shared statistics result. */
+  @property({ attribute: false }) energyPeriod?: EnergyPeriodContext;
 
   @state() protected actionState: ActionState = "idle";
   private _resetTimer = 0;

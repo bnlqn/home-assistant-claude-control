@@ -7,6 +7,7 @@ import type { EnergyHeroConfig } from "../config/schema.js";
 import { FLOW_DEADBAND_W, toWatts } from "../home-assistant/energy-flow.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
 import { panelAssetUrl } from "../panel/assets.js";
+import { sumStatistic, type EnergyPeriodContext } from "./energy-period.js";
 import "../primitives/entity-icon.js";
 
 const HOUSE_IMAGE_WIDTH = 960;
@@ -18,6 +19,12 @@ export type EnergyFlowAsset =
   | "grid-importing"
   | "home-consuming"
   | "ev-charging";
+
+export interface EnergyHeroTotals {
+  grid: number | null;
+  solar: number | null;
+  home: number | null;
+}
 
 /** Resolve the diagram layers that should be visible for the current HA state. */
 export function activeEnergyFlows(
@@ -46,11 +53,41 @@ export function activeEnergyFlows(
   return flows;
 }
 
+/** Resolve live-today or recorder-backed historical totals for the shared period. */
+export function energyHeroTotals(
+  hass?: HomeAssistant,
+  options?: EnergyHeroConfig,
+  energyPeriod?: EnergyPeriodContext,
+): EnergyHeroTotals {
+  const liveToday = !energyPeriod || (
+    energyPeriod.range.selection.period === "day" && energyPeriod.range.isCurrent
+  );
+  const numericState = (id?: string): number | null => {
+    if (!id) return null;
+    const value = Number(hass?.states[id]?.state);
+    return Number.isFinite(value) ? value : null;
+  };
+  const sources = options?.statistics;
+  const imported = sumStatistic(energyPeriod?.statistics ?? {}, sources?.gridImport);
+  const exported = sumStatistic(energyPeriod?.statistics ?? {}, sources?.gridExport);
+  const historicalGrid = imported !== null
+    ? imported - (exported ?? 0)
+    : exported !== null ? -exported : null;
+  const historicalSolar = sumStatistic(energyPeriod?.statistics ?? {}, sources?.solar);
+  const grid = liveToday ? numericState(options?.grid) ?? historicalGrid : historicalGrid;
+  const solar = liveToday ? numericState(options?.solar) ?? historicalSolar : historicalSolar;
+  return {
+    grid,
+    solar,
+    home: grid !== null && solar !== null ? grid + solar : null,
+  };
+}
+
 /**
- * The Energy page hero — Homey's 960×720 house render with the day's Grid /
- * Solar / Home totals overlaid and live energy **flows** glowing along the
- * conduit lines. It is a page asset, not a widget: `hd-view-grid` renders it
- * above the widget grid when a view declares `hero`.
+ * The Energy page hero — Homey's 960×720 house render with selected-period
+ * Grid / Solar / Home totals overlaid. Live energy **flows** glow along the
+ * conduit lines only for today. It is a page asset, not a widget:
+ * `hd-view-grid` renders it above the widget grid when a view declares `hero`.
  *
  * The flows are browser-native animated WebP layers authored to overlay the
  * exact 960×720 house. Live state decides which layers are mounted; reduced
@@ -60,6 +97,7 @@ export function activeEnergyFlows(
 export class EnergyHero extends LitElement {
   @property({ attribute: false }) hass?: HomeAssistant;
   @property({ attribute: false }) options?: EnergyHeroConfig;
+  @property({ attribute: false }) energyPeriod?: EnergyPeriodContext;
 
   private _reduce = false;
 
@@ -176,12 +214,6 @@ export class EnergyHero extends LitElement {
       typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
   }
 
-  private _num(id?: string): number | null {
-    if (!id) return null;
-    const n = Number(this.hass?.states[id]?.state);
-    return Number.isFinite(n) ? n : null;
-  }
-
   private _stat(value: number | null, label: string): TemplateResult {
     return html`<div class="stat">
       <span class="v">${value == null ? "—" : formatNumber(value)}<span class="u">kWh</span></span>
@@ -191,23 +223,25 @@ export class EnergyHero extends LitElement {
 
   render(): TemplateResult {
     const o = this.options;
-    const solarToday = this._num(o?.solar);
-    const gridToday = this._num(o?.grid);
-    const homeToday = gridToday != null && solarToday != null ? gridToday + solarToday : null;
-    const flows = activeEnergyFlows(this.hass, o);
+    const totals = energyHeroTotals(this.hass, o, this.energyPeriod);
+    const showLiveFlows = !this.energyPeriod || (
+      this.energyPeriod.range.selection.period === "day" && this.energyPeriod.range.isCurrent
+    );
+    const flows = showLiveFlows ? activeEnergyFlows(this.hass, o) : [];
+    const periodLabel = this.energyPeriod?.range.label ?? o?.label ?? "Today";
 
     return html`
       <div class="hero">
         <div class="inner">
           <div class="bar">
             <span class="pill">
-              ${o?.label ?? "Today"}
+              ${periodLabel}
               <hd-icon icon="mdi:calendar-blank" .size=${18}></hd-icon>
             </span>
           </div>
           <div class="stats">
-            ${this._stat(gridToday, "Grid")} ${this._stat(solarToday, "Solar Panels")}
-            ${this._stat(homeToday, "Home")}
+            ${this._stat(totals.grid, "Grid")} ${this._stat(totals.solar, "Solar Panels")}
+            ${this._stat(totals.home, "Home")}
           </div>
           <div class="house">
             <img

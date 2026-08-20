@@ -25,6 +25,8 @@ describe("KeyedAsyncController", () => {
     const firstLoader = vi.fn(() => first.promise);
 
     controller.load("first", firstLoader);
+    expect(controller.currentKey).toBe("first");
+    expect(controller.status).toBe("loading");
     controller.load("first", firstLoader);
     controller.load("second", () => second.promise);
     first.resolve([1]);
@@ -37,11 +39,17 @@ describe("KeyedAsyncController", () => {
     expect(controller.value).toEqual([2]);
     expect(controller.status).toBe("ready");
 
+    const refreshed = deferred<number[]>();
+    controller.load("second", () => refreshed.promise, true);
+    refreshed.resolve([4]);
+    await refreshed.promise;
+    expect(controller.value).toEqual([4]);
+
     const disconnected = deferred<number[]>();
     controller.load("third", () => disconnected.promise);
     registeredController!.hostDisconnected?.();
     disconnected.resolve([3]);
     await disconnected.promise;
-    expect(controller.value).toEqual([2]);
+    expect(controller.value).toEqual([4]);
   });
 });

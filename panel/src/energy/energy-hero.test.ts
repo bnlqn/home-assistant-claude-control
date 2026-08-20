@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { EnergyHeroConfig } from "../config/schema.js";
 import type { HassEntity, HomeAssistant } from "../types/hass.js";
-import { activeEnergyFlows } from "./energy-hero.js";
+import { resolveEnergyPeriod, type EnergyPeriodContext } from "./energy-period.js";
+import { activeEnergyFlows, energyHeroTotals } from "./energy-hero.js";
 
 const options: EnergyHeroConfig = {
   type: "energy",
@@ -11,6 +12,11 @@ const options: EnergyHeroConfig = {
   solarPower: "sensor.solar_power",
   carConnected: "binary_sensor.car_connected",
   carPower: "sensor.car_power",
+  statistics: {
+    gridImport: "sensor.grid_import",
+    gridExport: "sensor.grid_export",
+    solar: "sensor.solar_total",
+  },
 };
 
 function entity(entityId: string, state: string, unit?: string): HassEntity {
@@ -72,5 +78,50 @@ describe("activeEnergyFlows", () => {
 
     expect(activeEnergyFlows(state, options)).toEqual([]);
     expect(activeEnergyFlows(undefined, options)).toEqual([]);
+  });
+});
+
+describe("energyHeroTotals", () => {
+  it("uses fresh live entities for the current day", () => {
+    const state = hass({
+      "sensor.grid_today": ["6.6", "kWh"],
+      "sensor.solar_today": ["6.4", "kWh"],
+    });
+
+    expect(energyHeroTotals(state, options)).toEqual({ grid: 6.6, solar: 6.4, home: 13 });
+  });
+
+  it("uses shared recorder statistics for a historical period", () => {
+    const range = resolveEnergyPeriod(
+      { period: "day", anchor: "2026-08-20" },
+      new Date(2026, 7, 21, 12),
+    );
+    const context: EnergyPeriodContext = {
+      range,
+      status: "ready",
+      statistics: {
+        "sensor.grid_import": [{ start: range.start.getTime(), change: 8 }],
+        "sensor.grid_export": [{ start: range.start.getTime(), change: 3 }],
+        "sensor.solar_total": [{ start: range.start.getTime(), change: 7 }],
+      },
+    };
+
+    expect(energyHeroTotals(hass({}), options, context)).toEqual({
+      grid: 5,
+      solar: 7,
+      home: 12,
+    });
+  });
+
+  it("keeps missing recorder data unavailable instead of fabricating zero", () => {
+    const range = resolveEnergyPeriod(
+      { period: "month", anchor: "2026-07-01" },
+      new Date(2026, 7, 21, 12),
+    );
+    expect(energyHeroTotals(hass({}), options, {
+      range,
+      status: "ready",
+      statistics: {},
+    })).toEqual({ grid: null, solar: null, home: null });
   });
 });

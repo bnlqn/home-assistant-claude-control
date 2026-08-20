@@ -4,6 +4,7 @@ import type { HomeAssistant } from "../types/hass.js";
 import type { WidgetConfig } from "../config/schema.js";
 import { widgetTag } from "../widgets/widget-registry.js";
 import type { WidgetPlacement } from "./layout.js";
+import type { EnergyPeriodContext } from "../energy/energy-period.js";
 import "../widgets/widget-frame.js";
 
 export interface GridPosition {
@@ -26,6 +27,7 @@ export function renderWidgetCell(
   placement: WidgetPlacement,
   hass: HomeAssistant | undefined,
   position?: GridPosition,
+  energyPeriod?: EnergyPeriodContext,
 ) {
   try {
     const { colSpan, rowSpan, size, layout, profile } = placement;
@@ -41,6 +43,7 @@ export function renderWidgetCell(
       .currentSize=${size}
       .layout=${layout}
       .displayProfile=${profile}
+      .energyPeriod=${energyPeriod}
     ></${tag}>`;
   } catch (err) {
     console.error(`[widget-cell] widget "${widget?.id ?? widget?.type}" failed to render:`, err);

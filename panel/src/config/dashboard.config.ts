@@ -507,6 +507,11 @@ export const dashboardConfig: DashboardConfig = {
         solarPower: "sensor.goodwe_pv_power", // W
         carConnected: "binary_sensor.tesla_wall_connector_vehicle_connected", // swaps to the EV art
         carPower: "sensor.tesla_wall_connector_total_power", // kW, auto-normalized
+        statistics: {
+          gridImport: "sensor.p1_meter_energy_import",
+          gridExport: "sensor.p1_meter_energy_export",
+          solar: "sensor.goodwe_total_pv_generation",
+        },
       },
       widgets: [
         // Three Homey-style status tiles. They are regular widgets in the

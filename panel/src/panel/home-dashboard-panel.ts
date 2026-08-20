@@ -26,6 +26,7 @@ import "../primitives/misc.js";
 import type { HdConfirm } from "../primitives/confirm-dialog.js";
 import type { HdToasts } from "../primitives/toast.js";
 import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
+import { EnergyPeriodController } from "../controllers/energy-period-controller.js";
 import { resolveDisplayProfile } from "./layout.js";
 
 type Appearance = "auto" | "light" | "dark";
@@ -54,6 +55,7 @@ export class HomeDashboardPanel extends LitElement {
   @query("hd-toasts") private _toasts?: HdToasts;
 
   private readonly _responsive = new ResponsiveProfileController(this, resolveDisplayProfile);
+  private readonly _energyPeriod = new EnergyPeriodController(this);
   private _document?: { value: DashboardDocumentV1; issues: ValidationIssue[] };
   private readonly _resolvedConfigs = new Map<
     DisplayProfile,
@@ -294,6 +296,7 @@ export class HomeDashboardPanel extends LitElement {
           .hass=${this.hass}
           .view=${view}
           .displayProfile=${this._responsive.profile}
+          .energySelection=${this._energyPeriod.selection}
         ></hd-view-grid>
       </hd-app-shell>
 

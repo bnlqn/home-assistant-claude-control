@@ -392,6 +392,39 @@ Exit criteria:
 - navigating history never changes live controls;
 - missing recorder data produces an honest partial/unavailable state.
 
+Progress — foundation completed 2026-08-21:
+
+- introduced one serializable, page-level day/week/month selection anchored by
+  calendar date, with deterministic current, previous, ISO-week, month, label,
+  and boundary primitives ready for future controls;
+- added an Energy period controller that follows today across midnight by
+  default, can select or shift immutable ranges, and preserves a historical
+  selection once the user rewinds;
+- hardened the recorder adapter with explicit end bounds, hourly buckets,
+  invalid-row normalization, and defensive filtering of rows outside the
+  requested interval;
+- deduplicated hero and widget statistic ids into one page request, refreshed
+  current results every five minutes, and reused the keyed async boundary so
+  superseded or disconnected requests cannot repaint the page;
+- made the hero and Electricity Total consume the shared context; the hero uses
+  live daily entities and animated flows only for today, uses recorder totals
+  for historical periods, and shows missing totals as unavailable instead of
+  zero;
+- made Energy Chart follow the page context when hosted on Energy while
+  retaining its standalone selector behavior elsewhere;
+- configured monotonic grid-import, grid-export, and total-solar statistics for
+  the shipped Energy hero, while retaining the diagram as a page-level region;
+- passed 182 tests and visually verified current Energy at phone and desktop
+  sizes without overflow or runtime warnings;
+- deliberately re-baselined the raw entry budget from 390 to 405 kB for the
+  shared period/controller/adapter contract; the tighter 105 kB gzip warning
+  ceiling remains unchanged.
+
+Still required before Phase 5 exit: Home Assistant-timezone and DST-aware
+boundaries, statistic metadata/unit normalization, reset and partial-coverage
+fixtures, native-dashboard parity checks, bounded multi-range caching, and the
+accessible previous/next/date-selection interface.
+
 ### Phase 6 — Hardening and release
 
 Goal: make the dashboard dependable as an always-on home interface.
@@ -417,17 +450,15 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Keep the Phase 4 editor deferred as requested. The next implementation slice
-should establish the Energy time-range context from Phase 5 without changing
-the hero/widget boundary:
+Keep the Phase 4 editor and Energy navigation UI deferred. Harden historical
+correctness before exposing controls:
 
-1. define one page-level selection contract for current day, past day, week,
-   and month;
-2. put recorder/statistics access behind the existing Home Assistant adapter,
-   with abort/stale-result handling and honest unavailable states;
-3. let the Energy hero and historical widgets consume the same selection while
-   keeping live power entities separate from period totals;
-4. add deterministic fixtures before adding any date-navigation UI.
+1. resolve range boundaries in Home Assistant's configured timezone and add DST
+   transition fixtures;
+2. normalize recorder metadata/units and detect resets or incomplete coverage;
+3. compare representative day, week, and month totals against Home Assistant's
+   native Energy dashboard;
+4. add a bounded multi-range cache with explicit ready/partial/unavailable
+   results, then build the accessible previous/next/date interface.
 
-This advances the other explicitly planned capability while preserving the now
-stable document and grid foundations and avoiding premature editor work.
+This avoids presenting history controls until their numbers are trustworthy.

@@ -5,12 +5,13 @@ import { EntityWidget } from "./base-widget.js";
 import { fetchStatistics, statisticsRange, type StatBucket } from "../home-assistant/statistics.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
 import type { ElectricityTotalWidgetOptions } from "../config/widget-options.js";
+import { sumStatistic } from "../energy/energy-period.js";
 
 /**
- * Homey-style "Electricity Total" breakdown: today's `Imported − Exported =
- * Total` in kWh, sourced from the Statistics API's per-day `change` (the same
- * mechanism the energy chart uses). Entityless composite; refreshes on a light
- * interval since daily totals drift slowly.
+ * Homey-style `Imported − Exported = Total` breakdown for the Energy page's
+ * selected period, sourced from the shared Statistics API result. Outside that
+ * page context it retains a today-only fallback and refreshes on a light
+ * interval.
  */
 @define("hd-widget-electricitytotal")
 export class ElectricityTotalWidget extends EntityWidget {
@@ -50,6 +51,7 @@ export class ElectricityTotalWidget extends EntityWidget {
   }
 
   private async _fetch(): Promise<void> {
+    if (this.energyPeriod) return;
     if (!this.hass?.connected) return;
     const imp = this._opts.importEnergy;
     const exp = this._opts.exportEnergy;
@@ -128,23 +130,35 @@ export class ElectricityTotalWidget extends EntityWidget {
     }
   `;
 
-  private _term(value: number, unit: string, label: string, color: string): TemplateResult {
+  private _term(value: number | null, unit: string, label: string, color: string): TemplateResult {
     return html`<div class="term">
-      <span class="num" style=${`--n:${color}`}><b>${formatNumber(value)}</b><span class="u">${unit}</span></span>
+      <span class="num" style=${`--n:${color}`}><b>${value === null ? "—" : formatNumber(value)}</b><span class="u">${unit}</span></span>
       <span class="lbl">${label}</span>
     </div>`;
   }
 
   renderContent(): TemplateResult {
-    const total = this._import - this._export;
-    const dim = !this._ready;
+    const shared = this.energyPeriod;
+    const hasConfiguredTotal = !!(this._opts.importEnergy || this._opts.exportEnergy);
+    const imported = shared
+      ? this._opts.importEnergy
+        ? sumStatistic(shared.statistics, this._opts.importEnergy)
+        : hasConfiguredTotal ? 0 : null
+      : this._ready ? this._import : null;
+    const exported = shared
+      ? this._opts.exportEnergy
+        ? sumStatistic(shared.statistics, this._opts.exportEnergy)
+        : hasConfiguredTotal ? 0 : null
+      : this._ready ? this._export : null;
+    const total = imported !== null && exported !== null ? imported - exported : null;
+    const dim = shared ? shared.status !== "ready" : !this._ready;
     return html`
       <h2 class="title">${this.config.name ?? "Electricity Total"}</h2>
       <div class="card" style=${dim ? "opacity:0.6" : ""}>
         <span class="lead"><hd-icon icon="mdi:flash" .size=${26}></hd-icon></span>
-        ${this._term(this._import, "kWh", "Imported", "var(--accent)")}
+        ${this._term(imported, "kWh", "Imported", "var(--accent)")}
         <span class="op">−</span>
-        ${this._term(this._export, "kWh", "Exported", "var(--state-eco)")}
+        ${this._term(exported, "kWh", "Exported", "var(--state-eco)")}
         <span class="op">=</span>
         ${this._term(total, "kWh", "Total", "var(--accent)")}
         ${nothing}

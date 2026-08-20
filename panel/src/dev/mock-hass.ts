@@ -254,14 +254,17 @@ export class MockHassController {
     const ids = (msg.statistic_ids as string[]) ?? [];
     const period = (msg.period as string) ?? "day";
     const startMs = Date.parse(String(msg.start_time));
-    const now = Date.now();
-    const stepMs = period === "day" ? 864e5 : period === "week" ? 7 * 864e5 : 30 * 864e5;
-    const scale = period === "day" ? 1 : period === "week" ? 7 : 30;
+    const requestedEnd = msg.end_time ? Date.parse(String(msg.end_time)) : Date.now();
+    const endMs = Math.min(requestedEnd, Date.now());
+    const stepMs = period === "hour"
+      ? 3.6e6
+      : period === "day" ? 864e5 : period === "week" ? 7 * 864e5 : 30 * 864e5;
+    const scale = period === "hour" ? 1 / 24 : period === "day" ? 1 : period === "week" ? 7 : 30;
     const out: Record<string, Array<{ start: number; end: number; change: number; sum: number }>> = {};
     for (const id of ids) {
       const rows: Array<{ start: number; end: number; change: number; sum: number }> = [];
       let sum = 0;
-      for (let t = startMs; t < now; t += stepMs) {
+      for (let t = startMs; t < endMs; t += stepMs) {
         const change = Number((this.syntheticEnergy(id, t) * scale).toFixed(2));
         sum = Number((sum + change).toFixed(2));
         rows.push({ start: t, end: t + stepMs, change, sum });

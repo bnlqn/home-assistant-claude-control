@@ -4,6 +4,15 @@ import { repeat } from "lit/directives/repeat.js";
 import { define } from "../primitives/registry.js";
 import type { HomeAssistant } from "../types/hass.js";
 import type { ViewConfig } from "../config/schema.js";
+import type { EnergyPeriodSelection } from "../energy/energy-period.js";
+import {
+  currentEnergyPeriodSelection,
+  energyStatisticIds,
+  resolveEnergyPeriod,
+  type EnergyPeriodContext,
+  type EnergyPeriodRange,
+} from "../energy/energy-period.js";
+import { fetchStatistics, type StatBucket } from "../home-assistant/statistics.js";
 import {
   gridMetricsForProfile,
   packViewGrid,
@@ -12,6 +21,7 @@ import {
 } from "./layout.js";
 import { renderWidgetCell } from "./widget-cell.js";
 import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
+import { KeyedAsyncController } from "../controllers/keyed-async-controller.js";
 import "../primitives/entity-icon.js";
 import "../widgets/widget-frame.js";
 import "../energy/energy-hero.js";
@@ -26,8 +36,14 @@ export class HdViewGrid extends LitElement {
   @property({ attribute: false }) hass?: HomeAssistant;
   @property({ attribute: false }) view?: ViewConfig;
   @property({ attribute: false }) displayProfile: DisplayProfile = "desktop";
+  @property({ attribute: false }) energySelection?: EnergyPeriodSelection;
 
   private readonly _dimensions = new ResponsiveProfileController(this, (width) => width);
+  private readonly _energyStatistics = new KeyedAsyncController(
+    this,
+    () => ({} as Record<string, StatBucket[]>),
+  );
+  private _energyRefreshTimer = 0;
 
   static styles = css`
     :host {
@@ -81,14 +97,72 @@ export class HdViewGrid extends LitElement {
     }
   `;
 
+  connectedCallback(): void {
+    super.connectedCallback();
+    this._energyRefreshTimer = window.setInterval(() => this._loadEnergyStatistics(true), 5 * 60 * 1000);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    window.clearInterval(this._energyRefreshTimer);
+  }
+
+  protected updated(): void {
+    this._loadEnergyStatistics();
+  }
+
+  private _loadEnergyStatistics(force = false): void {
+    const query = this._energyQuery();
+    if (!query || !this.hass?.connected || query.ids.length === 0) return;
+    const hass = this.hass;
+    this._energyStatistics.load(query.key, () => fetchStatistics(
+      hass,
+      query.ids,
+      query.range.statisticPeriod,
+      query.range.start,
+      query.range.end,
+    ), force);
+  }
+
+  private _energyQuery(): { key: string; ids: string[]; range: EnergyPeriodRange } | undefined {
+    const view = this.view;
+    if (view?.hero?.type !== "energy") return undefined;
+    const range = resolveEnergyPeriod(
+      this.energySelection ?? currentEnergyPeriodSelection(),
+    );
+    const orderedIds = energyStatisticIds(view);
+    return { range, ids: orderedIds, key: `${range.key}|${orderedIds.join(",")}` };
+  }
+
+  private _energyContext(
+    query: ReturnType<HdViewGrid["_energyQuery"]>,
+  ): EnergyPeriodContext | undefined {
+    if (!query) return undefined;
+    const matches = this._energyStatistics.currentKey === query.key;
+    return {
+      range: query.range,
+      statistics: matches ? this._energyStatistics.value : {},
+      status: matches ? this._energyStatistics.status : "idle",
+      ...(matches && this._energyStatistics.error !== undefined
+        ? { error: this._energyStatistics.error }
+        : {}),
+    };
+  }
+
   render() {
     const view = this.view;
     const m = gridMetricsForProfile(this.displayProfile);
     const unit = squareUnit(this._dimensions.width || 1024, m);
 
     // A page-level hero (the Energy house) renders full-bleed above the grid.
+    const energyQuery = this._energyQuery();
+    const energyContext = this._energyContext(energyQuery);
     const hero = view?.hero
-      ? html`<hd-energy-hero .hass=${this.hass} .options=${view.hero}></hd-energy-hero>`
+      ? html`<hd-energy-hero
+          .hass=${this.hass}
+          .options=${view.hero}
+          .energyPeriod=${energyContext}
+        ></hd-energy-hero>`
       : nothing;
 
     if (!view || (view.widgets.length === 0 && !view.hero)) {
@@ -129,6 +203,7 @@ export class HdViewGrid extends LitElement {
                 item.placement,
                 this.hass,
                 { columnStart: item.columnStart, rowStart: item.rowStart },
+                energyContext,
               ),
         )}
       </div>

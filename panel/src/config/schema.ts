@@ -308,6 +308,13 @@ export interface EnergyHeroConfig {
   carPower?: string;
   /** Period label shown in the pill (defaults to "Today"). */
   label?: string;
+  /** Monotonic recorder statistics used for past day/week/month totals. */
+  statistics?: {
+    gridImport: string;
+    gridExport?: string;
+    solar: string;
+    car?: string;
+  };
 }
 
 export interface ViewConfig {

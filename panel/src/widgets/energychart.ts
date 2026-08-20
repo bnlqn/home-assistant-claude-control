@@ -7,10 +7,9 @@ import {
   fetchStatistics,
   statisticsRange,
   type StatBucket,
-  type StatPeriod,
 } from "../home-assistant/statistics.js";
 import type { BarSeries } from "../primitives/bar-chart.js";
-import type { EnergyChartWidgetOptions } from "../config/widget-options.js";
+import type { EnergyChartPeriod, EnergyChartWidgetOptions } from "../config/widget-options.js";
 import "./widget-frame.js";
 import "../primitives/bar-chart.js";
 import "../primitives/segmented.js";
@@ -25,17 +24,18 @@ const SERIES: Array<{ key: keyof EnergyChartWidgetOptions; label: string; color:
 ];
 
 /** How many trailing buckets to show per period. */
-const BUCKETS: Record<StatPeriod, number> = { day: 7, week: 8, month: 12 };
+const BUCKETS: Record<EnergyChartPeriod, number> = { day: 7, week: 8, month: 12 };
 
 /**
  * Long-range energy chart (entityless composite). Grouped bars of solar /
  * import / export / car-charging in kWh from the Statistics API, with a
- * Day / Week / Month selector. Each series id in `options` is a
+ * Day / Week / Month selector when standalone. On the Energy page it follows
+ * the shared page period instead. Each series id in `options` is a
  * `total_increasing` energy sensor with recorder statistics.
  */
 @define("hd-widget-energychart")
 export class EnergyChartWidget extends EntityWidget {
-  @state() private _period: StatPeriod = "day";
+  @state() private _period: EnergyChartPeriod = "day";
   @state() private _periodInit = false;
   private readonly _data = new KeyedAsyncController(
     this,
@@ -74,7 +74,7 @@ export class EnergyChartWidget extends EntityWidget {
 
   updated() {
     // Adopt the configured default period once.
-    if (!this._periodInit) {
+    if (!this.energyPeriod && !this._periodInit) {
       this._periodInit = true;
       if (this._opts.defaultPeriod) {
         this._period = this._opts.defaultPeriod;
@@ -85,6 +85,7 @@ export class EnergyChartWidget extends EntityWidget {
   }
 
   private _maybeFetch() {
+    if (this.energyPeriod) return;
     if (!this.hass?.connected) return;
     const ids = this._ids();
     if (!ids.length) return;
@@ -101,22 +102,28 @@ export class EnergyChartWidget extends EntityWidget {
     });
   }
 
-  private _setPeriod(p: StatPeriod) {
+  private _setPeriod(p: EnergyChartPeriod) {
     if (p !== this._period) this._period = p;
   }
 
   private _chart(): { labels: string[]; series: BarSeries[] } {
-    const n = BUCKETS[this._period];
+    const shared = this.energyPeriod;
+    const period = shared?.range.selection.period ?? this._period;
+    const data = shared?.statistics ?? this._data.value;
     // Union of bucket starts across series, aligned by exact start time.
     const startSet = new Set<number>();
     for (const s of SERIES) {
       const id = this._opts[s.key];
-      if (id) for (const b of this._data.value[id] ?? []) startSet.add(b.start);
+      if (id) for (const b of data[id] ?? []) startSet.add(b.start);
     }
-    const starts = [...startSet].sort((a, b) => a - b).slice(-n);
-    const labels = starts.map((ms) => bucketLabel(ms, this._period));
+    const sortedStarts = [...startSet].sort((a, b) => a - b);
+    const starts = shared ? sortedStarts : sortedStarts.slice(-BUCKETS[period]);
+    const labels = starts.map((ms) => bucketLabel(
+      ms,
+      shared?.range.statisticPeriod ?? period,
+    ));
     const series: BarSeries[] = SERIES.filter((s) => this._opts[s.key]).map((s) => {
-      const byStart = new Map((this._data.value[this._opts[s.key]!] ?? []).map((b) => [b.start, b.change]));
+      const byStart = new Map((data[this._opts[s.key]!] ?? []).map((b) => [b.start, b.change]));
       return {
         label: s.label,
         color: s.color,
@@ -137,18 +144,18 @@ export class EnergyChartWidget extends EntityWidget {
         .hasDetail=${false}
         .quickKind=${"none"}
       >
-        <div class="head">
-          <hd-segmented
-            .options=${[
-              { value: "day", label: "Day" },
-              { value: "week", label: "Week" },
-              { value: "month", label: "Month" },
-            ]}
-            .value=${this._period}
-            label="History period"
-            @hd-select=${(e: CustomEvent) => this._setPeriod(e.detail.value as StatPeriod)}
-          ></hd-segmented>
-        </div>
+        ${this.energyPeriod ? "" : html`<div class="head">
+            <hd-segmented
+              .options=${[
+                { value: "day", label: "Day" },
+                { value: "week", label: "Week" },
+                { value: "month", label: "Month" },
+              ]}
+              .value=${this._period}
+              label="History period"
+              @hd-select=${(e: CustomEvent) => this._setPeriod(e.detail.value as EnergyChartPeriod)}
+            ></hd-segmented>
+          </div>`}
         <div class="chart-box">
           <hd-bar-chart .series=${series} .labels=${labels} unit="kWh"></hd-bar-chart>
         </div>

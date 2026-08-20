@@ -440,4 +440,22 @@ function validateEnergyHero(
   if (value.label !== undefined && typeof value.label !== "string") {
     error(`${path}.label`, "Energy hero label must be a string.");
   }
+  if (value.statistics !== undefined) {
+    if (!isRecord(value.statistics)) {
+      error(`${path}.statistics`, "Energy hero statistics must be an object.");
+    } else {
+      for (const key of ["gridImport", "solar"] as const) {
+        const entityId = value.statistics[key];
+        if (typeof entityId !== "string" || !ENTITY_ID_RE.test(entityId)) {
+          error(`${path}.statistics.${key}`, `Energy hero ${key} statistic must be a valid entity_id.`);
+        }
+      }
+      for (const key of ["gridExport", "car"] as const) {
+        const entityId = value.statistics[key];
+        if (entityId !== undefined && (typeof entityId !== "string" || !ENTITY_ID_RE.test(entityId))) {
+          error(`${path}.statistics.${key}`, `Energy hero ${key} statistic must be a valid entity_id.`);
+        }
+      }
+    }
+  }
 }

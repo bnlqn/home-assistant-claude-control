@@ -36,8 +36,12 @@ export class KeyedAsyncController<Value> implements ReactiveController {
     }
   }
 
-  load(key: string, loader: () => Promise<Value>): void {
-    if (!key || (key === this.key && (this.status === "loading" || this.status === "ready"))) return;
+  get currentKey(): string {
+    return this.key;
+  }
+
+  load(key: string, loader: () => Promise<Value>, force = false): void {
+    if (!key || (!force && key === this.key && (this.status === "loading" || this.status === "ready"))) return;
     this.key = key;
     this.status = "loading";
     this.error = undefined;
