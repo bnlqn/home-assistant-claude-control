@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # Download Homey's Energy-page flow frame sequences (the glowing conduit
-# animations). Each flow is a 113-frame, 960x720 sequence played on <canvas>.
+# animations). Pack a downloaded set for the panel with:
+#   python3 scripts/pack-energy-flows.py flow-sequences public/assets/energy-flows
 #
 # Source pattern (from HYSequence): <folder>/<prefix>.<frame>.<ext>
 #   https://homey.app/sequence/pages/features-energy/<type>/<type>.<n>.webp

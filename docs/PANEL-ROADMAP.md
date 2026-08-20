@@ -134,7 +134,7 @@ Exit criteria:
 - production build size is measured and documented;
 - all automated checks run from one CI workflow.
 
-Progress — 2026-08-20, first correctness slice:
+Progress — 2026-08-20:
 
 - completed narrow-phone device reflow, shared/branded 44 px controls, scroll
   ownership, explicit Home Assistant safe-area ownership, and strict sanitized
@@ -143,12 +143,19 @@ Progress — 2026-08-20, first correctness slice:
   shared control sizing, and shell scroll reset;
 - verified 320×568 and 390×844 in a real browser, including internal card
   overflow and rendered control dimensions;
-- documented the measured 505 kB raw / 204 kB gzip entry module, 3.2 MiB
-  deploy directory, and initial warning budgets in `panel/README.md`;
-- still to do in Phase 0: extract embedded rasters, replace frame-per-file
-  animation loading, upgrade Vite/Vitest, add lint/dependency automation and
-  CI, automate browser screenshots/accessibility checks, and profile the wall
-  tablet's decoded image memory.
+- extracted the Energy house, Tesla, and Roborock raster data URLs into local
+  deployable assets;
+- replaced Energy's four 113-frame preload trees and canvas loop with at most
+  four keyed animated WebP layers, dedicated import/export direction, and
+  reduced-motion stills; the source-to-packed conversion is reproducible;
+- reduced the production entry module from 505 kB raw / 204 kB gzip to 369 kB
+  raw / 96 kB gzip, the deploy directory from 3.2 MiB / 453 files to 1.9 MiB /
+  14 files, and active Energy requests from as many as 452 to at most four;
+- verified the optimized Energy page at 320 and 390 px with no horizontal
+  overflow, no missing flow assets, and no canvas animation path;
+- still to do in Phase 0: upgrade Vite/Vitest, add lint/dependency automation
+  and CI, automate browser screenshots/accessibility checks, resolve the media
+  widget's extra-update warning, and profile wall-tablet decoded image memory.
 
 ### Phase 1 — Unified widget contract
 

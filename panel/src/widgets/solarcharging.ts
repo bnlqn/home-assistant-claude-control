@@ -3,7 +3,7 @@ import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { buildToggle } from "../home-assistant/service-calls.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
-import { TESLA_MODEL3_IMAGE } from "./tesla-image.js";
+import { panelAssetUrl } from "../panel/assets.js";
 import type { HomeAssistant } from "../types/hass.js";
 import "./widget-frame.js";
 import "../primitives/misc.js";
@@ -439,7 +439,13 @@ export class SolarChargingWidget extends EntityWidget {
       >
         <div class="hero" ?data-charging=${charging && m.armed}>
           <div class="glow"></div>
-          <img class="car" src=${TESLA_MODEL3_IMAGE} alt="" aria-hidden="true" draggable="false" />
+          <img
+            class="car"
+            src=${panelAssetUrl("assets/tesla-model-3.webp")}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+          />
           <div class="top">
             <div class="brand">Tesla</div>
             <div class="htext">

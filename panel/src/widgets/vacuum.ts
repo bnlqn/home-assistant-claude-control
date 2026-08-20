@@ -11,7 +11,7 @@ import {
 } from "../home-assistant/service-calls.js";
 import { formatNumber, titleCase } from "../home-assistant/state-formatting.js";
 import { vacuumCompanions } from "../home-assistant/vacuum-companions.js";
-import { ROBOROCK_S8_IMAGE } from "./roborock-image.js";
+import { panelAssetUrl } from "../panel/assets.js";
 import type { SegmentOption } from "../primitives/segmented.js";
 import "./widget-frame.js";
 import "../primitives/icon-button.js";
@@ -375,7 +375,13 @@ export class VacuumWidget extends EntityWidget {
       >
         <div class="hero" ?data-cleaning=${cleaning}>
           <div class="glow"></div>
-          <img class="robot" src=${ROBOROCK_S8_IMAGE} alt="" aria-hidden="true" draggable="false" />
+          <img
+            class="robot"
+            src=${panelAssetUrl("assets/roborock-s8.webp")}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+          />
           <div class="top">
             <div class="brand">roborock</div>
             <div class="htext">

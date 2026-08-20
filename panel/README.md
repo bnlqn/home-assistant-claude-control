@@ -66,12 +66,13 @@ assets into the Home Assistant working mirror:
 
 ```
 config/www/home-dashboard/home-dashboard-panel.js
-config/www/home-dashboard/flows/**/*.webp
+config/www/home-dashboard/assets/**/*.webp
 ```
 
-The 2026-08-20 baseline is 505 kB JavaScript (204 kB gzip) and approximately
-3.2 MiB / 453 files for the complete deployable directory. Of those files, 452
-are WebP animation frames. See [Build baseline and budgets](#build-baseline-and-budgets).
+The optimized 2026-08-20 baseline is 369 kB JavaScript (96 kB gzip) and
+approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
+flows are five packed animated WebPs plus reduced-motion stills. See
+[Build baseline and budgets](#build-baseline-and-budgets).
 
 Because it lands under `config/www/`, it ships through the normal
 `./bin/ha deploy` rsync flow and is served at
@@ -252,7 +253,7 @@ Composite widgets (`energy`, `action`) take their entities/service via
 
 ```
 panel/src/
-  panel/            home-dashboard-panel.ts (root) · app-shell · view-grid · router · layout
+  panel/            home-dashboard-panel.ts (root) · app-shell · view-grid · router · layout · assets
   config/           schema · validation · dashboard.config.ts  ← the only place entity ids live
   design-system/    tokens.ts (light/dark, type, motion) · mdi-paths.ts (tree-shaken icons)
   home-assistant/   capabilities · service-calls · state-formatting · history · entity-adapters/
@@ -281,22 +282,21 @@ Key ideas:
   — no icon font, no CDN. Unknown icons fall back to HA's `<ha-icon>` when
   present, else a neutral dot.
 - **Local-only runtime.** Lit and all executable dependencies are inlined into
-  the panel module. Animation frames are separate same-origin files under
-  `/local/home-dashboard/flows/`; nothing requires an external network.
+  the panel module. Raster art and packed animations are same-origin files under
+  `/local/home-dashboard/assets/`; nothing requires an external network.
 
 ## Build baseline and budgets
 
-These budgets prevent quiet regressions while the animation and embedded-image
-work is improved. The current values are warning ceilings, not performance
-targets to grow into.
+These budgets prevent quiet regressions. The current values are warning
+ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 505 kB | 550 kB | Reduce by extracting raster data URLs. |
-| Entry module, gzip | 204 kB | 225 kB | Keep framework/application growth bounded. |
-| Complete deploy directory | 3.2 MiB | 3.5 MiB | Reduce animation transfer size. |
+| Entry module, raw | 369 kB | 410 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 96 kB | 110 kB | Keep framework/application growth bounded. |
+| Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
-| Energy animation frame requests | Up to 452 | 452 temporary maximum | Replace frame-per-file loading; target 16 or fewer. |
+| Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
 | Decoded Energy animation memory | Not yet enforced | 256 MiB target | Measure on the wall tablet before release. |
 
 A production build prints raw and gzip module sizes. Check the complete output
@@ -306,12 +306,12 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 125+ Vitest cases covering config validation, widget-size
+`npm test` runs 130 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,
-the quick-action vs. open-detail split, the confirmation bus, and reduced-motion
-tokens.
+Energy flow selection and asset paths, the quick-action vs. open-detail split,
+the confirmation bus, and reduced-motion tokens.
 
 The dev harness (`npm run dev`) is the manual visual-verification surface across
 phone, tablet, laptop, and desktop widths, in light and dark.
