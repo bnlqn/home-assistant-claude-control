@@ -1,11 +1,10 @@
 import type { WidgetType } from "../config/schema.js";
+import { widgetDefinition } from "./widget-definition.js";
 
 // Side-effect imports register every widget custom element.
 import "./group.js";
-import "./light.js";
 import "./basic.js";
 import "./sensor.js";
-import "./climate.js";
 import "./cover.js";
 import "./media.js";
 import "./vacuum.js";
@@ -19,12 +18,12 @@ import "./electricity-total.js";
 import "./extra.js";
 
 /** Maps a configured widget `type` to its custom-element tag. */
-export const WIDGET_TAGS: Record<WidgetType, string> = {
+type LegacyWidgetType = Exclude<WidgetType, "light" | "climate">;
+
+const LEGACY_WIDGET_TAGS: Record<LegacyWidgetType, string> = {
   group: "hd-group",
-  light: "hd-widget-light",
   switch: "hd-widget-switch",
   fan: "hd-widget-fan",
-  climate: "hd-widget-climate",
   cover: "hd-widget-cover",
   media: "hd-widget-media",
   sensor: "hd-widget-sensor",
@@ -47,6 +46,26 @@ export const WIDGET_TAGS: Record<WidgetType, string> = {
   action: "hd-widget-action",
 };
 
+const definitionLoads = new Map<WidgetType, Promise<unknown>>();
+
+function loadDefinition(type: WidgetType): void {
+  if (definitionLoads.has(type)) return;
+  const definition = widgetDefinition(type);
+  if (!definition) return;
+  const load = definition.load().catch((error) => {
+    console.error(`[widget-registry] failed to load "${type}":`, error);
+  });
+  definitionLoads.set(type, load);
+}
+
 export function widgetTag(type: WidgetType): string {
-  return WIDGET_TAGS[type] ?? "hd-widget-sensor";
+  const definition = widgetDefinition(type);
+  if (definition) {
+    // Custom elements upgrade automatically once their module resolves. The
+    // dashboard can therefore render the stable tag immediately while loading
+    // the widget implementation only when its type is actually present.
+    loadDefinition(type);
+    return definition.tag;
+  }
+  return LEGACY_WIDGET_TAGS[type as LegacyWidgetType] ?? "hd-widget-sensor";
 }

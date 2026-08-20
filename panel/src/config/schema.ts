@@ -11,7 +11,7 @@
  * "XL" footprint reserved for genuinely diagram-scale widgets (the power-flow
  * hero) whose contents are size-capped and only need more *whitespace* to
  * breathe. `4x2` is a wide banner for width-hungry widgets (the energy chart).
- * Not every widget may use these (see SUPPORTED_SIZES).
+ * Not every widget may use these (see widget definitions and legacy sizes).
  */
 export type WidgetSize = "1x1" | "2x1" | "1x2" | "2x2" | "3x3" | "4x2";
 
@@ -188,14 +188,18 @@ export interface DashboardConfig {
  * this set is rejected at startup with a clear message, rather than producing a
  * cramped or empty-looking widget.
  */
-export const SUPPORTED_SIZES: Record<WidgetType, readonly WidgetSize[]> = {
+export type LegacyWidgetType = Exclude<WidgetType, "light" | "climate">;
+
+/**
+ * Size constraints for widgets not yet migrated to `WidgetDefinition`.
+ * Migrated widgets own this metadata beside their implementation instead.
+ */
+export const LEGACY_SUPPORTED_SIZES: Record<LegacyWidgetType, readonly WidgetSize[]> = {
   // A container is full-width and self-sizing; the grid ignores its footprint,
   // so every size is permitted (synthetic groups carry a nominal one).
   group: ALL_SIZES,
-  light: ["1x1", "2x1", "1x2", "2x2"],
   switch: ["1x1", "2x1"],
   fan: ["1x1", "2x1", "1x2"],
-  climate: ["2x1", "1x2", "2x2"],
   cover: ["1x1", "2x1", "1x2", "2x2"],
   media: ["2x1", "2x2"],
   sensor: ["1x1", "2x1", "1x2", "2x2"],
@@ -221,7 +225,7 @@ export const SUPPORTED_SIZES: Record<WidgetType, readonly WidgetSize[]> = {
 };
 
 /** A widget type must supply an `entity` unless it is one of these. */
-export const ENTITYLESS_TYPES: readonly WidgetType[] = [
+export const LEGACY_ENTITYLESS_TYPES: readonly LegacyWidgetType[] = [
   "group",
   "energy",
   "powerflow",

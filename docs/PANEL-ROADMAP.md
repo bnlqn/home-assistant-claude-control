@@ -190,6 +190,25 @@ Exit criteria:
 - TypeScript rejects an option belonging to another widget type;
 - every definition is covered by registry and footprint contract tests.
 
+Progress — 2026-08-20:
+
+- introduced the pure, typed `WidgetDefinition` contract and migrated `light`
+  and `climate` as the representative first slice;
+- moved their tags/loaders, supported/default sizes, entity requirements,
+  dependency discovery, section metadata, quick-action/detail metadata, and
+  climate companion-switch validation behind the definitions;
+- routed widget lookup, configuration validation, section classification, and
+  configured detail selection through the definition registry while preserving
+  a legacy fallback for every unmigrated type;
+- added contract coverage that loads both registered elements and renders every
+  supported footprint, plus validation/dependency regressions; the suite now
+  contains 137 tests;
+- kept the registry metadata layer free of UI-controller imports after a cycle
+  audit, with detail bodies selected by a typed controller key;
+- still to do in Phase 1: migrate the remaining catalogue, replace loose option
+  records with a discriminated configuration union, split the domain detail
+  controller, and introduce the reusable HA/async/profile controllers.
+
 ### Phase 2 — Shared responsive grid engine
 
 Goal: make the configured footprint meaningful on every page.
@@ -310,13 +329,16 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Implement Phase 0, then the smallest vertical slice of Phases 1 and 2:
+Complete the Phase 1 contract before changing placement semantics:
 
-1. create the unified registry for two representative widgets (`light` and
-   `climate`);
-2. render them through a shared grid without footprint flattening;
-3. verify all target viewports in a real browser;
-4. migrate the remaining widget types once the contract proves stable.
+1. convert the loose `WidgetConfig` options into a discriminated union, starting
+   with the migrated light/climate definitions and composite energy widgets;
+2. split `details/controllers.ts` into domain modules and move registered detail
+   ownership beside each widget definition;
+3. migrate the remaining catalogue in small domain groups with footprint and
+   dependency contract tests;
+4. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix
+   before removing the legacy section grids.
 
-This gives an early architecture checkpoint before converting the full widget
-catalogue or building persistence and customization UI.
+This keeps the architecture boundary testable while avoiding a simultaneous
+config, detail, and layout rewrite.

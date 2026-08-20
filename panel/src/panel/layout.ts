@@ -7,6 +7,7 @@ import type {
   WidgetType,
 } from "../config/schema.js";
 import { SECTION_KINDS } from "../config/schema.js";
+import { widgetDefinition } from "../widgets/widget-definition.js";
 
 /** Grid metrics derived purely from the panel's measured width. */
 export interface GridMetrics {
@@ -83,6 +84,9 @@ export const SECTION_LABELS: Record<SectionKind, string> = {
 
 /** The section a widget type auto-collects into. */
 export function sectionForWidgetType(type: WidgetType): SectionKind {
+  const definition = widgetDefinition(type);
+  if (definition) return definition.section;
+
   switch (type) {
     case "media":
       return "media";
@@ -97,7 +101,7 @@ export function sectionForWidgetType(type: WidgetType): SectionKind {
     case "weather":
       return "sensors";
     default:
-      // light, switch, fan, climate, cover, lock, vacuum, camera, scene,
+      // switch, fan, cover, lock, vacuum, camera, scene,
       // script, button, action, alarm — everything actionable.
       return "devices";
   }

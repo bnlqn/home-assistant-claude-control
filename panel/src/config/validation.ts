@@ -3,13 +3,15 @@ import {
   ALL_WIDGET_TYPES,
   BREAKPOINTS,
   DashboardConfig,
-  ENTITYLESS_TYPES,
   GroupOptions,
-  SUPPORTED_SIZES,
+  LEGACY_ENTITYLESS_TYPES,
+  LEGACY_SUPPORTED_SIZES,
+  LegacyWidgetType,
   ViewConfig,
   WidgetConfig,
   WidgetType,
 } from "./schema.js";
+import { widgetDefinition } from "../widgets/widget-definition.js";
 
 export interface ValidationIssue {
   level: "error" | "warning";
@@ -150,10 +152,12 @@ function validateWidget(
     return null;
   }
   const type = widget.type as WidgetType;
+  const definition = widgetDefinition(type);
   let valid = true;
 
   // Entity presence + shape.
-  const needsEntity = !ENTITYLESS_TYPES.includes(type);
+  const needsEntity = definition?.requiresEntity ??
+    !LEGACY_ENTITYLESS_TYPES.includes(type as LegacyWidgetType);
   if (needsEntity && !widget.entity) {
     err(`${wpath}.entity`, `Widget "${widget.id}" (${type}) requires an \`entity\`.`);
     valid = false;
@@ -170,6 +174,8 @@ function validateWidget(
     err(`${wpath}.size`, `Widget "${widget.id}" is missing a size set.`);
     valid = false;
   } else {
+    const supportedSizes = definition?.supportedSizes ??
+      LEGACY_SUPPORTED_SIZES[type as LegacyWidgetType];
     for (const bp of BREAKPOINTS) {
       const size = widget.size[bp];
       if (!size) {
@@ -182,14 +188,21 @@ function validateWidget(
         valid = false;
         continue;
       }
-      if (!SUPPORTED_SIZES[type].includes(size)) {
+      if (!supportedSizes.includes(size)) {
         err(
           `${wpath}.size.${bp}`,
-          `Widget type "${type}" does not support size "${size}" at ${bp}. Supported: ${SUPPORTED_SIZES[type].join(", ")}.`,
+          `Widget type "${type}" does not support size "${size}" at ${bp}. Supported: ${supportedSizes.join(", ")}.`,
         );
         valid = false;
       }
     }
+  }
+
+  // Migrated widgets own their option contract. This keeps widget-specific
+  // validation beside the definition instead of growing this central switch.
+  for (const issue of definition?.validateOptions?.(widget.options) ?? []) {
+    err(`${wpath}.options.${issue.path}`, issue.message);
+    valid = false;
   }
 
   // An explicit `group` container validates its children with the same rules,

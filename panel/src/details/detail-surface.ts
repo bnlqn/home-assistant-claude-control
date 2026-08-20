@@ -7,9 +7,11 @@ import { execute, type ServiceCall } from "../home-assistant/service-calls.js";
 import { normalizeEntity } from "../home-assistant/entity-adapters/index.js";
 import { fetchNumericHistory } from "../home-assistant/history.js";
 import { toast } from "../primitives/feedback.js";
+import { widgetDefinition } from "../widgets/widget-definition.js";
 import {
   detailNeedsForecast,
   detailNeedsHistory,
+  renderDefinedDetail,
   renderDetailBody,
   type DetailCtx,
 } from "./controllers.js";
@@ -411,6 +413,13 @@ export class HdDetail extends LitElement {
         : this.config?.type === "powerflow"
           ? "Live power flow"
           : vm.displayState;
+    const definition = this.config ? widgetDefinition(this.config.type) : undefined;
+    const state = this.hass.states[this.entityId];
+    const body = this.open && definition?.detailRenderer && state
+      ? renderDefinedDetail(definition.detailRenderer, ctx, state)
+      : this.open
+        ? renderDetailBody(ctx)
+        : nothing;
     return html`
       <hd-surface
         variant="auto"
@@ -419,7 +428,7 @@ export class HdDetail extends LitElement {
         .subheading=${subheading}
         @hd-close=${() => this._close()}
       >
-        ${this.open ? renderDetailBody(ctx) : nothing}
+        ${body}
       </hd-surface>
     `;
   }

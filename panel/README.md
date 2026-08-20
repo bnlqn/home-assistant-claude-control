@@ -73,7 +73,7 @@ config/www/home-dashboard/home-dashboard-panel.js
 config/www/home-dashboard/assets/**/*.webp
 ```
 
-The optimized 2026-08-20 baseline is 352 kB JavaScript (93 kB gzip) and
+The optimized 2026-08-20 baseline is 357 kB JavaScript (95 kB gzip) and
 approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
 flows are five packed animated WebPs plus reduced-motion stills. See
 [Build baseline and budgets](#build-baseline-and-budgets).
@@ -263,7 +263,7 @@ panel/src/
   home-assistant/   capabilities · service-calls · state-formatting · history · entity-adapters/
   primitives/       icon · icon-button · toggle · slider · segmented · misc (progress/badge/skeleton/trend)
                     · surface (sheet/drawer/dialog) · confirm-dialog · toast · feedback bus · registry
-  widgets/          widget-frame · base-widget · widget-registry · one module per domain
+  widgets/          widget-frame · base-widget · widget-definition · widget-registry · one module per domain
   details/          detail-surface.ts · controllers.ts (per-domain detail bodies)
   dev/              mock-hass.ts · main.ts (dev harness — never shipped)
   testing/          fixtures + Vitest setup
@@ -277,6 +277,11 @@ Key ideas:
 - **Capability-driven.** Brightness, colour, fan mode, tilt, source, etc. are
   only offered when the entity's `supported_features` / attributes advertise
   them (`home-assistant/capabilities.ts`).
+- **One widget contract, migrated incrementally.** `widget-definition.ts`
+  centralizes tag/loading, footprints, entity dependencies, section placement,
+  quick-action/detail metadata, and widget-specific option validation. Light
+  and climate are the first definitions; legacy widgets retain their existing
+  tables until each is migrated with contract coverage.
 - **Performance.** Each widget re-renders only when a **referenced** entity's
   state object changes by reference (or connectivity/size changes) — the
   frequently-changing full `hass` object doesn't re-render the whole grid.
@@ -296,8 +301,8 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 352 kB | 390 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 93 kB | 105 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 357 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 95 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
@@ -310,12 +315,13 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 132 Vitest cases covering config validation, widget-size
+`npm test` runs 137 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,
 Energy flow selection and asset paths, media update lifecycle, deferred
-responsive measurement, the quick-action vs. open-detail split, the
+responsive measurement, widget-definition dependencies and supported-footprint
+rendering, the quick-action vs. open-detail split, the
 confirmation bus, and reduced-motion tokens.
 
 `npm run check` is the local pre-commit equivalent of Panel CI. CI installs the

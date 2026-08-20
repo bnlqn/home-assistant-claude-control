@@ -60,6 +60,25 @@ describe("validateConfig", () => {
     expect(r.sanitized.views[0].widgets).toHaveLength(0);
   });
 
+  it("uses migrated widget definitions for sizes and options", () => {
+    const bad = structuredClone(okConfig);
+    bad.views[1].widgets[0] = {
+      id: "w2",
+      type: "climate",
+      entity: "climate.a",
+      size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+      options: { switches: [{ entity: "invalid", name: "" }] },
+    };
+
+    const r = validateConfig(bad);
+
+    expect(r.ok).toBe(false);
+    expect(r.issues.some((i) => i.message.includes('does not support size "1x1"'))).toBe(true);
+    expect(r.issues.some((i) => i.path.endsWith("options.switches[0].entity"))).toBe(true);
+    expect(r.issues.some((i) => i.path.endsWith("options.switches[0].name"))).toBe(true);
+    expect(r.sanitized.views[1].widgets).toHaveLength(0);
+  });
+
   it("flags duplicate widget ids", () => {
     const bad = structuredClone(okConfig);
     bad.views[1].widgets[0].id = "w1"; // duplicate of overview widget

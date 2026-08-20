@@ -1,6 +1,7 @@
 import { html, nothing, type TemplateResult } from "lit";
 import type { HomeAssistant, HassEntity } from "../types/hass.js";
 import type { WidgetConfig } from "../config/schema.js";
+import type { WidgetDetailRenderer } from "../widgets/widget-definition.js";
 import type { ServiceCall } from "../home-assistant/service-calls.js";
 import { buildFlowModel, type PowerflowOptions } from "../widgets/powerflow.js";
 import { buildSolarChargingModel, type SolarChargingOptions } from "../widgets/solarcharging.js";
@@ -269,6 +270,20 @@ function climateDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
       </div>`;
     })}
   `;
+}
+
+/** Resolve a renderer selected by a widget definition. */
+export function renderDefinedDetail(
+  renderer: WidgetDetailRenderer,
+  ctx: DetailCtx,
+  state: HassEntity,
+): TemplateResult {
+  switch (renderer) {
+    case "light":
+      return lightDetail(ctx, state);
+    case "climate":
+      return climateDetail(ctx, state);
+  }
 }
 
 // ---- Media ---------------------------------------------------------------
