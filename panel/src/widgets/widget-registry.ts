@@ -5,7 +5,6 @@ import { widgetDefinition } from "./widget-definition.js";
 import "./group.js";
 import "./basic.js";
 import "./sensor.js";
-import "./media.js";
 import "./weather.js";
 import "./energy.js";
 import "./powerflow.js";
@@ -17,7 +16,6 @@ import "./extra.js";
 
 const LEGACY_WIDGET_TAGS: Record<LegacyWidgetType, string> = {
   group: "hd-group",
-  media: "hd-widget-media",
   sensor: "hd-widget-sensor",
   binary_sensor: "hd-widget-binary",
   person: "hd-widget-person",

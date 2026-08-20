@@ -176,6 +176,10 @@ export interface VacuumWidgetConfig extends WidgetConfigBase<"vacuum"> {
   options?: VacuumWidgetOptions;
 }
 
+export interface MediaWidgetConfig extends WidgetConfigBase<"media"> {
+  options?: never;
+}
+
 export interface EnergyWidgetConfig extends WidgetConfigBase<"energy"> {
   options?: EnergyWidgetOptions;
 }
@@ -204,6 +208,7 @@ export type TypedOptionsWidgetType =
   | "cover"
   | "lock"
   | "vacuum"
+  | "media"
   | "energy"
   | "powerflow"
   | "solarcharging"
@@ -233,6 +238,7 @@ export type WidgetConfig =
   | CoverWidgetConfig
   | LockWidgetConfig
   | VacuumWidgetConfig
+  | MediaWidgetConfig
   | EnergyWidgetConfig
   | PowerflowWidgetConfig
   | SolarChargingWidgetConfig
@@ -301,7 +307,14 @@ export interface DashboardConfig {
  */
 export type LegacyWidgetType = Exclude<
   WidgetType,
-  "light" | "climate" | "switch" | "fan" | "cover" | "lock" | "vacuum"
+  | "light"
+  | "climate"
+  | "switch"
+  | "fan"
+  | "cover"
+  | "lock"
+  | "vacuum"
+  | "media"
 >;
 
 /**
@@ -312,7 +325,6 @@ export const LEGACY_SUPPORTED_SIZES: Record<LegacyWidgetType, readonly WidgetSiz
   // A container is full-width and self-sizing; the grid ignores its footprint,
   // so every size is permitted (synthetic groups carry a nominal one).
   group: ALL_SIZES,
-  media: ["2x1", "2x2"],
   sensor: ["1x1", "2x1", "1x2", "2x2"],
   binary_sensor: ["1x1", "2x1"],
   person: ["1x1", "2x1"],

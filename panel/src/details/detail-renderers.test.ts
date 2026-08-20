@@ -188,7 +188,7 @@ describe("domain detail modules", () => {
     const { ctx, call } = context(state, config);
     const container = document.createElement("div");
 
-    render(renderDetailBody(ctx), container);
+    render(renderDefinedDetail("media", ctx, state), container);
 
     expect(container.textContent).toContain("Night Drive");
     expect(container.querySelector("hd-slider")).not.toBeNull();

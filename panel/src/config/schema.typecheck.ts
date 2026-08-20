@@ -21,6 +21,9 @@ type LightRejectsAllOptions = Assert<
 type SwitchRejectsAllOptions = Assert<
   WidgetConfigOf<"switch">["options"] extends undefined ? true : false
 >;
+type MediaRejectsAllOptions = Assert<
+  WidgetConfigOf<"media">["options"] extends undefined ? true : false
+>;
 type VacuumRejectsEnergyOptions = Assert<DoesNotHave<VacuumWidgetOptions, "gridPower">>;
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
@@ -45,6 +48,12 @@ const validTypedWidgetFixtures: WidgetConfig[] = [
     entity: "vacuum.test",
     size,
     options: { brand: "roborock", hero: true },
+  },
+  {
+    id: "typed-media",
+    type: "media",
+    entity: "media_player.test",
+    size,
   },
 ];
 
@@ -85,6 +94,14 @@ const invalidTypedWidgetFixtures: WidgetConfig[] = [
       brand: "unknown",
     },
   },
+  // @ts-expect-error Media widgets do not accept an options bag.
+  {
+    id: "invalid-media",
+    type: "media",
+    entity: "media_player.test",
+    size,
+    options: { source: "TV" },
+  },
 ];
 
 void validTypedWidgetFixtures;
@@ -95,4 +112,5 @@ export type WidgetOptionContractAssertions =
   | EnergyRejectsClimateOptions
   | LightRejectsAllOptions
   | SwitchRejectsAllOptions
+  | MediaRejectsAllOptions
   | VacuumRejectsEnergyOptions;

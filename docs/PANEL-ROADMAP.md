@@ -227,6 +227,10 @@ Progress — 2026-08-20:
   a shared plain-widget frame helper; the fan now forwards its container layout
   consistently, and deferred-registration/layout coverage brings the suite to
   153 tests;
+- migrated media into the typed widget definition and discriminated config
+  union, moved its size/tag/section/detail metadata out of the legacy tables,
+  and verified registered detail routing and responsive footprints with the
+  suite at 154 tests;
 - still to do in Phase 1: migrate the remaining catalogue and its loose option
   records and introduce the reusable HA/async/profile controllers.
 
@@ -353,7 +357,7 @@ Goal: make the dashboard dependable as an always-on home interface.
 Complete the Phase 1 contract before changing placement semantics:
 
 1. expand the discriminated option union and definitions through the remaining
-   media, sensor, and action widget families;
+   sensor and action widget families;
 2. introduce the reusable HA/async/profile controllers and finish contract
    coverage for the remaining catalogue;
 3. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix

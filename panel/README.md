@@ -182,9 +182,10 @@ Add a `WidgetConfig` to a view's `widgets` array:
   `compact ≈ phone`, `medium ≈ tablet`, `wide ≈ desktop / wall display`.
 - The same widget may use different approved footprints at different
   breakpoints.
-- Widget-specific options are discriminated by `type`. Light accepts no option
-  bag; climate and the composite Energy family expose only their documented
-  keys, so TypeScript rejects options copied from an incompatible widget.
+- Widget-specific options are discriminated by `type`. Light, switch, and media
+  accept no option bag; climate, vacuum, and the composite Energy family expose
+  only their documented keys, so TypeScript rejects options copied from an
+  incompatible widget.
 
 ### Placeholder entities
 
@@ -283,11 +284,12 @@ Key ideas:
 - **One widget contract, migrated incrementally.** `widget-definition.ts`
   centralizes tag/loading, footprints, entity dependencies, section placement,
   quick-action/detail metadata, and widget-specific option validation. Light,
-  climate, switch, fan, cover, lock, and vacuum now use the contract; legacy
-  widgets retain their existing tables until each is migrated with coverage.
+  climate, switch, fan, cover, lock, vacuum, and media now use the contract;
+  legacy widgets retain their existing tables until each is migrated with
+  coverage.
 - **Detail domains stay independent.** Every detail body implements the small
   `DetailContext` contract in a focused domain module. Registered light,
-  climate, and device widgets select their renderer through the typed
+  climate, device, and media widgets select their renderer through the typed
   definition registry; a 66-line `controllers.ts` router preserves fallback
   routing for widget domains that have not yet migrated their definitions.
 - **Performance.** Each widget re-renders only when a **referenced** entity's
@@ -323,7 +325,7 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 153 Vitest cases covering config validation, widget-size
+`npm test` runs 154 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,

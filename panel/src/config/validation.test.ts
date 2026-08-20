@@ -79,6 +79,22 @@ describe("validateConfig", () => {
     expect(r.sanitized.views[1].widgets).toHaveLength(0);
   });
 
+  it("uses the media definition for responsive footprint validation", () => {
+    const bad = structuredClone(okConfig);
+    bad.views[0].widgets[0] = {
+      id: "media",
+      type: "media",
+      entity: "media_player.test",
+      size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+    };
+
+    const result = validateConfig(bad);
+
+    expect(result.ok).toBe(false);
+    expect(result.issues.some((issue) => issue.message.includes('does not support size "1x1"'))).toBe(true);
+    expect(result.sanitized.views[0].widgets).toHaveLength(0);
+  });
+
   it("validates migrated vacuum hero options", () => {
     const bad = structuredClone(okConfig);
     bad.views[0].widgets[0] = {

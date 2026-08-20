@@ -23,7 +23,8 @@ export type WidgetDetailRenderer =
   | "generic"
   | "cover"
   | "lock"
-  | "vacuum";
+  | "vacuum"
+  | "media";
 
 /**
  * The single contract for a reusable dashboard widget.
@@ -237,6 +238,22 @@ export const VACUUM_WIDGET_DEFINITION = {
   detailRenderer: "vacuum",
 } satisfies WidgetDefinition<"vacuum">;
 
+export const MEDIA_WIDGET_DEFINITION = {
+  type: "media",
+  tag: "hd-widget-media",
+  label: "Media",
+  icon: "mdi:cast",
+  load: () => import("./media.js"),
+  supportedSizes: ["2x1", "2x2"],
+  defaultSize: { compact: "2x1", medium: "2x1", wide: "2x2" },
+  requiresEntity: true,
+  section: "media",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "media",
+} satisfies WidgetDefinition<"media">;
+
 type MigratedWidgetType =
   | "light"
   | "climate"
@@ -244,7 +261,8 @@ type MigratedWidgetType =
   | "fan"
   | "cover"
   | "lock"
-  | "vacuum";
+  | "vacuum"
+  | "media";
 type WidgetDefinitionMap = {
   [Type in MigratedWidgetType]: WidgetDefinition<Type>;
 };
@@ -256,6 +274,7 @@ const DEFINITIONS = {
   cover: COVER_WIDGET_DEFINITION,
   lock: LOCK_WIDGET_DEFINITION,
   vacuum: VACUUM_WIDGET_DEFINITION,
+  media: MEDIA_WIDGET_DEFINITION,
 } satisfies WidgetDefinitionMap;
 
 type AnyWidgetDefinitionMap = {

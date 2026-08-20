@@ -8,6 +8,7 @@ import {
   FAN_WIDGET_DEFINITION,
   LIGHT_WIDGET_DEFINITION,
   LOCK_WIDGET_DEFINITION,
+  MEDIA_WIDGET_DEFINITION,
   SWITCH_WIDGET_DEFINITION,
   VACUUM_WIDGET_DEFINITION,
   WIDGET_DEFINITIONS,
@@ -77,6 +78,13 @@ const vacuumConfig: WidgetConfig = {
   options: { brand: "roborock" },
 };
 
+const mediaConfig: WidgetConfig = {
+  id: "media-test",
+  type: "media",
+  entity: "media_player.test",
+  size: sizes("2x1", "2x1", "2x2"),
+};
+
 function entity(entityId: string, state: string, attributes: Record<string, unknown>): HassEntity {
   return {
     entity_id: entityId,
@@ -117,6 +125,12 @@ function hass(): HomeAssistant {
       fan_speed_list: ["quiet", "balanced"],
       supported_features: 4 | 16 | 32 | 512 | 8192,
     }),
+    entity("media_player.test", "playing", {
+      friendly_name: "Test media",
+      media_title: "Night Drive",
+      app_name: "Music",
+      supported_features: 1 | 16 | 32 | 16384,
+    }),
   ];
   return {
     states: Object.fromEntries(states.map((state) => [state.entity_id, state])),
@@ -136,6 +150,7 @@ describe("widget definitions", () => {
       "cover",
       "lock",
       "vacuum",
+      "media",
     ]);
     expect(widgetDefinition("light")).toBe(LIGHT_WIDGET_DEFINITION);
     expect(widgetDefinition("climate")).toBe(CLIMATE_WIDGET_DEFINITION);
@@ -152,6 +167,18 @@ describe("widget definitions", () => {
       VACUUM_WIDGET_DEFINITION,
     ]) {
       expect(definition.section).toBe("devices");
+    }
+
+    for (const definition of [
+      LIGHT_WIDGET_DEFINITION,
+      CLIMATE_WIDGET_DEFINITION,
+      SWITCH_WIDGET_DEFINITION,
+      FAN_WIDGET_DEFINITION,
+      COVER_WIDGET_DEFINITION,
+      LOCK_WIDGET_DEFINITION,
+      VACUUM_WIDGET_DEFINITION,
+      MEDIA_WIDGET_DEFINITION,
+    ]) {
       expect(definition.icon).toMatch(/^mdi:/);
       expect(definition.requiresEntity).toBe(true);
       expect(definition.hasDetail).toBe(true);
@@ -170,7 +197,9 @@ describe("widget definitions", () => {
       cover: "cover",
       lock: "lock",
       vacuum: "vacuum",
+      media: "media",
     });
+    expect(MEDIA_WIDGET_DEFINITION.section).toBe("media");
   });
 
   it("declares every entity dependency, including climate companion switches", () => {
@@ -185,12 +214,14 @@ describe("widget definitions", () => {
     expect(COVER_WIDGET_DEFINITION.dependencyIds(coverConfig)).toEqual(["cover.test"]);
     expect(LOCK_WIDGET_DEFINITION.dependencyIds(lockConfig)).toEqual(["lock.test"]);
     expect(VACUUM_WIDGET_DEFINITION.dependencyIds(vacuumConfig)).toEqual(["vacuum.test"]);
+    expect(MEDIA_WIDGET_DEFINITION.dependencyIds(mediaConfig)).toEqual(["media_player.test"]);
   });
 
   it("keeps split device elements unloaded until their definition is requested", () => {
     expect(customElements.get(SWITCH_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(FAN_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(LOCK_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(MEDIA_WIDGET_DEFINITION.tag)).toBeUndefined();
   });
 
   it("validates climate-specific options at the definition boundary", () => {
@@ -226,6 +257,7 @@ describe("widget definitions", () => {
       [COVER_WIDGET_DEFINITION, coverConfig],
       [LOCK_WIDGET_DEFINITION, lockConfig],
       [VACUUM_WIDGET_DEFINITION, vacuumConfig],
+      [MEDIA_WIDGET_DEFINITION, mediaConfig],
     ] as const) {
       expect(widgetTag(definition.type)).toBe(definition.tag);
       await definition.load();
