@@ -3,12 +3,15 @@ import type { LitElement } from "lit";
 import type { WidgetConfig, WidgetSize } from "../config/schema.js";
 import type { HassEntity, HomeAssistant } from "../types/hass.js";
 import {
+  BINARY_SENSOR_WIDGET_DEFINITION,
+  CAMERA_WIDGET_DEFINITION,
   CLIMATE_WIDGET_DEFINITION,
   COVER_WIDGET_DEFINITION,
   FAN_WIDGET_DEFINITION,
   LIGHT_WIDGET_DEFINITION,
   LOCK_WIDGET_DEFINITION,
   MEDIA_WIDGET_DEFINITION,
+  PERSON_WIDGET_DEFINITION,
   SENSOR_WIDGET_DEFINITION,
   SWITCH_WIDGET_DEFINITION,
   VACUUM_WIDGET_DEFINITION,
@@ -101,6 +104,27 @@ const weatherConfig: WidgetConfig = {
   size: sizes("2x1", "1x2", "2x2"),
 };
 
+const binarySensorConfig: WidgetConfig = {
+  id: "binary-sensor-test",
+  type: "binary_sensor",
+  entity: "binary_sensor.test",
+  size: sizes("1x1", "1x1", "2x1"),
+};
+
+const personConfig: WidgetConfig = {
+  id: "person-test",
+  type: "person",
+  entity: "person.test",
+  size: sizes("1x1", "1x1", "2x1"),
+};
+
+const cameraConfig: WidgetConfig = {
+  id: "camera-test",
+  type: "camera",
+  entity: "camera.test",
+  size: sizes("2x1", "2x1", "2x2"),
+};
+
 function entity(entityId: string, state: string, attributes: Record<string, unknown>): HassEntity {
   return {
     entity_id: entityId,
@@ -157,6 +181,12 @@ function hass(): HomeAssistant {
       humidity: 58,
       forecast: [],
     }),
+    entity("binary_sensor.test", "on", { friendly_name: "Test binary sensor" }),
+    entity("person.test", "home", { friendly_name: "Test person" }),
+    entity("camera.test", "streaming", {
+      friendly_name: "Test camera",
+      entity_picture: "/api/camera_proxy/camera.test",
+    }),
   ];
   return {
     states: Object.fromEntries(states.map((state) => [state.entity_id, state])),
@@ -179,13 +209,19 @@ describe("widget definitions", () => {
       "media",
       "sensor",
       "weather",
+      "binary_sensor",
+      "person",
+      "camera",
     ]);
     expect(widgetDefinition("light")).toBe(LIGHT_WIDGET_DEFINITION);
     expect(widgetDefinition("climate")).toBe(CLIMATE_WIDGET_DEFINITION);
     expect(widgetDefinition("vacuum")).toBe(VACUUM_WIDGET_DEFINITION);
     expect(widgetDefinition("sensor")).toBe(SENSOR_WIDGET_DEFINITION);
     expect(widgetDefinition("weather")).toBe(WEATHER_WIDGET_DEFINITION);
-    expect(widgetDefinition("camera")).toBeUndefined();
+    expect(widgetDefinition("binary_sensor")).toBe(BINARY_SENSOR_WIDGET_DEFINITION);
+    expect(widgetDefinition("person")).toBe(PERSON_WIDGET_DEFINITION);
+    expect(widgetDefinition("camera")).toBe(CAMERA_WIDGET_DEFINITION);
+    expect(widgetDefinition("scene")).toBeUndefined();
 
     for (const definition of [
       LIGHT_WIDGET_DEFINITION,
@@ -195,6 +231,7 @@ describe("widget definitions", () => {
       COVER_WIDGET_DEFINITION,
       LOCK_WIDGET_DEFINITION,
       VACUUM_WIDGET_DEFINITION,
+      CAMERA_WIDGET_DEFINITION,
     ]) {
       expect(definition.section).toBe("devices");
     }
@@ -210,6 +247,9 @@ describe("widget definitions", () => {
       MEDIA_WIDGET_DEFINITION,
       SENSOR_WIDGET_DEFINITION,
       WEATHER_WIDGET_DEFINITION,
+      BINARY_SENSOR_WIDGET_DEFINITION,
+      PERSON_WIDGET_DEFINITION,
+      CAMERA_WIDGET_DEFINITION,
     ]) {
       expect(definition.icon).toMatch(/^mdi:/);
       expect(definition.requiresEntity).toBe(true);
@@ -232,10 +272,15 @@ describe("widget definitions", () => {
       media: "media",
       sensor: "sensor",
       weather: "weather",
+      binary_sensor: "generic",
+      person: "generic",
+      camera: "generic",
     });
     expect(MEDIA_WIDGET_DEFINITION.section).toBe("media");
     expect(SENSOR_WIDGET_DEFINITION.section).toBe("sensors");
     expect(WEATHER_WIDGET_DEFINITION.section).toBe("sensors");
+    expect(BINARY_SENSOR_WIDGET_DEFINITION.section).toBe("sensors");
+    expect(PERSON_WIDGET_DEFINITION.section).toBe("sensors");
   });
 
   it("declares every entity dependency, including climate companion switches", () => {
@@ -253,6 +298,9 @@ describe("widget definitions", () => {
     expect(MEDIA_WIDGET_DEFINITION.dependencyIds(mediaConfig)).toEqual(["media_player.test"]);
     expect(SENSOR_WIDGET_DEFINITION.dependencyIds(sensorConfig)).toEqual(["sensor.test"]);
     expect(WEATHER_WIDGET_DEFINITION.dependencyIds(weatherConfig)).toEqual(["weather.test"]);
+    expect(BINARY_SENSOR_WIDGET_DEFINITION.dependencyIds(binarySensorConfig)).toEqual(["binary_sensor.test"]);
+    expect(PERSON_WIDGET_DEFINITION.dependencyIds(personConfig)).toEqual(["person.test"]);
+    expect(CAMERA_WIDGET_DEFINITION.dependencyIds(cameraConfig)).toEqual(["camera.test"]);
   });
 
   it("keeps split device elements unloaded until their definition is requested", () => {
@@ -262,6 +310,9 @@ describe("widget definitions", () => {
     expect(customElements.get(MEDIA_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(SENSOR_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(WEATHER_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(BINARY_SENSOR_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(PERSON_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(CAMERA_WIDGET_DEFINITION.tag)).toBeUndefined();
   });
 
   it("validates climate-specific options at the definition boundary", () => {
@@ -300,6 +351,9 @@ describe("widget definitions", () => {
       [MEDIA_WIDGET_DEFINITION, mediaConfig],
       [SENSOR_WIDGET_DEFINITION, sensorConfig],
       [WEATHER_WIDGET_DEFINITION, weatherConfig],
+      [BINARY_SENSOR_WIDGET_DEFINITION, binarySensorConfig],
+      [PERSON_WIDGET_DEFINITION, personConfig],
+      [CAMERA_WIDGET_DEFINITION, cameraConfig],
     ] as const) {
       expect(widgetTag(definition.type)).toBe(definition.tag);
       await definition.load();

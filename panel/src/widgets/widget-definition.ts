@@ -288,6 +288,54 @@ export const WEATHER_WIDGET_DEFINITION = {
   detailRenderer: "weather",
 } satisfies WidgetDefinition<"weather">;
 
+export const BINARY_SENSOR_WIDGET_DEFINITION = {
+  type: "binary_sensor",
+  tag: "hd-widget-binary",
+  label: "Binary sensor",
+  icon: "mdi:checkbox-marked-circle-outline",
+  load: () => import("./binary-sensor.js"),
+  supportedSizes: ["1x1", "2x1"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "sensors",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "generic",
+} satisfies WidgetDefinition<"binary_sensor">;
+
+export const PERSON_WIDGET_DEFINITION = {
+  type: "person",
+  tag: "hd-widget-person",
+  label: "Person",
+  icon: "mdi:account",
+  load: () => import("./person.js"),
+  supportedSizes: ["1x1", "2x1"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "sensors",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "generic",
+} satisfies WidgetDefinition<"person">;
+
+export const CAMERA_WIDGET_DEFINITION = {
+  type: "camera",
+  tag: "hd-widget-camera",
+  label: "Camera",
+  icon: "mdi:cctv",
+  load: () => import("./camera.js"),
+  supportedSizes: ["2x1", "2x2"],
+  defaultSize: { compact: "2x1", medium: "2x1", wide: "2x2" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "generic",
+} satisfies WidgetDefinition<"camera">;
+
 type MigratedWidgetType =
   | "light"
   | "climate"
@@ -298,7 +346,10 @@ type MigratedWidgetType =
   | "vacuum"
   | "media"
   | "sensor"
-  | "weather";
+  | "weather"
+  | "binary_sensor"
+  | "person"
+  | "camera";
 type WidgetDefinitionMap = {
   [Type in MigratedWidgetType]: WidgetDefinition<Type>;
 };
@@ -313,6 +364,9 @@ const DEFINITIONS = {
   media: MEDIA_WIDGET_DEFINITION,
   sensor: SENSOR_WIDGET_DEFINITION,
   weather: WEATHER_WIDGET_DEFINITION,
+  binary_sensor: BINARY_SENSOR_WIDGET_DEFINITION,
+  person: PERSON_WIDGET_DEFINITION,
+  camera: CAMERA_WIDGET_DEFINITION,
 } satisfies WidgetDefinitionMap;
 
 type AnyWidgetDefinitionMap = {

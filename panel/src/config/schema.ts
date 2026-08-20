@@ -188,6 +188,18 @@ export interface WeatherWidgetConfig extends WidgetConfigBase<"weather"> {
   options?: never;
 }
 
+export interface BinarySensorWidgetConfig extends WidgetConfigBase<"binary_sensor"> {
+  options?: never;
+}
+
+export interface PersonWidgetConfig extends WidgetConfigBase<"person"> {
+  options?: never;
+}
+
+export interface CameraWidgetConfig extends WidgetConfigBase<"camera"> {
+  options?: never;
+}
+
 export interface EnergyWidgetConfig extends WidgetConfigBase<"energy"> {
   options?: EnergyWidgetOptions;
 }
@@ -219,6 +231,9 @@ export type TypedOptionsWidgetType =
   | "media"
   | "sensor"
   | "weather"
+  | "binary_sensor"
+  | "person"
+  | "camera"
   | "energy"
   | "powerflow"
   | "solarcharging"
@@ -251,6 +266,9 @@ export type WidgetConfig =
   | MediaWidgetConfig
   | SensorWidgetConfig
   | WeatherWidgetConfig
+  | BinarySensorWidgetConfig
+  | PersonWidgetConfig
+  | CameraWidgetConfig
   | EnergyWidgetConfig
   | PowerflowWidgetConfig
   | SolarChargingWidgetConfig
@@ -329,6 +347,9 @@ export type LegacyWidgetType = Exclude<
   | "media"
   | "sensor"
   | "weather"
+  | "binary_sensor"
+  | "person"
+  | "camera"
 >;
 
 /**
@@ -339,12 +360,9 @@ export const LEGACY_SUPPORTED_SIZES: Record<LegacyWidgetType, readonly WidgetSiz
   // A container is full-width and self-sizing; the grid ignores its footprint,
   // so every size is permitted (synthetic groups carry a nominal one).
   group: ALL_SIZES,
-  binary_sensor: ["1x1", "2x1"],
-  person: ["1x1", "2x1"],
   scene: ["1x1", "2x1", "1x2"],
   script: ["1x1", "2x1"],
   button: ["1x1", "2x1"],
-  camera: ["2x1", "2x2"],
   energy: ["2x1", "1x2", "2x2"],
   powerflow: ["2x2", "3x3"],
   solarcharging: ["2x1", "1x2", "2x2"],

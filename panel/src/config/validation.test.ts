@@ -122,6 +122,41 @@ describe("validateConfig", () => {
     expect(result.sanitized.views[0].widgets).toHaveLength(0);
   });
 
+  it("uses presence and camera definitions for responsive footprint validation", () => {
+    const bad = structuredClone(okConfig);
+    bad.views[0].widgets = [
+      {
+        id: "binary-sensor",
+        type: "binary_sensor",
+        entity: "binary_sensor.test",
+        size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+      },
+      {
+        id: "person",
+        type: "person",
+        entity: "person.test",
+        size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+      },
+      {
+        id: "camera",
+        type: "camera",
+        entity: "camera.test",
+        size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+      },
+    ];
+
+    const result = validateConfig(bad);
+
+    expect(result.ok).toBe(false);
+    expect(result.issues.some((issue) =>
+      issue.message.includes('Widget type "binary_sensor" does not support size "2x2"'))).toBe(true);
+    expect(result.issues.some((issue) =>
+      issue.message.includes('Widget type "person" does not support size "2x2"'))).toBe(true);
+    expect(result.issues.some((issue) =>
+      issue.message.includes('Widget type "camera" does not support size "1x1"'))).toBe(true);
+    expect(result.sanitized.views[0].widgets).toHaveLength(0);
+  });
+
   it("validates migrated vacuum hero options", () => {
     const bad = structuredClone(okConfig);
     bad.views[0].widgets[0] = {

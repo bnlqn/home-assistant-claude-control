@@ -2,24 +2,7 @@ import { html } from "lit";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { requestConfirm, toast } from "../primitives/feedback.js";
-import { renderPlainWidgetFrame } from "./plain-widget-frame.js";
 import "./widget-frame.js";
-
-// ---- Person / presence ---------------------------------------------------
-@define("hd-widget-person")
-export class PersonWidget extends EntityWidget {
-  renderContent() {
-    return renderPlainWidgetFrame(this, { quickKind: "none", hasDetail: true });
-  }
-}
-
-// ---- Binary sensor -------------------------------------------------------
-@define("hd-widget-binary")
-export class BinaryWidget extends EntityWidget {
-  renderContent() {
-    return renderPlainWidgetFrame(this, { quickKind: "none", hasDetail: true });
-  }
-}
 
 /** Momentary tiles (scene / script / button) — whole tile activates. */
 abstract class MomentaryWidget extends EntityWidget {
@@ -135,8 +118,6 @@ export class ActionWidget extends EntityWidget {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "hd-widget-person": PersonWidget;
-    "hd-widget-binary": BinaryWidget;
     "hd-widget-scene": SceneWidget;
     "hd-widget-script": ScriptWidget;
     "hd-widget-button": ButtonWidget;

@@ -30,6 +30,15 @@ type SensorRejectsAllOptions = Assert<
 type WeatherRejectsAllOptions = Assert<
   WidgetConfigOf<"weather">["options"] extends undefined ? true : false
 >;
+type BinarySensorRejectsAllOptions = Assert<
+  WidgetConfigOf<"binary_sensor">["options"] extends undefined ? true : false
+>;
+type PersonRejectsAllOptions = Assert<
+  WidgetConfigOf<"person">["options"] extends undefined ? true : false
+>;
+type CameraRejectsAllOptions = Assert<
+  WidgetConfigOf<"camera">["options"] extends undefined ? true : false
+>;
 type VacuumRejectsEnergyOptions = Assert<DoesNotHave<VacuumWidgetOptions, "gridPower">>;
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
@@ -71,6 +80,24 @@ const validTypedWidgetFixtures: WidgetConfig[] = [
     id: "typed-weather",
     type: "weather",
     entity: "weather.test",
+    size,
+  },
+  {
+    id: "typed-binary-sensor",
+    type: "binary_sensor",
+    entity: "binary_sensor.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  },
+  {
+    id: "typed-person",
+    type: "person",
+    entity: "person.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  },
+  {
+    id: "typed-camera",
+    type: "camera",
+    entity: "camera.test",
     size,
   },
 ];
@@ -136,6 +163,30 @@ const invalidTypedWidgetFixtures: WidgetConfig[] = [
     size,
     options: { forecast: "hourly" },
   },
+  // @ts-expect-error Binary-sensor widgets do not accept an options bag.
+  {
+    id: "invalid-binary-sensor",
+    type: "binary_sensor",
+    entity: "binary_sensor.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    options: { activeLabel: "Open" },
+  },
+  // @ts-expect-error Person widgets do not accept an options bag.
+  {
+    id: "invalid-person",
+    type: "person",
+    entity: "person.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    options: { showMap: true },
+  },
+  // @ts-expect-error Camera widgets do not accept an options bag.
+  {
+    id: "invalid-camera",
+    type: "camera",
+    entity: "camera.test",
+    size,
+    options: { refreshSeconds: 5 },
+  },
 ];
 
 void validTypedWidgetFixtures;
@@ -149,4 +200,7 @@ export type WidgetOptionContractAssertions =
   | MediaRejectsAllOptions
   | SensorRejectsAllOptions
   | WeatherRejectsAllOptions
+  | BinarySensorRejectsAllOptions
+  | PersonRejectsAllOptions
+  | CameraRejectsAllOptions
   | VacuumRejectsEnergyOptions;

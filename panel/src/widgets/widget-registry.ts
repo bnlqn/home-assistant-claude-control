@@ -14,12 +14,9 @@ import "./extra.js";
 
 const LEGACY_WIDGET_TAGS: Record<LegacyWidgetType, string> = {
   group: "hd-group",
-  binary_sensor: "hd-widget-binary",
-  person: "hd-widget-person",
   scene: "hd-widget-scene",
   script: "hd-widget-script",
   button: "hd-widget-button",
-  camera: "hd-widget-camera",
   energy: "hd-widget-energy",
   powerflow: "hd-widget-powerflow",
   solarcharging: "hd-widget-solarcharging",

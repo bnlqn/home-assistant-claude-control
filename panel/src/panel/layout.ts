@@ -98,14 +98,9 @@ export function sectionForWidgetType(type: WidgetType): SectionKind {
     case "solarcharging":
     case "energychart":
       return "energy";
-    case "sensor":
-    case "binary_sensor":
-    case "person":
-    case "weather":
-      return "sensors";
     default:
-      // switch, fan, cover, lock, vacuum, camera, scene,
-      // script, button, action, alarm — everything actionable.
+      // Scene, script, button, action, alarm, and any future unclassified type
+      // remain actionable device tiles until they gain their own definition.
       return "devices";
   }
 }

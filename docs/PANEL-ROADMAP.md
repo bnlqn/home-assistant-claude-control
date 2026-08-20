@@ -234,6 +234,9 @@ Progress — 2026-08-20:
 - migrated sensor and weather into typed, independently loaded widget
   definitions, moving their footprint/section/detail metadata out of the legacy
   tables and adding responsive validation coverage with the suite at 155 tests;
+- split person, binary sensor, and camera out of their shared legacy bundles and
+  migrated them into typed, independently loaded definitions, removing the last
+  sensor-section fallback classification and bringing the suite to 156 tests;
 - still to do in Phase 1: migrate the remaining catalogue and its loose option
   records and introduce the reusable HA/async/profile controllers.
 
@@ -359,8 +362,8 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 Complete the Phase 1 contract before changing placement semantics:
 
-1. split and migrate the remaining presence, binary-sensor, camera, and action
-   widget families into the discriminated contract;
+1. split and migrate the remaining scene, script, button, alarm, and entityless
+   action widgets into the discriminated contract;
 2. introduce the reusable HA/async/profile controllers and finish contract
    coverage for the remaining catalogue;
 3. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix
