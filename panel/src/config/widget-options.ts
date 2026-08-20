@@ -18,6 +18,21 @@ export interface VacuumWidgetOptions {
   hero?: boolean;
 }
 
+export interface ActionWidgetTarget {
+  entity_id?: string | string[];
+  device_id?: string | string[];
+  area_id?: string | string[];
+}
+
+export interface ActionWidgetOptions {
+  /** Home Assistant service in `domain.service` form. */
+  service: `${string}.${string}`;
+  /** Service data passed as the third `callService` argument. */
+  data?: Record<string, unknown>;
+  /** Home Assistant service target passed separately from service data. */
+  target?: ActionWidgetTarget;
+}
+
 export interface EnergyWidgetOptions {
   gridPower?: string;
   solarPower?: string;

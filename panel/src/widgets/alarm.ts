@@ -1,11 +1,10 @@
 import { css, html, nothing } from "lit";
+import { titleCase } from "../home-assistant/state-formatting.js";
+import { requestConfirm } from "../primitives/feedback.js";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
-import { requestConfirm } from "../primitives/feedback.js";
-import { titleCase } from "../home-assistant/state-formatting.js";
 import "./widget-frame.js";
 
-// ---- Alarm control panel -------------------------------------------------
 @define("hd-widget-alarm")
 export class AlarmWidget extends EntityWidget {
   static styles = css`
@@ -32,28 +31,39 @@ export class AlarmWidget extends EntityWidget {
       color: var(--state-alert);
     }
   `;
+
   private async _call(service: string, confirm: boolean) {
     if (!this.entityId || !this.hass) return;
     if (confirm) {
-      const ok = await requestConfirm(this, { title: `${titleCase(service.replace("alarm_", "").replace("_", " "))}?`, confirmLabel: "Confirm", destructive: service === "alarm_disarm" });
-      if (!ok) return;
+      const confirmed = await requestConfirm(this, {
+        title: `${titleCase(service.replace("alarm_", "").replace("_", " "))}?`,
+        confirmLabel: "Confirm",
+        destructive: service === "alarm_disarm",
+      });
+      if (!confirmed) return;
     }
     void this.callService(
       { domain: "alarm_control_panel", service, data: { entity_id: this.entityId } },
       { errorVerb: "update" },
     );
   }
+
   renderContent() {
     const vm = this.vm;
-    const st = vm.rawState;
-    const accent = st === "triggered" ? "alert" : st.startsWith("armed") ? "warn" : st === "disarmed" ? "eco" : "accent";
-    const size = this.currentSize;
-    const armed = st !== "disarmed";
+    const state = vm.rawState;
+    const accent = state === "triggered"
+      ? "alert"
+      : state.startsWith("armed")
+        ? "warn"
+        : state === "disarmed"
+          ? "eco"
+          : "accent";
+    const armed = state !== "disarmed";
     return html`<hd-widget-frame
-      .icon=${st === "triggered" ? "mdi:shield-alert" : armed ? "mdi:shield-home" : "mdi:shield-off"}
+      .icon=${state === "triggered" ? "mdi:shield-alert" : armed ? "mdi:shield-home" : "mdi:shield-off"}
       .name=${vm.name}
-      .stateText=${titleCase(st.replace("_", " "))}
-      .size=${size}
+      .stateText=${titleCase(state.replace("_", " "))}
+      .size=${this.currentSize}
       .accent=${accent}
       .active=${armed}
       .unavailable=${!vm.available}
@@ -61,8 +71,8 @@ export class AlarmWidget extends EntityWidget {
       .quickKind=${"none"}
       @hd-activate=${() => this.openDetail()}
     >
-      ${size !== "1x1"
-        ? html`<div class="controls" @click=${(e: Event) => e.stopPropagation()}>
+      ${this.currentSize !== "1x1"
+        ? html`<div class="controls" @click=${(event: Event) => event.stopPropagation()}>
             ${armed
               ? html`<button class="danger" @click=${() => this._call("alarm_disarm", true)}>Disarm</button>`
               : html`<button @click=${() => this._call("alarm_arm_home", false)}>Arm home</button>

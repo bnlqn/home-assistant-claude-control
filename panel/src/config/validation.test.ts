@@ -221,12 +221,40 @@ describe("validateConfig", () => {
           type: "overview",
           label: "Home",
           icon: "mdi:home",
-          widgets: [{ id: "e", type: "energy", size: { compact: "2x1", medium: "2x2", wide: "2x2" } }],
+          widgets: [
+            { id: "e", type: "energy", size: { compact: "2x1", medium: "2x2", wide: "2x2" } },
+            {
+              id: "a",
+              type: "action",
+              size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+              options: { service: "light.turn_off", target: { entity_id: "light.all_lights" } },
+            },
+          ],
         },
       ],
     };
     const r = validateConfig(cfg);
     expect(r.ok).toBe(true);
+  });
+
+  it("validates entityless action service options", () => {
+    const bad = structuredClone(okConfig);
+    bad.views[0].widgets[0] = {
+      id: "action",
+      type: "action",
+      size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+      options: { service: "invalid", data: [], target: "light.test" },
+    } as unknown as WidgetConfig;
+
+    const result = validateConfig(bad);
+
+    expect(result.ok).toBe(false);
+    expect(result.issues.filter((issue) => issue.path.includes("options."))).toEqual([
+      expect.objectContaining({ path: expect.stringContaining("options.service") }),
+      expect.objectContaining({ path: expect.stringContaining("options.data") }),
+      expect.objectContaining({ path: expect.stringContaining("options.target") }),
+    ]);
+    expect(result.sanitized.views[0].widgets).toHaveLength(0);
   });
 
   it("flags a malformed entity id", () => {

@@ -99,7 +99,6 @@ export const dashboardConfig: DashboardConfig = {
           options: {
             service: "light.turn_off",
             target: { entity_id: "light.all_lights" },
-            activeIcon: "mdi:lightbulb-off",
           },
         },
         {

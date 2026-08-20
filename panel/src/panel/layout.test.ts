@@ -25,7 +25,7 @@ const w = (id: string, type: WidgetConfig["type"], entity?: string): WidgetConfi
   type,
   ...(entity ? { entity } : {}),
   size: sz,
-});
+}) as WidgetConfig;
 const opts = (g: WidgetConfig): GroupOptions => g.options as unknown as GroupOptions;
 
 describe("responsive grid metrics", () => {

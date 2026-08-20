@@ -3,6 +3,7 @@ import type {
   WidgetConfigOf,
 } from "./schema.js";
 import type {
+  ActionWidgetOptions,
   ClimateWidgetOptions,
   EnergyWidgetOptions,
   VacuumWidgetOptions,
@@ -39,6 +40,19 @@ type PersonRejectsAllOptions = Assert<
 type CameraRejectsAllOptions = Assert<
   WidgetConfigOf<"camera">["options"] extends undefined ? true : false
 >;
+type SceneRejectsAllOptions = Assert<
+  WidgetConfigOf<"scene">["options"] extends undefined ? true : false
+>;
+type ScriptRejectsAllOptions = Assert<
+  WidgetConfigOf<"script">["options"] extends undefined ? true : false
+>;
+type ButtonRejectsAllOptions = Assert<
+  WidgetConfigOf<"button">["options"] extends undefined ? true : false
+>;
+type AlarmRejectsAllOptions = Assert<
+  WidgetConfigOf<"alarm">["options"] extends undefined ? true : false
+>;
+type ActionRejectsClimateOptions = Assert<DoesNotHave<ActionWidgetOptions, "switches">>;
 type VacuumRejectsEnergyOptions = Assert<DoesNotHave<VacuumWidgetOptions, "gridPower">>;
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
@@ -99,6 +113,37 @@ const validTypedWidgetFixtures: WidgetConfig[] = [
     type: "camera",
     entity: "camera.test",
     size,
+  },
+  {
+    id: "typed-scene",
+    type: "scene",
+    entity: "scene.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  },
+  {
+    id: "typed-script",
+    type: "script",
+    entity: "script.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  },
+  {
+    id: "typed-button",
+    type: "button",
+    entity: "button.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  },
+  {
+    id: "typed-alarm",
+    type: "alarm",
+    entity: "alarm_control_panel.test",
+    size,
+  },
+  {
+    id: "typed-action",
+    type: "action",
+    name: "Lights off",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    options: { service: "light.turn_off", target: { entity_id: "light.test" } },
   },
 ];
 
@@ -187,6 +232,21 @@ const invalidTypedWidgetFixtures: WidgetConfig[] = [
     size,
     options: { refreshSeconds: 5 },
   },
+  // @ts-expect-error Scene widgets do not accept an options bag.
+  {
+    id: "invalid-scene",
+    type: "scene",
+    entity: "scene.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    options: { transition: 3 },
+  },
+  // @ts-expect-error Action widgets require a service.
+  {
+    id: "invalid-action",
+    type: "action",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    options: { target: { entity_id: "light.test" } },
+  },
 ];
 
 void validTypedWidgetFixtures;
@@ -203,4 +263,9 @@ export type WidgetOptionContractAssertions =
   | BinarySensorRejectsAllOptions
   | PersonRejectsAllOptions
   | CameraRejectsAllOptions
+  | SceneRejectsAllOptions
+  | ScriptRejectsAllOptions
+  | ButtonRejectsAllOptions
+  | AlarmRejectsAllOptions
+  | ActionRejectsClimateOptions
   | VacuumRejectsEnergyOptions;

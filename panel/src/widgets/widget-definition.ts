@@ -6,6 +6,7 @@ import type {
   WidgetType,
 } from "../config/schema.js";
 import type {
+  ActionWidgetOptions,
   ClimateSwitchOption,
   VacuumWidgetOptions,
 } from "../config/widget-options.js";
@@ -119,6 +120,24 @@ function validateVacuumOptions(options: unknown): WidgetOptionIssue[] {
   }
   if (value.hero !== undefined && typeof value.hero !== "boolean") {
     issues.push({ path: "hero", message: "Vacuum `hero` must be a boolean." });
+  }
+  return issues;
+}
+
+function validateActionOptions(options: unknown): WidgetOptionIssue[] {
+  if (!isOptionRecord(options)) {
+    return [{ path: "", message: "Action options must be an object." }];
+  }
+  const value = options as Partial<ActionWidgetOptions>;
+  const issues: WidgetOptionIssue[] = [];
+  if (typeof value.service !== "string" || !/^[a-z_]+\.[a-z_]+$/.test(value.service)) {
+    issues.push({ path: "service", message: "Action `service` must use `domain.service` form." });
+  }
+  if (value.data !== undefined && !isOptionRecord(value.data)) {
+    issues.push({ path: "data", message: "Action `data` must be an object." });
+  }
+  if (value.target !== undefined && !isOptionRecord(value.target)) {
+    issues.push({ path: "target", message: "Action `target` must be an object." });
   }
   return issues;
 }
@@ -336,6 +355,83 @@ export const CAMERA_WIDGET_DEFINITION = {
   detailRenderer: "generic",
 } satisfies WidgetDefinition<"camera">;
 
+export const SCENE_WIDGET_DEFINITION = {
+  type: "scene",
+  tag: "hd-widget-scene",
+  label: "Scene",
+  icon: "mdi:palette-outline",
+  load: () => import("./scene.js"),
+  supportedSizes: ["1x1", "2x1", "1x2"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "activate",
+  hasDetail: false,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+} satisfies WidgetDefinition<"scene">;
+
+export const SCRIPT_WIDGET_DEFINITION = {
+  type: "script",
+  tag: "hd-widget-script",
+  label: "Script",
+  icon: "mdi:script-text-outline",
+  load: () => import("./script.js"),
+  supportedSizes: ["1x1", "2x1"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "activate",
+  hasDetail: false,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+} satisfies WidgetDefinition<"script">;
+
+export const BUTTON_WIDGET_DEFINITION = {
+  type: "button",
+  tag: "hd-widget-button",
+  label: "Button",
+  icon: "mdi:gesture-tap-button",
+  load: () => import("./button.js"),
+  supportedSizes: ["1x1", "2x1"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "activate",
+  hasDetail: false,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+} satisfies WidgetDefinition<"button">;
+
+export const ALARM_WIDGET_DEFINITION = {
+  type: "alarm",
+  tag: "hd-widget-alarm",
+  label: "Alarm",
+  icon: "mdi:shield-home-outline",
+  load: () => import("./alarm.js"),
+  supportedSizes: ["1x1", "2x1", "2x2"],
+  defaultSize: { compact: "1x1", medium: "2x1", wide: "2x2" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "generic",
+} satisfies WidgetDefinition<"alarm">;
+
+export const ACTION_WIDGET_DEFINITION = {
+  type: "action",
+  tag: "hd-widget-action",
+  label: "Action",
+  icon: "mdi:gesture-tap-button",
+  load: () => import("./action.js"),
+  supportedSizes: ["1x1", "2x1"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: false,
+  section: "devices",
+  quickAction: "activate",
+  hasDetail: false,
+  dependencyIds: () => [],
+  validateOptions: validateActionOptions,
+} satisfies WidgetDefinition<"action">;
+
 type MigratedWidgetType =
   | "light"
   | "climate"
@@ -349,7 +445,12 @@ type MigratedWidgetType =
   | "weather"
   | "binary_sensor"
   | "person"
-  | "camera";
+  | "camera"
+  | "scene"
+  | "script"
+  | "button"
+  | "alarm"
+  | "action";
 type WidgetDefinitionMap = {
   [Type in MigratedWidgetType]: WidgetDefinition<Type>;
 };
@@ -367,6 +468,11 @@ const DEFINITIONS = {
   binary_sensor: BINARY_SENSOR_WIDGET_DEFINITION,
   person: PERSON_WIDGET_DEFINITION,
   camera: CAMERA_WIDGET_DEFINITION,
+  scene: SCENE_WIDGET_DEFINITION,
+  script: SCRIPT_WIDGET_DEFINITION,
+  button: BUTTON_WIDGET_DEFINITION,
+  alarm: ALARM_WIDGET_DEFINITION,
+  action: ACTION_WIDGET_DEFINITION,
 } satisfies WidgetDefinitionMap;
 
 type AnyWidgetDefinitionMap = {

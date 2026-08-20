@@ -7,6 +7,7 @@
  */
 
 import type {
+  ActionWidgetOptions,
   ClimateWidgetOptions,
   ElectricityTotalWidgetOptions,
   EnergyChartWidgetOptions,
@@ -17,6 +18,8 @@ import type {
 } from "./widget-options.js";
 
 export type {
+  ActionWidgetOptions,
+  ActionWidgetTarget,
   ClimateSwitchOption,
   ClimateWidgetOptions,
   ElectricityTotalWidgetOptions,
@@ -200,6 +203,26 @@ export interface CameraWidgetConfig extends WidgetConfigBase<"camera"> {
   options?: never;
 }
 
+export interface SceneWidgetConfig extends WidgetConfigBase<"scene"> {
+  options?: never;
+}
+
+export interface ScriptWidgetConfig extends WidgetConfigBase<"script"> {
+  options?: never;
+}
+
+export interface ButtonWidgetConfig extends WidgetConfigBase<"button"> {
+  options?: never;
+}
+
+export interface AlarmWidgetConfig extends WidgetConfigBase<"alarm"> {
+  options?: never;
+}
+
+export interface ActionWidgetConfig extends WidgetConfigBase<"action"> {
+  options: ActionWidgetOptions;
+}
+
 export interface EnergyWidgetConfig extends WidgetConfigBase<"energy"> {
   options?: EnergyWidgetOptions;
 }
@@ -234,6 +257,11 @@ export type TypedOptionsWidgetType =
   | "binary_sensor"
   | "person"
   | "camera"
+  | "scene"
+  | "script"
+  | "button"
+  | "alarm"
+  | "action"
   | "energy"
   | "powerflow"
   | "solarcharging"
@@ -269,6 +297,11 @@ export type WidgetConfig =
   | BinarySensorWidgetConfig
   | PersonWidgetConfig
   | CameraWidgetConfig
+  | SceneWidgetConfig
+  | ScriptWidgetConfig
+  | ButtonWidgetConfig
+  | AlarmWidgetConfig
+  | ActionWidgetConfig
   | EnergyWidgetConfig
   | PowerflowWidgetConfig
   | SolarChargingWidgetConfig
@@ -350,6 +383,11 @@ export type LegacyWidgetType = Exclude<
   | "binary_sensor"
   | "person"
   | "camera"
+  | "scene"
+  | "script"
+  | "button"
+  | "alarm"
+  | "action"
 >;
 
 /**
@@ -360,9 +398,6 @@ export const LEGACY_SUPPORTED_SIZES: Record<LegacyWidgetType, readonly WidgetSiz
   // A container is full-width and self-sizing; the grid ignores its footprint,
   // so every size is permitted (synthetic groups carry a nominal one).
   group: ALL_SIZES,
-  scene: ["1x1", "2x1", "1x2"],
-  script: ["1x1", "2x1"],
-  button: ["1x1", "2x1"],
   energy: ["2x1", "1x2", "2x2"],
   powerflow: ["2x2", "3x3"],
   solarcharging: ["2x1", "1x2", "2x2"],
@@ -371,8 +406,6 @@ export const LEGACY_SUPPORTED_SIZES: Record<LegacyWidgetType, readonly WidgetSiz
   metrictile: ["1x1", "2x1"],
   // Full-width "Imported − Exported = Total" breakdown band.
   electricitytotal: ["2x2", "4x2"],
-  alarm: ["1x1", "2x1", "2x2"],
-  action: ["1x1", "2x1"],
 };
 
 /** A widget type must supply an `entity` unless it is one of these. */
@@ -383,5 +416,4 @@ export const LEGACY_ENTITYLESS_TYPES: readonly LegacyWidgetType[] = [
   "solarcharging",
   "energychart",
   "electricitytotal",
-  "action",
 ];

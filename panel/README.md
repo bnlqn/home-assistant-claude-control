@@ -73,7 +73,7 @@ config/www/home-dashboard/home-dashboard-panel.js
 config/www/home-dashboard/assets/**/*.webp
 ```
 
-The optimized 2026-08-20 baseline is 366 kB JavaScript (96 kB gzip) and
+The optimized 2026-08-20 baseline is 369 kB JavaScript (97 kB gzip) and
 approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
 flows are five packed animated WebPs plus reduced-motion stills. See
 [Build baseline and budgets](#build-baseline-and-budgets).
@@ -183,9 +183,10 @@ Add a `WidgetConfig` to a view's `widgets` array:
 - The same widget may use different approved footprints at different
   breakpoints.
 - Widget-specific options are discriminated by `type`. Light, switch, media,
-  sensor, weather, presence, and camera widgets accept no option bag; climate,
-  vacuum, and the composite Energy family expose only their documented keys, so
-  TypeScript rejects options copied from an incompatible widget.
+  sensor, weather, presence, camera, and entity-backed action widgets accept no
+  option bag; climate, vacuum, entityless action, and the composite Energy
+  family expose only their documented keys, so TypeScript rejects options
+  copied from an incompatible widget.
 
 ### Placeholder entities
 
@@ -285,8 +286,9 @@ Key ideas:
   centralizes tag/loading, footprints, entity dependencies, section placement,
   quick-action/detail metadata, and widget-specific option validation. Light,
   climate, switch, fan, cover, lock, vacuum, media, sensor, weather, person,
-  binary sensor, and camera now use the contract; legacy widgets retain their
-  existing tables until each is migrated with coverage.
+  binary sensor, camera, scene, script, button, alarm, and entityless action now
+  use the contract; legacy widgets retain their existing tables until each is
+  migrated with coverage.
 - **Detail domains stay independent.** Every detail body implements the small
   `DetailContext` contract in a focused domain module. Registered light,
   climate, device, media, sensor, weather, presence, and camera widgets select
@@ -312,8 +314,8 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 366 kB | 390 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 96 kB | 105 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 369 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 97 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
@@ -326,7 +328,7 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 156 Vitest cases covering config validation, widget-size
+`npm test` runs 159 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,

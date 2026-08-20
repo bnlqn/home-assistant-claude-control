@@ -3,28 +3,21 @@ import { widgetDefinition } from "./widget-definition.js";
 
 // Side-effect imports register every widget custom element.
 import "./group.js";
-import "./basic.js";
 import "./energy.js";
 import "./powerflow.js";
 import "./solarcharging.js";
 import "./energychart.js";
 import "./metric-tile.js";
 import "./electricity-total.js";
-import "./extra.js";
 
 const LEGACY_WIDGET_TAGS: Record<LegacyWidgetType, string> = {
   group: "hd-group",
-  scene: "hd-widget-scene",
-  script: "hd-widget-script",
-  button: "hd-widget-button",
   energy: "hd-widget-energy",
   powerflow: "hd-widget-powerflow",
   solarcharging: "hd-widget-solarcharging",
   energychart: "hd-widget-energychart",
   metrictile: "hd-widget-metrictile",
   electricitytotal: "hd-widget-electricitytotal",
-  alarm: "hd-widget-alarm",
-  action: "hd-widget-action",
 };
 
 const definitionLoads = new Map<WidgetType, Promise<unknown>>();

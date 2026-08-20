@@ -3,7 +3,10 @@ import type { LitElement } from "lit";
 import type { WidgetConfig, WidgetSize } from "../config/schema.js";
 import type { HassEntity, HomeAssistant } from "../types/hass.js";
 import {
+  ACTION_WIDGET_DEFINITION,
+  ALARM_WIDGET_DEFINITION,
   BINARY_SENSOR_WIDGET_DEFINITION,
+  BUTTON_WIDGET_DEFINITION,
   CAMERA_WIDGET_DEFINITION,
   CLIMATE_WIDGET_DEFINITION,
   COVER_WIDGET_DEFINITION,
@@ -12,6 +15,8 @@ import {
   LOCK_WIDGET_DEFINITION,
   MEDIA_WIDGET_DEFINITION,
   PERSON_WIDGET_DEFINITION,
+  SCENE_WIDGET_DEFINITION,
+  SCRIPT_WIDGET_DEFINITION,
   SENSOR_WIDGET_DEFINITION,
   SWITCH_WIDGET_DEFINITION,
   VACUUM_WIDGET_DEFINITION,
@@ -125,6 +130,42 @@ const cameraConfig: WidgetConfig = {
   size: sizes("2x1", "2x1", "2x2"),
 };
 
+const sceneConfig: WidgetConfig = {
+  id: "scene-test",
+  type: "scene",
+  entity: "scene.test",
+  size: sizes("1x1", "1x1", "2x1"),
+};
+
+const scriptConfig: WidgetConfig = {
+  id: "script-test",
+  type: "script",
+  entity: "script.test",
+  size: sizes("1x1", "1x1", "2x1"),
+};
+
+const buttonConfig: WidgetConfig = {
+  id: "button-test",
+  type: "button",
+  entity: "button.test",
+  size: sizes("1x1", "1x1", "2x1"),
+};
+
+const alarmConfig: WidgetConfig = {
+  id: "alarm-test",
+  type: "alarm",
+  entity: "alarm_control_panel.test",
+  size: sizes("1x1", "2x1", "2x2"),
+};
+
+const actionConfig: WidgetConfig = {
+  id: "action-test",
+  type: "action",
+  name: "Lights off",
+  size: sizes("1x1", "1x1", "2x1"),
+  options: { service: "light.turn_off", target: { entity_id: "light.test" } },
+};
+
 function entity(entityId: string, state: string, attributes: Record<string, unknown>): HassEntity {
   return {
     entity_id: entityId,
@@ -187,6 +228,10 @@ function hass(): HomeAssistant {
       friendly_name: "Test camera",
       entity_picture: "/api/camera_proxy/camera.test",
     }),
+    entity("scene.test", "scening", { friendly_name: "Test scene" }),
+    entity("script.test", "off", { friendly_name: "Test script" }),
+    entity("button.test", "unknown", { friendly_name: "Test button" }),
+    entity("alarm_control_panel.test", "disarmed", { friendly_name: "Test alarm" }),
   ];
   return {
     states: Object.fromEntries(states.map((state) => [state.entity_id, state])),
@@ -212,6 +257,11 @@ describe("widget definitions", () => {
       "binary_sensor",
       "person",
       "camera",
+      "scene",
+      "script",
+      "button",
+      "alarm",
+      "action",
     ]);
     expect(widgetDefinition("light")).toBe(LIGHT_WIDGET_DEFINITION);
     expect(widgetDefinition("climate")).toBe(CLIMATE_WIDGET_DEFINITION);
@@ -221,7 +271,9 @@ describe("widget definitions", () => {
     expect(widgetDefinition("binary_sensor")).toBe(BINARY_SENSOR_WIDGET_DEFINITION);
     expect(widgetDefinition("person")).toBe(PERSON_WIDGET_DEFINITION);
     expect(widgetDefinition("camera")).toBe(CAMERA_WIDGET_DEFINITION);
-    expect(widgetDefinition("scene")).toBeUndefined();
+    expect(widgetDefinition("scene")).toBe(SCENE_WIDGET_DEFINITION);
+    expect(widgetDefinition("action")).toBe(ACTION_WIDGET_DEFINITION);
+    expect(widgetDefinition("metrictile")).toBeUndefined();
 
     for (const definition of [
       LIGHT_WIDGET_DEFINITION,
@@ -232,6 +284,10 @@ describe("widget definitions", () => {
       LOCK_WIDGET_DEFINITION,
       VACUUM_WIDGET_DEFINITION,
       CAMERA_WIDGET_DEFINITION,
+      SCENE_WIDGET_DEFINITION,
+      SCRIPT_WIDGET_DEFINITION,
+      BUTTON_WIDGET_DEFINITION,
+      ALARM_WIDGET_DEFINITION,
     ]) {
       expect(definition.section).toBe("devices");
     }
@@ -250,6 +306,7 @@ describe("widget definitions", () => {
       BINARY_SENSOR_WIDGET_DEFINITION,
       PERSON_WIDGET_DEFINITION,
       CAMERA_WIDGET_DEFINITION,
+      ALARM_WIDGET_DEFINITION,
     ]) {
       expect(definition.icon).toMatch(/^mdi:/);
       expect(definition.requiresEntity).toBe(true);
@@ -275,12 +332,27 @@ describe("widget definitions", () => {
       binary_sensor: "generic",
       person: "generic",
       camera: "generic",
+      scene: undefined,
+      script: undefined,
+      button: undefined,
+      alarm: "generic",
+      action: undefined,
     });
     expect(MEDIA_WIDGET_DEFINITION.section).toBe("media");
     expect(SENSOR_WIDGET_DEFINITION.section).toBe("sensors");
     expect(WEATHER_WIDGET_DEFINITION.section).toBe("sensors");
     expect(BINARY_SENSOR_WIDGET_DEFINITION.section).toBe("sensors");
     expect(PERSON_WIDGET_DEFINITION.section).toBe("sensors");
+    for (const definition of [
+      SCENE_WIDGET_DEFINITION,
+      SCRIPT_WIDGET_DEFINITION,
+      BUTTON_WIDGET_DEFINITION,
+      ACTION_WIDGET_DEFINITION,
+    ]) {
+      expect(definition.hasDetail).toBe(false);
+      expect(definition.quickAction).toBe("activate");
+    }
+    expect(ACTION_WIDGET_DEFINITION.requiresEntity).toBe(false);
   });
 
   it("declares every entity dependency, including climate companion switches", () => {
@@ -301,6 +373,11 @@ describe("widget definitions", () => {
     expect(BINARY_SENSOR_WIDGET_DEFINITION.dependencyIds(binarySensorConfig)).toEqual(["binary_sensor.test"]);
     expect(PERSON_WIDGET_DEFINITION.dependencyIds(personConfig)).toEqual(["person.test"]);
     expect(CAMERA_WIDGET_DEFINITION.dependencyIds(cameraConfig)).toEqual(["camera.test"]);
+    expect(SCENE_WIDGET_DEFINITION.dependencyIds(sceneConfig)).toEqual(["scene.test"]);
+    expect(SCRIPT_WIDGET_DEFINITION.dependencyIds(scriptConfig)).toEqual(["script.test"]);
+    expect(BUTTON_WIDGET_DEFINITION.dependencyIds(buttonConfig)).toEqual(["button.test"]);
+    expect(ALARM_WIDGET_DEFINITION.dependencyIds(alarmConfig)).toEqual(["alarm_control_panel.test"]);
+    expect(ACTION_WIDGET_DEFINITION.dependencyIds()).toEqual([]);
   });
 
   it("keeps split device elements unloaded until their definition is requested", () => {
@@ -313,6 +390,11 @@ describe("widget definitions", () => {
     expect(customElements.get(BINARY_SENSOR_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(PERSON_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(CAMERA_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(SCENE_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(SCRIPT_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(BUTTON_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(ALARM_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(ACTION_WIDGET_DEFINITION.tag)).toBeUndefined();
   });
 
   it("validates climate-specific options at the definition boundary", () => {
@@ -339,6 +421,19 @@ describe("widget definitions", () => {
     ]);
   });
 
+  it("validates entityless action options at the definition boundary", () => {
+    expect(ACTION_WIDGET_DEFINITION.validateOptions?.(actionConfig.options)).toEqual([]);
+    expect(ACTION_WIDGET_DEFINITION.validateOptions?.({
+      service: "bad",
+      data: [],
+      target: "light.test",
+    })).toEqual([
+      { path: "service", message: "Action `service` must use `domain.service` form." },
+      { path: "data", message: "Action `data` must be an object." },
+      { path: "target", message: "Action `target` must be an object." },
+    ]);
+  });
+
   it("loads the registered element and renders every supported footprint", async () => {
     for (const [definition, config] of [
       [LIGHT_WIDGET_DEFINITION, lightConfig],
@@ -354,6 +449,11 @@ describe("widget definitions", () => {
       [BINARY_SENSOR_WIDGET_DEFINITION, binarySensorConfig],
       [PERSON_WIDGET_DEFINITION, personConfig],
       [CAMERA_WIDGET_DEFINITION, cameraConfig],
+      [SCENE_WIDGET_DEFINITION, sceneConfig],
+      [SCRIPT_WIDGET_DEFINITION, scriptConfig],
+      [BUTTON_WIDGET_DEFINITION, buttonConfig],
+      [ALARM_WIDGET_DEFINITION, alarmConfig],
+      [ACTION_WIDGET_DEFINITION, actionConfig],
     ] as const) {
       expect(widgetTag(definition.type)).toBe(definition.tag);
       await definition.load();

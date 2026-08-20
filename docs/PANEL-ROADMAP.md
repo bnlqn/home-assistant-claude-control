@@ -237,6 +237,10 @@ Progress — 2026-08-20:
 - split person, binary sensor, and camera out of their shared legacy bundles and
   migrated them into typed, independently loaded definitions, removing the last
   sensor-section fallback classification and bringing the suite to 156 tests;
+- replaced the legacy basic/extra bundles with independent scene, script,
+  button, alarm, and entityless-action modules and definitions; action options
+  are typed and validated, HA targets use the dedicated service target argument,
+  and service/footprint regressions bring the suite to 159 tests;
 - still to do in Phase 1: migrate the remaining catalogue and its loose option
   records and introduce the reusable HA/async/profile controllers.
 
@@ -362,8 +366,8 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 Complete the Phase 1 contract before changing placement semantics:
 
-1. split and migrate the remaining scene, script, button, alarm, and entityless
-   action widgets into the discriminated contract;
+1. migrate the remaining group, composite Energy, metric-tile, and electricity
+   total widgets into the definition contract without changing the Energy hero;
 2. introduce the reusable HA/async/profile controllers and finish contract
    coverage for the remaining catalogue;
 3. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix
