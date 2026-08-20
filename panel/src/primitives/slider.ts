@@ -166,7 +166,7 @@ export class HdSlider extends LitElement {
   private _onKeyDown(ev: KeyboardEvent) {
     if (this.disabled) return;
     const big = Math.max(this.step, (this.max - this.min) / 10);
-    let next = this.value;
+    let next: number;
     switch (ev.key) {
       case "ArrowUp":
       case "ArrowRight":

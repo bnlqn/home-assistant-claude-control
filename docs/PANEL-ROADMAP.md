@@ -155,8 +155,11 @@ Progress — 2026-08-20:
   14 files, and active Energy requests from as many as 452 to at most four;
 - verified the optimized Energy page at 320 and 390 px with no horizontal
   overflow, no missing flow assets, and no canvas animation path;
-- still to do in Phase 0: add lint/dependency automation and CI, automate
-  browser screenshots/accessibility checks, resolve the media
+- added TypeScript/Lit correctness linting, a single local check command, Panel
+  CI with deploy-mirror verification, and grouped Dependabot updates; live Home
+  Assistant configuration validation remains an authenticated deployment gate;
+- still to do in Phase 0: automate browser screenshots/accessibility checks,
+  resolve the media
   widget's extra-update warning, and profile wall-tablet decoded image memory.
 
 ### Phase 1 — Unified widget contract

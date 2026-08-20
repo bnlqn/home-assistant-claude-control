@@ -1,0 +1,48 @@
+name: Panel CI
+
+on:
+  pull_request:
+    paths:
+      - "panel/**"
+      - "config/www/home-dashboard/**"
+      - ".github/workflows/panel-ci.yml"
+  push:
+    paths:
+      - "panel/**"
+      - "config/www/home-dashboard/**"
+      - ".github/workflows/panel-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: panel-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: panel
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: panel/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Lint, type-check, test, and build
+        run: npm run check
+
+      - name: Verify deploy mirror is current
+        working-directory: .
+        run: git diff --exit-code -- config/www/home-dashboard

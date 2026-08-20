@@ -4579,7 +4579,7 @@ var Ur, X = (Ur = class extends T {
 	}
 	_onKeyDown(e) {
 		if (this.disabled) return;
-		let t = Math.max(this.step, (this.max - this.min) / 10), n = this.value;
+		let t = Math.max(this.step, (this.max - this.min) / 10), n;
 		switch (e.key) {
 			case "ArrowUp":
 			case "ArrowRight":
@@ -5605,7 +5605,7 @@ var xi = {
 	speedtest: "mdi:speedometer"
 };
 function Si(e) {
-	return xi[e.replace(/ /g, " ").trim().toLowerCase()];
+	return xi[e.replace(/\u00a0/g, " ").trim().toLowerCase()];
 }
 function Ci(e) {
 	return e.some((e) => Si(e) !== void 0);

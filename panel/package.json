@@ -4,10 +4,15 @@
   "private": true,
   "description": "Homey-style custom Home Assistant dashboard panel (Lit + TypeScript + Vite)",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "build:fast": "vite build",
+    "check": "tsc --noEmit && eslint . && vitest run && vite build",
+    "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -18,9 +23,13 @@
     "lit": "^3.2.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.10.2",
+    "eslint": "~10.8.1",
+    "eslint-plugin-lit": "^2.3.1",
     "jsdom": "^25.0.1",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.67.0",
     "vite": "^8.2.1",
     "vitest": "^4.1.10"
   }

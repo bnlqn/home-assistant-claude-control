@@ -39,6 +39,8 @@ right in the widgets · a consistent detail surface for everything else.</em></p
 
 ## Quick start
 
+Use Node.js 20.19+, 22.13+, or 24+.
+
 ```bash
 cd panel
 npm ci
@@ -57,6 +59,8 @@ detail sheets, light & dark — works in the browser without a live HA. A small
 | `npm run dev`       | Vite dev server with the mock hass harness (hot reload).            |
 | `npm run build`     | Type-check **and** build the production module.                     |
 | `npm run build:fast`| Build without the type-check (faster iteration).                    |
+| `npm run check`     | Run type-check, lint, tests, and the production build.              |
+| `npm run lint`      | Run TypeScript and Lit correctness linting.                         |
 | `npm test`          | Run the Vitest suite once.                                          |
 | `npm run test:watch`| Vitest in watch mode.                                               |
 | `npm run typecheck` | `tsc --noEmit` only.                                                |
@@ -312,6 +316,13 @@ construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,
 Energy flow selection and asset paths, the quick-action vs. open-detail split,
 the confirmation bus, and reduced-motion tokens.
+
+`npm run check` is the local pre-commit equivalent of Panel CI. CI installs the
+lockfile, runs the complete check, and verifies that the tracked deploy mirror
+matches the source build. Dependabot groups panel development updates weekly
+and checks GitHub Actions monthly. Home Assistant configuration validation
+still requires the authenticated live-instance workflow (`./bin/ha validate`)
+and is intentionally not attempted by public CI.
 
 The dev harness (`npm run dev`) is the manual visual-verification surface across
 phone, tablet, laptop, and desktop widths, in light and dark.

@@ -35,7 +35,7 @@ const APP_ICONS: Record<string, string> = {
 
 /** Icon for an exact source/app name, or undefined when unknown. */
 export function appIcon(name: string): string | undefined {
-  return APP_ICONS[name.replace(/ /g, " ").trim().toLowerCase()];
+  return APP_ICONS[name.replace(/\u00a0/g, " ").trim().toLowerCase()];
 }
 
 /** True when a source list looks like an app launcher (Apple TV & friends). */
