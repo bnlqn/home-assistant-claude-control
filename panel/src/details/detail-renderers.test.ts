@@ -9,10 +9,6 @@ import type { DetailContext } from "./detail-context.js";
 import { renderDetailBody } from "./controllers.js";
 import { renderDefinedDetail } from "./detail-registry.js";
 import {
-  renderCoverDetail,
-  renderVacuumDetail,
-} from "./device-detail.js";
-import {
   renderPowerflowDetail,
   renderSolarChargingDetail,
 } from "./energy-detail.js";
@@ -174,7 +170,7 @@ describe("climate detail renderer", () => {
   });
 });
 
-describe("legacy domain detail modules", () => {
+describe("domain detail modules", () => {
   it("keeps media rendering and transport service routing independent", () => {
     const state = entity("media_player.test", "playing", {
       media_title: "Night Drive",
@@ -221,7 +217,7 @@ describe("legacy domain detail modules", () => {
     };
     const coverContext = context(cover, coverConfig);
     const coverContainer = document.createElement("div");
-    render(renderCoverDetail(coverContext.ctx, cover), coverContainer);
+    render(renderDefinedDetail("cover", coverContext.ctx, cover), coverContainer);
 
     coverContainer.querySelector("hd-slider")!.dispatchEvent(new CustomEvent("hd-change", {
       detail: { value: 42 },
@@ -248,7 +244,7 @@ describe("legacy domain detail modules", () => {
     };
     const vacuumContext = context(vacuum, vacuumConfig);
     const vacuumContainer = document.createElement("div");
-    render(renderVacuumDetail(vacuumContext.ctx, vacuum), vacuumContainer);
+    render(renderDefinedDetail("vacuum", vacuumContext.ctx, vacuum), vacuumContainer);
 
     vacuumContainer.querySelector<HTMLButtonElement>("button.bigbtn")!.click();
     expect(vacuumContext.call).toHaveBeenCalledWith({
@@ -256,6 +252,23 @@ describe("legacy domain detail modules", () => {
       service: "start",
       data: { entity_id: vacuum.entity_id },
     }, "start");
+
+    const toggle = entity("switch.test", "off", {});
+    const toggleConfig: WidgetConfig = {
+      id: "switch-detail",
+      type: "switch",
+      entity: toggle.entity_id,
+      size,
+    };
+    const toggleContext = context(toggle, toggleConfig);
+    const toggleContainer = document.createElement("div");
+    render(renderDefinedDetail("generic", toggleContext.ctx, toggle), toggleContainer);
+    toggleContainer.querySelector<HTMLButtonElement>("button.bigbtn")!.click();
+    expect(toggleContext.call).toHaveBeenCalledWith({
+      domain: "switch",
+      service: "turn_on",
+      data: { entity_id: toggle.entity_id },
+    }, "turn on");
   });
 
   it("keeps sensor history and weather forecast rendering in a read-only module", () => {

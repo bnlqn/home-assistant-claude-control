@@ -240,7 +240,7 @@ export class VacuumWidget extends EntityWidget {
   private get _branded(): boolean {
     if (this.config.type !== "vacuum") return false;
     const o = this.config.options ?? {};
-    return o.brand === "roborock" || o.branded === true;
+    return o.brand === "roborock" || o.branded === true || o.hero === true;
   }
 
   protected relevantEntityIds(): string[] {

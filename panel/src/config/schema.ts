@@ -13,6 +13,7 @@ import type {
   EnergyWidgetOptions,
   PowerflowWidgetOptions,
   SolarChargingWidgetOptions,
+  VacuumWidgetOptions,
 } from "./widget-options.js";
 
 export type {
@@ -24,6 +25,7 @@ export type {
   EnergyWidgetOptions,
   PowerflowWidgetOptions,
   SolarChargingWidgetOptions,
+  VacuumWidgetOptions,
 } from "./widget-options.js";
 
 /**
@@ -154,6 +156,26 @@ export interface ClimateWidgetConfig extends WidgetConfigBase<"climate"> {
   options?: ClimateWidgetOptions;
 }
 
+export interface SwitchWidgetConfig extends WidgetConfigBase<"switch"> {
+  options?: never;
+}
+
+export interface FanWidgetConfig extends WidgetConfigBase<"fan"> {
+  options?: never;
+}
+
+export interface CoverWidgetConfig extends WidgetConfigBase<"cover"> {
+  options?: never;
+}
+
+export interface LockWidgetConfig extends WidgetConfigBase<"lock"> {
+  options?: never;
+}
+
+export interface VacuumWidgetConfig extends WidgetConfigBase<"vacuum"> {
+  options?: VacuumWidgetOptions;
+}
+
 export interface EnergyWidgetConfig extends WidgetConfigBase<"energy"> {
   options?: EnergyWidgetOptions;
 }
@@ -177,6 +199,11 @@ export interface ElectricityTotalWidgetConfig extends WidgetConfigBase<"electric
 export type TypedOptionsWidgetType =
   | "light"
   | "climate"
+  | "switch"
+  | "fan"
+  | "cover"
+  | "lock"
+  | "vacuum"
   | "energy"
   | "powerflow"
   | "solarcharging"
@@ -201,6 +228,11 @@ export type LegacyWidgetConfig = {
 export type WidgetConfig =
   | LightWidgetConfig
   | ClimateWidgetConfig
+  | SwitchWidgetConfig
+  | FanWidgetConfig
+  | CoverWidgetConfig
+  | LockWidgetConfig
+  | VacuumWidgetConfig
   | EnergyWidgetConfig
   | PowerflowWidgetConfig
   | SolarChargingWidgetConfig
@@ -267,7 +299,10 @@ export interface DashboardConfig {
  * this set is rejected at startup with a clear message, rather than producing a
  * cramped or empty-looking widget.
  */
-export type LegacyWidgetType = Exclude<WidgetType, "light" | "climate">;
+export type LegacyWidgetType = Exclude<
+  WidgetType,
+  "light" | "climate" | "switch" | "fan" | "cover" | "lock" | "vacuum"
+>;
 
 /**
  * Size constraints for widgets not yet migrated to `WidgetDefinition`.
@@ -277,9 +312,6 @@ export const LEGACY_SUPPORTED_SIZES: Record<LegacyWidgetType, readonly WidgetSiz
   // A container is full-width and self-sizing; the grid ignores its footprint,
   // so every size is permitted (synthetic groups carry a nominal one).
   group: ALL_SIZES,
-  switch: ["1x1", "2x1"],
-  fan: ["1x1", "2x1", "1x2"],
-  cover: ["1x1", "2x1", "1x2", "2x2"],
   media: ["2x1", "2x2"],
   sensor: ["1x1", "2x1", "1x2", "2x2"],
   binary_sensor: ["1x1", "2x1"],
@@ -287,8 +319,6 @@ export const LEGACY_SUPPORTED_SIZES: Record<LegacyWidgetType, readonly WidgetSiz
   scene: ["1x1", "2x1", "1x2"],
   script: ["1x1", "2x1"],
   button: ["1x1", "2x1"],
-  lock: ["1x1", "2x1"],
-  vacuum: ["1x1", "2x1", "2x2"],
   camera: ["2x1", "2x2"],
   weather: ["2x1", "1x2", "2x2"],
   energy: ["2x1", "1x2", "2x2"],

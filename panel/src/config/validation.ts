@@ -201,7 +201,7 @@ function validateWidget(
   // Migrated widgets own their option contract. This keeps widget-specific
   // validation beside the definition instead of growing this central switch.
   for (const issue of definition?.validateOptions?.(widget.options) ?? []) {
-    err(`${wpath}.options.${issue.path}`, issue.message);
+    err(`${wpath}.options${issue.path ? `.${issue.path}` : ""}`, issue.message);
     valid = false;
   }
 

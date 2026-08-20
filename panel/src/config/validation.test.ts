@@ -79,6 +79,27 @@ describe("validateConfig", () => {
     expect(r.sanitized.views[1].widgets).toHaveLength(0);
   });
 
+  it("validates migrated vacuum hero options", () => {
+    const bad = structuredClone(okConfig);
+    bad.views[0].widgets[0] = {
+      id: "vacuum",
+      type: "vacuum",
+      entity: "vacuum.test",
+      size: { compact: "1x1", medium: "2x1", wide: "2x2" },
+      options: { brand: "unknown", branded: "yes", hero: 1 },
+    } as unknown as WidgetConfig;
+
+    const result = validateConfig(bad);
+
+    expect(result.ok).toBe(false);
+    expect(result.issues.filter((issue) => issue.path.includes("options."))).toEqual([
+      expect.objectContaining({ path: expect.stringContaining("options.brand") }),
+      expect.objectContaining({ path: expect.stringContaining("options.branded") }),
+      expect.objectContaining({ path: expect.stringContaining("options.hero") }),
+    ]);
+    expect(result.sanitized.views[0].widgets).toHaveLength(0);
+  });
+
   it("flags duplicate widget ids", () => {
     const bad = structuredClone(okConfig);
     bad.views[1].widgets[0].id = "w1"; // duplicate of overview widget

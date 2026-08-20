@@ -219,6 +219,10 @@ Progress — 2026-08-20:
 - moved the remaining media, device, sensor/weather, and Energy detail bodies
   into focused domain modules, reducing `controllers.ts` from 506 lines to a
   66-line compatibility router and extending regression coverage to 148 tests;
+- migrated switch, fan, cover, lock, and vacuum into typed widget definitions,
+  removing their size/tag/section/detail metadata from the legacy tables;
+  vacuum hero options are now typed and `hero: true` consistently controls both
+  grid breakout and full-bleed rendering, with the suite at 151 tests;
 - still to do in Phase 1: migrate the remaining catalogue and its loose option
   records and introduce the reusable HA/async/profile controllers.
 
@@ -345,11 +349,11 @@ Goal: make the dashboard dependable as an always-on home interface.
 Complete the Phase 1 contract before changing placement semantics:
 
 1. expand the discriminated option union and definitions through the remaining
-   device, media, sensor, and action widget families;
-2. split `details/controllers.ts` into domain modules and move registered detail
-   ownership beside each widget definition;
-3. migrate the remaining catalogue in small domain groups with footprint and
-   dependency contract tests;
+   media, sensor, and action widget families;
+2. split the grouped `basic.ts` and `extra.ts` implementations so each migrated
+   widget can load as an independent module;
+3. introduce the reusable HA/async/profile controllers and finish contract
+   coverage for the remaining catalogue;
 4. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix
    before removing the legacy section grids.
 

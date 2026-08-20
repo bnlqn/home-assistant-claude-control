@@ -9,6 +9,15 @@ export interface ClimateWidgetOptions {
   switches?: ClimateSwitchOption[];
 }
 
+export interface VacuumWidgetOptions {
+  /** Enable the optional Roborock-branded 2×2 hero treatment. */
+  brand?: "roborock";
+  /** Backward-compatible explicit switch for the branded hero. */
+  branded?: boolean;
+  /** Generic full-bleed hero opt-in used by the shared breakout resolver. */
+  hero?: boolean;
+}
+
 export interface EnergyWidgetOptions {
   gridPower?: string;
   solarPower?: string;

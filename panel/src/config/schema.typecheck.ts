@@ -2,7 +2,11 @@ import type {
   WidgetConfig,
   WidgetConfigOf,
 } from "./schema.js";
-import type { ClimateWidgetOptions, EnergyWidgetOptions } from "./widget-options.js";
+import type {
+  ClimateWidgetOptions,
+  EnergyWidgetOptions,
+  VacuumWidgetOptions,
+} from "./widget-options.js";
 
 type Assert<Condition extends true> = Condition;
 type DoesNotHave<Shape, Key extends PropertyKey> = Key extends keyof Shape ? false : true;
@@ -14,6 +18,10 @@ type EnergyRejectsClimateOptions = Assert<DoesNotHave<EnergyWidgetOptions, "swit
 type LightRejectsAllOptions = Assert<
   WidgetConfigOf<"light">["options"] extends undefined ? true : false
 >;
+type SwitchRejectsAllOptions = Assert<
+  WidgetConfigOf<"switch">["options"] extends undefined ? true : false
+>;
+type VacuumRejectsEnergyOptions = Assert<DoesNotHave<VacuumWidgetOptions, "gridPower">>;
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
 
@@ -30,6 +38,13 @@ const validTypedWidgetFixtures: WidgetConfig[] = [
     type: "energy",
     size,
     options: { gridPower: "sensor.grid_power" },
+  },
+  {
+    id: "typed-vacuum",
+    type: "vacuum",
+    entity: "vacuum.test",
+    size,
+    options: { brand: "roborock", hero: true },
   },
 ];
 
@@ -52,6 +67,24 @@ const invalidTypedWidgetFixtures: WidgetConfig[] = [
     size: { compact: "1x1", medium: "1x1", wide: "1x1" },
     options: { switches: [] },
   },
+  // @ts-expect-error Switch widgets do not accept an options bag.
+  {
+    id: "invalid-switch",
+    type: "switch",
+    entity: "switch.test",
+    size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+    options: { hero: true },
+  },
+  // @ts-expect-error Vacuum brand is deliberately restricted.
+  {
+    id: "invalid-vacuum",
+    type: "vacuum",
+    entity: "vacuum.test",
+    size,
+    options: {
+      brand: "unknown",
+    },
+  },
 ];
 
 void validTypedWidgetFixtures;
@@ -60,4 +93,6 @@ void invalidTypedWidgetFixtures;
 export type WidgetOptionContractAssertions =
   | ClimateRejectsEnergyOptions
   | EnergyRejectsClimateOptions
-  | LightRejectsAllOptions;
+  | LightRejectsAllOptions
+  | SwitchRejectsAllOptions
+  | VacuumRejectsEnergyOptions;

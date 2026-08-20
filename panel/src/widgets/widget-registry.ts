@@ -1,13 +1,11 @@
-import type { WidgetType } from "../config/schema.js";
+import type { LegacyWidgetType, WidgetType } from "../config/schema.js";
 import { widgetDefinition } from "./widget-definition.js";
 
 // Side-effect imports register every widget custom element.
 import "./group.js";
 import "./basic.js";
 import "./sensor.js";
-import "./cover.js";
 import "./media.js";
-import "./vacuum.js";
 import "./weather.js";
 import "./energy.js";
 import "./powerflow.js";
@@ -17,14 +15,8 @@ import "./metric-tile.js";
 import "./electricity-total.js";
 import "./extra.js";
 
-/** Maps a configured widget `type` to its custom-element tag. */
-type LegacyWidgetType = Exclude<WidgetType, "light" | "climate">;
-
 const LEGACY_WIDGET_TAGS: Record<LegacyWidgetType, string> = {
   group: "hd-group",
-  switch: "hd-widget-switch",
-  fan: "hd-widget-fan",
-  cover: "hd-widget-cover",
   media: "hd-widget-media",
   sensor: "hd-widget-sensor",
   binary_sensor: "hd-widget-binary",
@@ -32,8 +24,6 @@ const LEGACY_WIDGET_TAGS: Record<LegacyWidgetType, string> = {
   scene: "hd-widget-scene",
   script: "hd-widget-script",
   button: "hd-widget-button",
-  lock: "hd-widget-lock",
-  vacuum: "hd-widget-vacuum",
   camera: "hd-widget-camera",
   weather: "hd-widget-weather",
   energy: "hd-widget-energy",

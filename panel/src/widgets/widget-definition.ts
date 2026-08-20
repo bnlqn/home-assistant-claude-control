@@ -5,7 +5,10 @@ import type {
   WidgetSizeSet,
   WidgetType,
 } from "../config/schema.js";
-import type { ClimateSwitchOption } from "../config/widget-options.js";
+import type {
+  ClimateSwitchOption,
+  VacuumWidgetOptions,
+} from "../config/widget-options.js";
 
 export interface WidgetOptionIssue {
   /** Path relative to `options`, such as `switches[0].entity`. */
@@ -14,7 +17,13 @@ export interface WidgetOptionIssue {
 }
 
 export type WidgetQuickAction = "toggle" | "activate" | "none";
-export type WidgetDetailRenderer = "light" | "climate";
+export type WidgetDetailRenderer =
+  | "light"
+  | "climate"
+  | "generic"
+  | "cover"
+  | "lock"
+  | "vacuum";
 
 /**
  * The single contract for a reusable dashboard widget.
@@ -92,6 +101,25 @@ function validateClimateOptions(options: unknown): WidgetOptionIssue[] {
   return issues;
 }
 
+function validateVacuumOptions(options: unknown): WidgetOptionIssue[] {
+  if (options === undefined) return [];
+  if (!isOptionRecord(options)) {
+    return [{ path: "", message: "Vacuum options must be an object." }];
+  }
+  const value = options as Partial<VacuumWidgetOptions>;
+  const issues: WidgetOptionIssue[] = [];
+  if (value.brand !== undefined && value.brand !== "roborock") {
+    issues.push({ path: "brand", message: "Vacuum `brand` must be `roborock`." });
+  }
+  if (value.branded !== undefined && typeof value.branded !== "boolean") {
+    issues.push({ path: "branded", message: "Vacuum `branded` must be a boolean." });
+  }
+  if (value.hero !== undefined && typeof value.hero !== "boolean") {
+    issues.push({ path: "hero", message: "Vacuum `hero` must be a boolean." });
+  }
+  return issues;
+}
+
 export const LIGHT_WIDGET_DEFINITION = {
   type: "light",
   tag: "hd-widget-light",
@@ -128,13 +156,106 @@ export const CLIMATE_WIDGET_DEFINITION = {
   detailRenderer: "climate",
 } satisfies WidgetDefinition<"climate">;
 
-type MigratedWidgetType = "light" | "climate";
+export const SWITCH_WIDGET_DEFINITION = {
+  type: "switch",
+  tag: "hd-widget-switch",
+  label: "Switch",
+  icon: "mdi:toggle-switch",
+  load: () => import("./basic.js"),
+  supportedSizes: ["1x1", "2x1"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "toggle",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "generic",
+} satisfies WidgetDefinition<"switch">;
+
+export const FAN_WIDGET_DEFINITION = {
+  type: "fan",
+  tag: "hd-widget-fan",
+  label: "Fan",
+  icon: "mdi:fan",
+  load: () => import("./extra.js"),
+  supportedSizes: ["1x1", "2x1", "1x2"],
+  defaultSize: { compact: "1x1", medium: "2x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "toggle",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "generic",
+} satisfies WidgetDefinition<"fan">;
+
+export const COVER_WIDGET_DEFINITION = {
+  type: "cover",
+  tag: "hd-widget-cover",
+  label: "Cover",
+  icon: "mdi:window-shutter",
+  load: () => import("./cover.js"),
+  supportedSizes: ["1x1", "2x1", "1x2", "2x2"],
+  defaultSize: { compact: "1x1", medium: "2x1", wide: "2x2" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "cover",
+} satisfies WidgetDefinition<"cover">;
+
+export const LOCK_WIDGET_DEFINITION = {
+  type: "lock",
+  tag: "hd-widget-lock",
+  label: "Lock",
+  icon: "mdi:lock",
+  load: () => import("./basic.js"),
+  supportedSizes: ["1x1", "2x1"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "toggle",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "lock",
+} satisfies WidgetDefinition<"lock">;
+
+export const VACUUM_WIDGET_DEFINITION = {
+  type: "vacuum",
+  tag: "hd-widget-vacuum",
+  label: "Vacuum",
+  icon: "mdi:robot-vacuum",
+  load: () => import("./vacuum.js"),
+  supportedSizes: ["1x1", "2x1", "2x2"],
+  defaultSize: { compact: "1x1", medium: "2x1", wide: "2x2" },
+  requiresEntity: true,
+  section: "devices",
+  quickAction: "toggle",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  validateOptions: validateVacuumOptions,
+  detailRenderer: "vacuum",
+} satisfies WidgetDefinition<"vacuum">;
+
+type MigratedWidgetType =
+  | "light"
+  | "climate"
+  | "switch"
+  | "fan"
+  | "cover"
+  | "lock"
+  | "vacuum";
 type WidgetDefinitionMap = {
   [Type in MigratedWidgetType]: WidgetDefinition<Type>;
 };
 const DEFINITIONS = {
   light: LIGHT_WIDGET_DEFINITION,
   climate: CLIMATE_WIDGET_DEFINITION,
+  switch: SWITCH_WIDGET_DEFINITION,
+  fan: FAN_WIDGET_DEFINITION,
+  cover: COVER_WIDGET_DEFINITION,
+  lock: LOCK_WIDGET_DEFINITION,
+  vacuum: VACUUM_WIDGET_DEFINITION,
 } satisfies WidgetDefinitionMap;
 
 type AnyWidgetDefinitionMap = {
