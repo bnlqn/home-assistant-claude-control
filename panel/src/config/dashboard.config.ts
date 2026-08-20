@@ -555,6 +555,32 @@ export const dashboardConfig: DashboardConfig = {
             ],
           },
         },
+        // Bespoke: the solar-only EV-charging control system, as a branded Tesla
+        // hero (Model 3 product shot on the official red) — master arm, live
+        // charge status, and the grid-power start/stop thresholds in its detail.
+        {
+          id: "en-solar-charging",
+          type: "solarcharging",
+          name: "Solar charging",
+          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+          options: {
+            brand: "tesla",
+            master: "input_boolean.tesla_solar_charging_active",
+            vehicleConnected: "binary_sensor.tesla_wall_connector_vehicle_connected",
+            chargingState: "sensor.other_tesla_model_3_charging",
+            wallStatus: "sensor.tesla_wall_connector_status",
+            chargePower: "sensor.tesla_wall_connector_total_power", // kW
+            battery: "sensor.other_tesla_model_3_battery_level",
+            chargeLimit: "number.other_tesla_model_3_charge_limit",
+            sessionEnergy: "sensor.tesla_wall_connector_session_energy",
+            chargeRate: "sensor.other_tesla_model_3_charge_rate",
+            chargeCurrent: "number.other_tesla_model_3_charge_current",
+            startThreshold: "input_number.tesla_solar_grid_start_threshold_w",
+            stopThreshold: "input_number.tesla_solar_grid_stop_threshold_w",
+            minCurrent: "input_number.tesla_solar_min_charge_current",
+            deadband: "input_number.tesla_solar_deadband_current_a",
+          },
+        },
         // Today's Imported − Exported = Total, from the Statistics API.
         {
           id: "en-total",

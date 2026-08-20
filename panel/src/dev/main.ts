@@ -67,6 +67,12 @@ controller.setEntity("sensor.other_tesla_model_3_battery_level", "75", {
   device_class: "battery",
 } as const);
 controller.setEntity("binary_sensor.tesla_wall_connector_vehicle_connected", "on");
+// Solar-charging widget baseline (dev-only): master armed + a target so the
+// branded Tesla hero shows its eco state, battery bar and target marker.
+controller.setEntity("input_boolean.tesla_solar_charging_active", "on");
+controller.setEntity("number.other_tesla_model_3_charge_limit", "80", { unit_of_measurement: "%" } as const);
+controller.setEntity("sensor.other_tesla_model_3_charge_rate", "34", { unit_of_measurement: "km/h" } as const);
+controller.setEntity("sensor.tesla_wall_connector_session_energy", "4.6", KWH);
 controller.setEntity("sensor.p1_meter_energy_import", "9.8", KWH);
 controller.setEntity("sensor.p1_meter_energy_export", "3.2", KWH);
 
