@@ -121,7 +121,7 @@ export const dashboardConfig: DashboardConfig = {
           type: "vacuum",
           entity: "vacuum.roborock_s8_pro_ultra",
           name: "S8 Pro Ultra",
-          size: { compact: "1x1", medium: "2x2", wide: "2x2" },
+          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
           options: { brand: "roborock" },
         },
         {
@@ -200,7 +200,7 @@ export const dashboardConfig: DashboardConfig = {
           type: "vacuum",
           entity: "vacuum.roborock_s8_pro_ultra",
           name: "S8 Pro Ultra",
-          size: { compact: "1x1", medium: "2x2", wide: "2x2" },
+          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
           options: { brand: "roborock" },
         },
       ],
@@ -497,120 +497,74 @@ export const dashboardConfig: DashboardConfig = {
       type: "system",
       label: "Energy",
       icon: "mdi:lightning-bolt-outline",
+      // The house is a page ASSET (not a widget): a full-bleed hero rendered
+      // above the grid, with today's Grid / Solar / Home totals overlaid and
+      // live flows animated over the conduit lines. Home = Grid + Solar.
+      hero: {
+        type: "energy",
+        grid: "sensor.whole_home_energy_daily_usage", // daily net grid (kWh)
+        solar: "sensor.goodwe_today_s_pv_generation", // daily solar (kWh)
+        gridPower: "sensor.p1_meter_power", // signed W: + import / − export
+        solarPower: "sensor.goodwe_pv_power", // W
+        carConnected: "binary_sensor.tesla_wall_connector_vehicle_connected", // swaps to the EV art
+        carPower: "sensor.tesla_wall_connector_total_power", // kW, auto-normalized
+      },
       widgets: [
-        // Hero: the live power-flow diagram (Grid ↔ Solar ↔ House ↔ Car). The
-        // stat tiles below are its numeric breakdown.
+        // The three Homey-style status tiles, in their own container. (No home
+        // battery in this install, so the fourth "Battery" tile is omitted.)
         {
-          id: "en-flow",
-          type: "powerflow",
-          name: "Power flow",
-          // Full-width 2x2 on a phone; the roomier XL square on tablet/desktop,
-          // where the size-capped nodes stay put and the gaps open up.
-          size: { compact: "2x2", medium: "3x3", wide: "3x3" },
+          id: "en-tiles",
+          type: "group",
+          size: { compact: "4x2", medium: "4x2", wide: "4x2" },
           options: {
-            gridPower: "sensor.p1_meter_power", // signed W: + import / − export (HomeWizard P1)
-            solarPower: "sensor.goodwe_pv_power",
-            houseConsumption: "sensor.house_power_consumption",
-            carPower: "sensor.tesla_wall_connector_total_power", // kW, auto-normalized
-            carPowerAlt: "sensor.other_tesla_model_3_charger_power", // kW fallback
-            carActive: "sensor.tesla_wall_connector_status",
-            carActiveAlt: "sensor.other_tesla_model_3_charging",
+            variant: "tiles",
+            children: [
+              {
+                id: "en-t-electricity",
+                type: "metrictile",
+                entity: "sensor.p1_meter_power",
+                name: "Electricity",
+                icon: "mdi:flash",
+                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+                options: { accent: "accent", format: "power", status: "gridDirection" },
+              },
+              {
+                id: "en-t-solar",
+                type: "metrictile",
+                entity: "sensor.goodwe_pv_power",
+                name: "Solar",
+                icon: "mdi:weather-sunny",
+                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+                options: { accent: "light", format: "power", status: "none" },
+              },
+              {
+                id: "en-t-ev",
+                type: "metrictile",
+                entity: "sensor.other_tesla_model_3_battery_level",
+                name: "Electric Vehicle",
+                icon: "mdi:car-electric",
+                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+                options: {
+                  accent: "alert",
+                  format: "percent",
+                  status: "carCharge",
+                  chargeStatus: "sensor.tesla_wall_connector_status",
+                  connected: "binary_sensor.tesla_wall_connector_vehicle_connected",
+                },
+              },
+            ],
           },
         },
-        // Bespoke: the solar-only EV-charging control system (master arm, live
-        // charge status, and the grid-power start/stop thresholds as sliders).
+        // Today's Imported − Exported = Total, from the Statistics API.
         {
-          id: "en-solar-charging",
-          type: "solarcharging",
-          name: "Solar charging",
-          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+          id: "en-total",
+          type: "electricitytotal",
+          name: "Electricity Total",
+          size: { compact: "4x2", medium: "4x2", wide: "4x2" },
           options: {
-            master: "input_boolean.tesla_solar_charging_active",
-            vehicleConnected: "binary_sensor.tesla_wall_connector_vehicle_connected",
-            chargingState: "sensor.other_tesla_model_3_charging",
-            wallStatus: "sensor.tesla_wall_connector_status",
-            chargePower: "sensor.tesla_wall_connector_total_power", // kW
-            battery: "sensor.other_tesla_model_3_battery_level",
-            chargeLimit: "number.other_tesla_model_3_charge_limit",
-            sessionEnergy: "sensor.tesla_wall_connector_session_energy",
-            chargeRate: "sensor.other_tesla_model_3_charge_rate",
-            chargeCurrent: "number.other_tesla_model_3_charge_current",
-            startThreshold: "input_number.tesla_solar_grid_start_threshold_w",
-            stopThreshold: "input_number.tesla_solar_grid_stop_threshold_w",
-            minCurrent: "input_number.tesla_solar_min_charge_current",
-            deadband: "input_number.tesla_solar_deadband_current_a",
+            importEnergy: "sensor.p1_meter_energy_import",
+            exportEnergy: "sensor.p1_meter_energy_export",
           },
-        },
-        // Long-range history from the Statistics API — solar / import / export /
-        // car-charging in kWh, with a Day / Week / Month selector.
-        {
-          id: "en-history",
-          type: "energychart",
-          name: "Energy history",
-          size: { compact: "2x2", medium: "4x2", wide: "4x2" },
-          options: {
-            solar: "sensor.goodwe_total_pv_generation",
-            gridImport: "sensor.p1_meter_energy_import",
-            gridExport: "sensor.p1_meter_energy_export",
-            car: "sensor.tesla_wall_connector_energy",
-            defaultPeriod: "day",
-          },
-        },
-        {
-          id: "en-grid-now",
-          type: "sensor",
-          entity: "sensor.p1_meter_power",
-          name: "Grid now",
-          icon: "mdi:transmission-tower",
-          size: { compact: "2x1", medium: "2x1", wide: "2x1" },
-        },
-        {
-          id: "en-solar-now",
-          type: "sensor",
-          entity: "sensor.goodwe_pv_power",
-          name: "Solar now",
-          icon: "mdi:solar-power",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-        },
-        {
-          id: "en-house-now",
-          type: "sensor",
-          entity: "sensor.house_power_consumption",
-          name: "House now",
-          icon: "mdi:home-variant",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-        },
-        {
-          id: "en-solar-today",
-          type: "sensor",
-          entity: "sensor.goodwe_today_s_pv_generation",
-          name: "Solar today",
-          icon: "mdi:solar-power-variant",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-        },
-        {
-          id: "en-forecast",
-          type: "sensor",
-          entity: "sensor.energy_forecast_end_of_day",
-          name: "Forecast use",
-          icon: "mdi:chart-bell-curve",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-        },
-        {
-          id: "en-import",
-          type: "sensor",
-          entity: "sensor.p1_meter_energy_import",
-          name: "Imported",
-          icon: "mdi:transmission-tower-import",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-        },
-        {
-          id: "en-export",
-          type: "sensor",
-          entity: "sensor.p1_meter_energy_export",
-          name: "Exported",
-          icon: "mdi:transmission-tower-export",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
         },
       ],
     },

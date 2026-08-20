@@ -58,6 +58,18 @@ function scenario(name: "export" | "import" | "car") {
     controller.setEntity("sensor.tesla_wall_connector_total_power", "4.5", KW);
   }
 }
+// Baseline energy entities the Energy hero / tiles / total read (dev-only).
+const KWH = { unit_of_measurement: "kWh", device_class: "energy" } as const;
+controller.setEntity("sensor.whole_home_energy_daily_usage", "6.6", KWH); // Grid stat
+controller.setEntity("sensor.goodwe_today_s_pv_generation", "6.4", KWH); // Solar stat
+controller.setEntity("sensor.other_tesla_model_3_battery_level", "75", {
+  unit_of_measurement: "%",
+  device_class: "battery",
+} as const);
+controller.setEntity("binary_sensor.tesla_wall_connector_vehicle_connected", "on");
+controller.setEntity("sensor.p1_meter_energy_import", "9.8", KWH);
+controller.setEntity("sensor.p1_meter_energy_export", "3.2", KWH);
+
 scenario("export"); // lively default so the Energy view looks alive on load
 
 // Tiny dev toolbar (dev-only; never shipped).

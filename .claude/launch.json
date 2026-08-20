@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "scratchpad-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4173", "--directory", "/private/tmp/claude-501/-Users-ben-Developer-home-assistant-claude-control/3f0f41dd-38cd-4419-8777-3e60da610f8e/scratchpad"],
+      "port": 4173
+    },
+    {
+      "name": "home-dashboard-dev",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-lc",
+        "cd /Users/ben/Developer/home-assistant-claude-control/panel && npm run dev -- --port 5179 --strictPort --host"
+      ],
+      "port": 5179
+    },
+    {
+      "name": "home-dashboard-dev-5182",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-lc",
+        "cd /Users/ben/Developer/home-assistant-claude-control/panel && npm run dev -- --port 5182 --strictPort --host"
+      ],
+      "port": 5182
+    }
+  ]
+}

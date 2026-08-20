@@ -52,6 +52,8 @@ export type WidgetType =
   | "powerflow"
   | "solarcharging"
   | "energychart"
+  | "metrictile"
+  | "electricitytotal"
   | "alarm"
   | "action";
 
@@ -77,6 +79,8 @@ export const ALL_WIDGET_TYPES: readonly WidgetType[] = [
   "powerflow",
   "solarcharging",
   "energychart",
+  "metrictile",
+  "electricitytotal",
   "alarm",
   "action",
 ] as const;
@@ -88,9 +92,9 @@ export type ViewType = "overview" | "room" | "system";
  * the `variant` a `group` container renders as: media hero band, small device
  * tiles, read-only value tiles, or an energy/diagram band.
  */
-export type SectionKind = "media" | "devices" | "sensors" | "energy";
+export type SectionKind = "media" | "devices" | "sensors" | "energy" | "tiles";
 
-export const SECTION_KINDS: readonly SectionKind[] = ["media", "devices", "sensors", "energy"] as const;
+export const SECTION_KINDS: readonly SectionKind[] = ["media", "devices", "sensors", "energy", "tiles"] as const;
 
 /**
  * Options for a `group` container widget. A container owns a titled section and
@@ -128,6 +132,30 @@ export interface WidgetConfig {
   options?: Record<string, unknown>;
 }
 
+/**
+ * A page-level hero rendered above a view's widget grid. Unlike a widget, it is
+ * not part of the grid/section system — it's a full-bleed asset that belongs to
+ * the page (currently only the Energy page's house render with overlaid totals
+ * and animated flows). See `energy/energy-hero.ts`.
+ */
+export interface EnergyHeroConfig {
+  type: "energy";
+  /** Daily grid total (kWh) shown as the "Grid" stat. */
+  grid: string;
+  /** Daily solar generation (kWh) shown as the "Solar Panels" stat. */
+  solar: string;
+  /** Live signed grid power (W: +import / −export) — drives the grid flow. */
+  gridPower: string;
+  /** Live solar power (W) — drives the solar flow glow. */
+  solarPower: string;
+  /** binary_sensor: EV plugged in — swaps the hero art (car in the garage). */
+  carConnected?: string;
+  /** Live car charge power (W/kW) — drives the car flow glow when connected. */
+  carPower?: string;
+  /** Period label shown in the pill (defaults to "Today"). */
+  label?: string;
+}
+
 export interface ViewConfig {
   id: string;
   type: ViewType;
@@ -135,6 +163,8 @@ export interface ViewConfig {
   icon: string;
   /** Optional subtitle shown under the view title in the shell. */
   subtitle?: string;
+  /** Optional full-bleed page hero rendered above the widget grid. */
+  hero?: EnergyHeroConfig;
   widgets: WidgetConfig[];
 }
 
@@ -182,6 +212,10 @@ export const SUPPORTED_SIZES: Record<WidgetType, readonly WidgetSize[]> = {
   powerflow: ["2x2", "3x3"],
   solarcharging: ["2x1", "1x2", "2x2"],
   energychart: ["2x2", "4x2"],
+  // Homey-style wide status tile (icon + name + "value • status"); one per grid cell.
+  metrictile: ["1x1", "2x1"],
+  // Full-width "Imported − Exported = Total" breakdown band.
+  electricitytotal: ["2x2", "4x2"],
   alarm: ["1x1", "2x1", "2x2"],
   action: ["1x1", "2x1"],
 };
@@ -193,5 +227,6 @@ export const ENTITYLESS_TYPES: readonly WidgetType[] = [
   "powerflow",
   "solarcharging",
   "energychart",
+  "electricitytotal",
   "action",
 ];

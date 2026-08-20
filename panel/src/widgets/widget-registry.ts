@@ -14,6 +14,8 @@ import "./energy.js";
 import "./powerflow.js";
 import "./solarcharging.js";
 import "./energychart.js";
+import "./metric-tile.js";
+import "./electricity-total.js";
 import "./extra.js";
 
 /** Maps a configured widget `type` to its custom-element tag. */
@@ -39,6 +41,8 @@ export const WIDGET_TAGS: Record<WidgetType, string> = {
   powerflow: "hd-widget-powerflow",
   solarcharging: "hd-widget-solarcharging",
   energychart: "hd-widget-energychart",
+  metrictile: "hd-widget-metrictile",
+  electricitytotal: "hd-widget-electricitytotal",
   alarm: "hd-widget-alarm",
   action: "hd-widget-action",
 };

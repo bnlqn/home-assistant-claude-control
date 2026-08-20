@@ -9,6 +9,7 @@ import { renderWidgetCell } from "./widget-cell.js";
 import "../primitives/entity-icon.js";
 import "../widgets/widget-frame.js";
 import "../widgets/group.js";
+import "../energy/energy-hero.js";
 
 /**
  * The view canvas. A view's flat widget list is organised by `sectioniseView`
@@ -85,7 +86,12 @@ export class HdViewGrid extends LitElement {
     const m = gridMetricsForWidth(this._width);
     const stackStyle = `--pad:${m.pad}px`;
 
-    if (!view || view.widgets.length === 0) {
+    // A page-level hero (the Energy house) renders full-bleed above the grid.
+    const hero = view?.hero
+      ? html`<hd-energy-hero .hass=${this.hass} .options=${view.hero}></hd-energy-hero>`
+      : nothing;
+
+    if (!view || (view.widgets.length === 0 && !view.hero)) {
       return html`<div class="empty">
         <hd-icon icon="mdi:view-dashboard-outline" .size=${40}></hd-icon>
         <h3>No widgets yet</h3>
@@ -98,6 +104,7 @@ export class HdViewGrid extends LitElement {
     const items = sectioniseView(view.widgets);
 
     return html`
+      ${hero}
       <div class="stack" style=${stackStyle}>
         ${repeat(
           items,

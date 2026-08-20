@@ -114,7 +114,9 @@ export class HdGroup extends LitElement {
         ? 84
         : variant === "media"
           ? 116
-          : squareUnit(this._width || 1024, { columns: cols, gap, pad: 0, bucket });
+          : variant === "tiles"
+            ? 100 // wide status cards (icon + name + "value • status"); name may wrap
+            : squareUnit(this._width || 1024, { columns: cols, gap, pad: 0, bucket });
 
     const gridStyle = `--cols:${cols}; --gap:${gap}px; --unit:${unit}px`;
 

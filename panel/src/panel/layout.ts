@@ -77,6 +77,8 @@ export const SECTION_LABELS: Record<SectionKind, string> = {
   devices: "Devices",
   sensors: "Sensors",
   energy: "Energy",
+  // Hand-composed only (never auto-collected); heading comes from GroupOptions.
+  tiles: "",
 };
 
 /** The section a widget type auto-collects into. */
@@ -105,7 +107,7 @@ export function sectionForWidgetType(type: WidgetType): SectionKind {
 export function layoutForVariant(variant: SectionKind): "row" | "tile" | "value" {
   if (variant === "devices") return "tile";
   if (variant === "sensors") return "value";
-  return "row"; // media / energy own their own bodies
+  return "row"; // media / energy / tiles own their own bodies
 }
 
 /**
@@ -126,6 +128,9 @@ export function sectionColumns(variant: SectionKind, width: number): number {
       // Energy widgets are wide (2×1 bars, 2×2 diagrams). Keep ≥2 columns so a
       // 2-wide widget fills the row without becoming a full-width square.
       return w < 900 ? 2 : 4;
+    case "tiles":
+      // Homey status tiles: two-up on a phone, one row across on a tablet.
+      return w < 640 ? 2 : 3;
   }
 }
 

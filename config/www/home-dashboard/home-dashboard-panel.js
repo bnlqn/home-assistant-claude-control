@@ -3,18 +3,18 @@
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const ie = globalThis, We = ie.ShadowRoot && (ie.ShadyCSS === void 0 || ie.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, Xe = Symbol(), ri = /* @__PURE__ */ new WeakMap();
-let Ri = class {
+const re = globalThis, si = re.ShadowRoot && (re.ShadyCSS === void 0 || re.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, ni = Symbol(), vi = /* @__PURE__ */ new WeakMap();
+let Wi = class {
   constructor(e, i, a) {
-    if (this._$cssResult$ = !0, a !== Xe) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+    if (this._$cssResult$ = !0, a !== ni) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
     this.cssText = e, this.t = i;
   }
   get styleSheet() {
     let e = this.o;
     const i = this.t;
-    if (We && e === void 0) {
+    if (si && e === void 0) {
       const a = i !== void 0 && i.length === 1;
-      a && (e = ri.get(i)), e === void 0 && ((this.o = e = new CSSStyleSheet()).replaceSync(this.cssText), a && ri.set(i, e));
+      a && (e = vi.get(i)), e === void 0 && ((this.o = e = new CSSStyleSheet()).replaceSync(this.cssText), a && vi.set(i, e));
     }
     return e;
   }
@@ -22,33 +22,33 @@ let Ri = class {
     return this.cssText;
   }
 };
-const Zi = (t) => new Ri(typeof t == "string" ? t : t + "", void 0, Xe), x = (t, ...e) => {
+const Ki = (t) => new Wi(typeof t == "string" ? t : t + "", void 0, ni), y = (t, ...e) => {
   const i = t.length === 1 ? t[0] : e.reduce((a, s, n) => a + ((r) => {
     if (r._$cssResult$ === !0) return r.cssText;
     if (typeof r == "number") return r;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + r + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
   })(s) + t[n + 1], t[0]);
-  return new Ri(i, t, Xe);
-}, P1 = (t, e) => {
-  if (We) t.adoptedStyleSheets = e.map((i) => i instanceof CSSStyleSheet ? i : i.styleSheet);
+  return new Wi(i, t, ni);
+}, Fa = (t, e) => {
+  if (si) t.adoptedStyleSheets = e.map((i) => i instanceof CSSStyleSheet ? i : i.styleSheet);
   else for (const i of e) {
-    const a = document.createElement("style"), s = ie.litNonce;
+    const a = document.createElement("style"), s = re.litNonce;
     s !== void 0 && a.setAttribute("nonce", s), a.textContent = i.cssText, t.appendChild(a);
   }
-}, oi = We ? (t) => t : (t) => t instanceof CSSStyleSheet ? ((e) => {
+}, bi = si ? (t) => t : (t) => t instanceof CSSStyleSheet ? ((e) => {
   let i = "";
   for (const a of e.cssRules) i += a.cssText;
-  return Zi(i);
+  return Ki(i);
 })(t) : t;
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: T1, defineProperty: E1, getOwnPropertyDescriptor: O1, getOwnPropertyNames: z1, getOwnPropertySymbols: D1, getPrototypeOf: I1 } = Object, ve = globalThis, ci = ve.trustedTypes, R1 = ci ? ci.emptyScript : "", Z1 = ve.reactiveElementPolyfillSupport, It = (t, e) => t, se = { toAttribute(t, e) {
+const { is: Ua, defineProperty: Ja, getOwnPropertyDescriptor: $a, getOwnPropertyNames: ja, getOwnPropertySymbols: qa, getPrototypeOf: Wa } = Object, xe = globalThis, yi = xe.trustedTypes, Ka = yi ? yi.emptyScript : "", Na = xe.reactiveElementPolyfillSupport, Ft = (t, e) => t, ce = { toAttribute(t, e) {
   switch (e) {
     case Boolean:
-      t = t ? R1 : null;
+      t = t ? Ka : null;
       break;
     case Object:
     case Array:
@@ -73,23 +73,23 @@ const { is: T1, defineProperty: E1, getOwnPropertyDescriptor: O1, getOwnProperty
       }
   }
   return i;
-} }, Be = (t, e) => !T1(t, e), li = { attribute: !0, type: String, converter: se, reflect: !1, useDefault: !1, hasChanged: Be };
-Symbol.metadata ??= Symbol("metadata"), ve.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-let mt = class extends HTMLElement {
+} }, ri = (t, e) => !Ua(t, e), wi = { attribute: !0, type: String, converter: ce, reflect: !1, useDefault: !1, hasChanged: ri };
+Symbol.metadata ??= Symbol("metadata"), xe.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
+let gt = class extends HTMLElement {
   static addInitializer(e) {
     this._$Ei(), (this.l ??= []).push(e);
   }
   static get observedAttributes() {
     return this.finalize(), this._$Eh && [...this._$Eh.keys()];
   }
-  static createProperty(e, i = li) {
+  static createProperty(e, i = wi) {
     if (i.state && (i.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((i = Object.create(i)).wrapped = !0), this.elementProperties.set(e, i), !i.noAccessor) {
       const a = Symbol(), s = this.getPropertyDescriptor(e, a, i);
-      s !== void 0 && E1(this.prototype, e, s);
+      s !== void 0 && Ja(this.prototype, e, s);
     }
   }
   static getPropertyDescriptor(e, i, a) {
-    const { get: s, set: n } = O1(this.prototype, e) ?? { get() {
+    const { get: s, set: n } = $a(this.prototype, e) ?? { get() {
       return this[i];
     }, set(r) {
       this[i] = r;
@@ -100,17 +100,17 @@ let mt = class extends HTMLElement {
     }, configurable: !0, enumerable: !0 };
   }
   static getPropertyOptions(e) {
-    return this.elementProperties.get(e) ?? li;
+    return this.elementProperties.get(e) ?? wi;
   }
   static _$Ei() {
-    if (this.hasOwnProperty(It("elementProperties"))) return;
-    const e = I1(this);
+    if (this.hasOwnProperty(Ft("elementProperties"))) return;
+    const e = Wa(this);
     e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
   }
   static finalize() {
-    if (this.hasOwnProperty(It("finalized"))) return;
-    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(It("properties"))) {
-      const i = this.properties, a = [...z1(i), ...D1(i)];
+    if (this.hasOwnProperty(Ft("finalized"))) return;
+    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(Ft("properties"))) {
+      const i = this.properties, a = [...ja(i), ...qa(i)];
       for (const s of a) this.createProperty(s, i[s]);
     }
     const e = this[Symbol.metadata];
@@ -129,8 +129,8 @@ let mt = class extends HTMLElement {
     const i = [];
     if (Array.isArray(e)) {
       const a = new Set(e.flat(1 / 0).reverse());
-      for (const s of a) i.unshift(oi(s));
-    } else e !== void 0 && i.push(oi(e));
+      for (const s of a) i.unshift(bi(s));
+    } else e !== void 0 && i.push(bi(e));
     return i;
   }
   static _$Eu(e, i) {
@@ -156,7 +156,7 @@ let mt = class extends HTMLElement {
   }
   createRenderRoot() {
     const e = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
-    return P1(e, this.constructor.elementStyles), e;
+    return Fa(e, this.constructor.elementStyles), e;
   }
   connectedCallback() {
     this.renderRoot ??= this.createRenderRoot(), this.enableUpdating(!0), this._$EO?.forEach((e) => e.hostConnected?.());
@@ -172,14 +172,14 @@ let mt = class extends HTMLElement {
   _$ET(e, i) {
     const a = this.constructor.elementProperties.get(e), s = this.constructor._$Eu(e, a);
     if (s !== void 0 && a.reflect === !0) {
-      const n = (a.converter?.toAttribute !== void 0 ? a.converter : se).toAttribute(i, a.type);
+      const n = (a.converter?.toAttribute !== void 0 ? a.converter : ce).toAttribute(i, a.type);
       this._$Em = e, n == null ? this.removeAttribute(s) : this.setAttribute(s, n), this._$Em = null;
     }
   }
   _$AK(e, i) {
     const a = this.constructor, s = a._$Eh.get(e);
     if (s !== void 0 && this._$Em !== s) {
-      const n = a.getPropertyOptions(s), r = typeof n.converter == "function" ? { fromAttribute: n.converter } : n.converter?.fromAttribute !== void 0 ? n.converter : se;
+      const n = a.getPropertyOptions(s), r = typeof n.converter == "function" ? { fromAttribute: n.converter } : n.converter?.fromAttribute !== void 0 ? n.converter : ce;
       this._$Em = s;
       const c = r.fromAttribute(i, n.type);
       this[s] = c ?? this._$Ej?.get(s) ?? c, this._$Em = null;
@@ -188,7 +188,7 @@ let mt = class extends HTMLElement {
   requestUpdate(e, i, a, s = !1, n) {
     if (e !== void 0) {
       const r = this.constructor;
-      if (s === !1 && (n = this[e]), a ??= r.getPropertyOptions(e), !((a.hasChanged ?? Be)(n, i) || a.useDefault && a.reflect && n === this._$Ej?.get(e) && !this.hasAttribute(r._$Eu(e, a)))) return;
+      if (s === !1 && (n = this[e]), a ??= r.getPropertyOptions(e), !((a.hasChanged ?? ri)(n, i) || a.useDefault && a.reflect && n === this._$Ej?.get(e) && !this.hasAttribute(r._$Eu(e, a)))) return;
       this.C(e, i, a);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
@@ -256,59 +256,59 @@ let mt = class extends HTMLElement {
   firstUpdated(e) {
   }
 };
-mt.elementStyles = [], mt.shadowRootOptions = { mode: "open" }, mt[It("elementProperties")] = /* @__PURE__ */ new Map(), mt[It("finalized")] = /* @__PURE__ */ new Map(), Z1?.({ ReactiveElement: mt }), (ve.reactiveElementVersions ??= []).push("2.1.2");
+gt.elementStyles = [], gt.shadowRootOptions = { mode: "open" }, gt[Ft("elementProperties")] = /* @__PURE__ */ new Map(), gt[Ft("finalized")] = /* @__PURE__ */ new Map(), Na?.({ ReactiveElement: gt }), (xe.reactiveElementVersions ??= []).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const Ye = globalThis, di = (t) => t, ne = Ye.trustedTypes, hi = ne ? ne.createPolicy("lit-html", { createHTML: (t) => t }) : void 0, qi = "$lit$", W = `lit$${Math.random().toFixed(9).slice(2)}$`, Fi = "?" + W, q1 = `<${Fi}>`, at = document, Zt = () => at.createComment(""), qt = (t) => t === null || typeof t != "object" && typeof t != "function", Qe = Array.isArray, F1 = (t) => Qe(t) || typeof t?.[Symbol.iterator] == "function", ke = `[ 	
-\f\r]`, Vt = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ui = /-->/g, pi = />/g, Q = RegExp(`>|${ke}(?:([^\\s"'>=/]+)(${ke}*=${ke}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), mi = /'/g, gi = /"/g, Ni = /^(?:script|style|textarea|title)$/i, Ui = (t) => (e, ...i) => ({ _$litType$: t, strings: e, values: i }), o = Ui(1), Ft = Ui(2), st = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), fi = /* @__PURE__ */ new WeakMap(), et = at.createTreeWalker(at, 129);
-function ji(t, e) {
-  if (!Qe(t) || !t.hasOwnProperty("raw")) throw Error("invalid template strings array");
-  return hi !== void 0 ? hi.createHTML(e) : e;
+const oi = globalThis, Ci = (t) => t, le = oi.trustedTypes, xi = le ? le.createPolicy("lit-html", { createHTML: (t) => t }) : void 0, Ni = "$lit$", q = `lit$${Math.random().toFixed(9).slice(2)}$`, Xi = "?" + q, Xa = `<${Xi}>`, at = document, Jt = () => at.createComment(""), $t = (t) => t === null || typeof t != "object" && typeof t != "function", ci = Array.isArray, Ya = (t) => ci(t) || typeof t?.[Symbol.iterator] == "function", Be = `[ 	
+\f\r]`, Et = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, Ai = /-->/g, Li = />/g, X = RegExp(`>|${Be}(?:([^\\s"'>=/]+)(${Be}*=${Be}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), Hi = /'/g, Mi = /"/g, Yi = /^(?:script|style|textarea|title)$/i, Gi = (t) => (e, ...i) => ({ _$litType$: t, strings: e, values: i }), o = Gi(1), jt = Gi(2), st = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), Vi = /* @__PURE__ */ new WeakMap(), et = at.createTreeWalker(at, 129);
+function ta(t, e) {
+  if (!ci(t) || !t.hasOwnProperty("raw")) throw Error("invalid template strings array");
+  return xi !== void 0 ? xi.createHTML(e) : e;
 }
-const N1 = (t, e) => {
+const Ga = (t, e) => {
   const i = t.length - 1, a = [];
-  let s, n = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", r = Vt;
+  let s, n = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", r = Et;
   for (let c = 0; c < i; c++) {
     const l = t[c];
-    let h, u, p = -1, f = 0;
-    for (; f < l.length && (r.lastIndex = f, u = r.exec(l), u !== null); ) f = r.lastIndex, r === Vt ? u[1] === "!--" ? r = ui : u[1] !== void 0 ? r = pi : u[2] !== void 0 ? (Ni.test(u[2]) && (s = RegExp("</" + u[2], "g")), r = Q) : u[3] !== void 0 && (r = Q) : r === Q ? u[0] === ">" ? (r = s ?? Vt, p = -1) : u[1] === void 0 ? p = -2 : (p = r.lastIndex - u[2].length, h = u[1], r = u[3] === void 0 ? Q : u[3] === '"' ? gi : mi) : r === gi || r === mi ? r = Q : r === ui || r === pi ? r = Vt : (r = Q, s = void 0);
-    const g = r === Q && t[c + 1].startsWith("/>") ? " " : "";
-    n += r === Vt ? l + q1 : p >= 0 ? (a.push(h), l.slice(0, p) + qi + l.slice(p) + W + g) : l + W + (p === -2 ? c : g);
+    let h, u, m = -1, f = 0;
+    for (; f < l.length && (r.lastIndex = f, u = r.exec(l), u !== null); ) f = r.lastIndex, r === Et ? u[1] === "!--" ? r = Ai : u[1] !== void 0 ? r = Li : u[2] !== void 0 ? (Yi.test(u[2]) && (s = RegExp("</" + u[2], "g")), r = X) : u[3] !== void 0 && (r = X) : r === X ? u[0] === ">" ? (r = s ?? Et, m = -1) : u[1] === void 0 ? m = -2 : (m = r.lastIndex - u[2].length, h = u[1], r = u[3] === void 0 ? X : u[3] === '"' ? Mi : Hi) : r === Mi || r === Hi ? r = X : r === Ai || r === Li ? r = Et : (r = X, s = void 0);
+    const g = r === X && t[c + 1].startsWith("/>") ? " " : "";
+    n += r === Et ? l + Xa : m >= 0 ? (a.push(h), l.slice(0, m) + Ni + l.slice(m) + q + g) : l + q + (m === -2 ? c : g);
   }
-  return [ji(t, n + (t[i] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), a];
+  return [ta(t, n + (t[i] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), a];
 };
-class Nt {
+class qt {
   constructor({ strings: e, _$litType$: i }, a) {
     let s;
     this.parts = [];
     let n = 0, r = 0;
-    const c = e.length - 1, l = this.parts, [h, u] = N1(e, i);
-    if (this.el = Nt.createElement(h, a), et.currentNode = this.el.content, i === 2 || i === 3) {
-      const p = this.el.content.firstChild;
-      p.replaceWith(...p.childNodes);
+    const c = e.length - 1, l = this.parts, [h, u] = Ga(e, i);
+    if (this.el = qt.createElement(h, a), et.currentNode = this.el.content, i === 2 || i === 3) {
+      const m = this.el.content.firstChild;
+      m.replaceWith(...m.childNodes);
     }
     for (; (s = et.nextNode()) !== null && l.length < c; ) {
       if (s.nodeType === 1) {
-        if (s.hasAttributes()) for (const p of s.getAttributeNames()) if (p.endsWith(qi)) {
-          const f = u[r++], g = s.getAttribute(p).split(W), v = /([.?@])?(.*)/.exec(f);
-          l.push({ type: 1, index: n, name: v[2], strings: g, ctor: v[1] === "." ? j1 : v[1] === "?" ? K1 : v[1] === "@" ? W1 : be }), s.removeAttribute(p);
-        } else p.startsWith(W) && (l.push({ type: 6, index: n }), s.removeAttribute(p));
-        if (Ni.test(s.tagName)) {
-          const p = s.textContent.split(W), f = p.length - 1;
+        if (s.hasAttributes()) for (const m of s.getAttributeNames()) if (m.endsWith(Ni)) {
+          const f = u[r++], g = s.getAttribute(m).split(q), v = /([.?@])?(.*)/.exec(f);
+          l.push({ type: 1, index: n, name: v[2], strings: g, ctor: v[1] === "." ? e1 : v[1] === "?" ? i1 : v[1] === "@" ? a1 : Ae }), s.removeAttribute(m);
+        } else m.startsWith(q) && (l.push({ type: 6, index: n }), s.removeAttribute(m));
+        if (Yi.test(s.tagName)) {
+          const m = s.textContent.split(q), f = m.length - 1;
           if (f > 0) {
-            s.textContent = ne ? ne.emptyScript : "";
-            for (let g = 0; g < f; g++) s.append(p[g], Zt()), et.nextNode(), l.push({ type: 2, index: ++n });
-            s.append(p[f], Zt());
+            s.textContent = le ? le.emptyScript : "";
+            for (let g = 0; g < f; g++) s.append(m[g], Jt()), et.nextNode(), l.push({ type: 2, index: ++n });
+            s.append(m[f], Jt());
           }
         }
-      } else if (s.nodeType === 8) if (s.data === Fi) l.push({ type: 2, index: n });
+      } else if (s.nodeType === 8) if (s.data === Xi) l.push({ type: 2, index: n });
       else {
-        let p = -1;
-        for (; (p = s.data.indexOf(W, p + 1)) !== -1; ) l.push({ type: 7, index: n }), p += W.length - 1;
+        let m = -1;
+        for (; (m = s.data.indexOf(q, m + 1)) !== -1; ) l.push({ type: 7, index: n }), m += q.length - 1;
       }
       n++;
     }
@@ -318,13 +318,13 @@ class Nt {
     return a.innerHTML = e, a;
   }
 }
-function ft(t, e, i = t, a) {
+function vt(t, e, i = t, a) {
   if (e === st) return e;
   let s = a !== void 0 ? i._$Co?.[a] : i._$Cl;
-  const n = qt(e) ? void 0 : e._$litDirective$;
-  return s?.constructor !== n && (s?._$AO?.(!1), n === void 0 ? s = void 0 : (s = new n(t), s._$AT(t, i, a)), a !== void 0 ? (i._$Co ??= [])[a] = s : i._$Cl = s), s !== void 0 && (e = ft(t, s._$AS(t, e.values), s, a)), e;
+  const n = $t(e) ? void 0 : e._$litDirective$;
+  return s?.constructor !== n && (s?._$AO?.(!1), n === void 0 ? s = void 0 : (s = new n(t), s._$AT(t, i, a)), a !== void 0 ? (i._$Co ??= [])[a] = s : i._$Cl = s), s !== void 0 && (e = vt(t, s._$AS(t, e.values), s, a)), e;
 }
-class U1 {
+class t1 {
   constructor(e, i) {
     this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = i;
   }
@@ -341,7 +341,7 @@ class U1 {
     for (; l !== void 0; ) {
       if (r === l.index) {
         let h;
-        l.type === 2 ? h = new $t(n, n.nextSibling, this, e) : l.type === 1 ? h = new l.ctor(n, l.name, l.strings, this, e) : l.type === 6 && (h = new X1(n, this, e)), this._$AV.push(h), l = a[++c];
+        l.type === 2 ? h = new Vt(n, n.nextSibling, this, e) : l.type === 1 ? h = new l.ctor(n, l.name, l.strings, this, e) : l.type === 6 && (h = new s1(n, this, e)), this._$AV.push(h), l = a[++c];
       }
       r !== l?.index && (n = et.nextNode(), r++);
     }
@@ -352,7 +352,7 @@ class U1 {
     for (const a of this._$AV) a !== void 0 && (a.strings !== void 0 ? (a._$AI(e, a, i), i += a.strings.length - 2) : a._$AI(e[i])), i++;
   }
 }
-class $t {
+class Vt {
   get _$AU() {
     return this._$AM?._$AU ?? this._$Cv;
   }
@@ -371,7 +371,7 @@ class $t {
     return this._$AB;
   }
   _$AI(e, i = this) {
-    e = ft(this, e, i), qt(e) ? e === d || e == null || e === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : e !== this._$AH && e !== st && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : F1(e) ? this.k(e) : this._(e);
+    e = vt(this, e, i), $t(e) ? e === d || e == null || e === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : e !== this._$AH && e !== st && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Ya(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -380,38 +380,38 @@ class $t {
     this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
   }
   _(e) {
-    this._$AH !== d && qt(this._$AH) ? this._$AA.nextSibling.data = e : this.T(at.createTextNode(e)), this._$AH = e;
+    this._$AH !== d && $t(this._$AH) ? this._$AA.nextSibling.data = e : this.T(at.createTextNode(e)), this._$AH = e;
   }
   $(e) {
-    const { values: i, _$litType$: a } = e, s = typeof a == "number" ? this._$AC(e) : (a.el === void 0 && (a.el = Nt.createElement(ji(a.h, a.h[0]), this.options)), a);
+    const { values: i, _$litType$: a } = e, s = typeof a == "number" ? this._$AC(e) : (a.el === void 0 && (a.el = qt.createElement(ta(a.h, a.h[0]), this.options)), a);
     if (this._$AH?._$AD === s) this._$AH.p(i);
     else {
-      const n = new U1(s, this), r = n.u(this.options);
+      const n = new t1(s, this), r = n.u(this.options);
       n.p(i), this.T(r), this._$AH = n;
     }
   }
   _$AC(e) {
-    let i = fi.get(e.strings);
-    return i === void 0 && fi.set(e.strings, i = new Nt(e)), i;
+    let i = Vi.get(e.strings);
+    return i === void 0 && Vi.set(e.strings, i = new qt(e)), i;
   }
   k(e) {
-    Qe(this._$AH) || (this._$AH = [], this._$AR());
+    ci(this._$AH) || (this._$AH = [], this._$AR());
     const i = this._$AH;
     let a, s = 0;
-    for (const n of e) s === i.length ? i.push(a = new $t(this.O(Zt()), this.O(Zt()), this, this.options)) : a = i[s], a._$AI(n), s++;
+    for (const n of e) s === i.length ? i.push(a = new Vt(this.O(Jt()), this.O(Jt()), this, this.options)) : a = i[s], a._$AI(n), s++;
     s < i.length && (this._$AR(a && a._$AB.nextSibling, s), i.length = s);
   }
   _$AR(e = this._$AA.nextSibling, i) {
     for (this._$AP?.(!1, !0, i); e !== this._$AB; ) {
-      const a = di(e).nextSibling;
-      di(e).remove(), e = a;
+      const a = Ci(e).nextSibling;
+      Ci(e).remove(), e = a;
     }
   }
   setConnected(e) {
     this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
   }
 }
-class be {
+class Ae {
   get tagName() {
     return this.element.tagName;
   }
@@ -424,11 +424,11 @@ class be {
   _$AI(e, i = this, a, s) {
     const n = this.strings;
     let r = !1;
-    if (n === void 0) e = ft(this, e, i, 0), r = !qt(e) || e !== this._$AH && e !== st, r && (this._$AH = e);
+    if (n === void 0) e = vt(this, e, i, 0), r = !$t(e) || e !== this._$AH && e !== st, r && (this._$AH = e);
     else {
       const c = e;
       let l, h;
-      for (e = n[0], l = 0; l < n.length - 1; l++) h = ft(this, c[a + l], i, l), h === st && (h = this._$AH[l]), r ||= !qt(h) || h !== this._$AH[l], h === d ? e = d : e !== d && (e += (h ?? "") + n[l + 1]), this._$AH[l] = h;
+      for (e = n[0], l = 0; l < n.length - 1; l++) h = vt(this, c[a + l], i, l), h === st && (h = this._$AH[l]), r ||= !$t(h) || h !== this._$AH[l], h === d ? e = d : e !== d && (e += (h ?? "") + n[l + 1]), this._$AH[l] = h;
     }
     r && !s && this.j(e);
   }
@@ -436,7 +436,7 @@ class be {
     e === d ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
   }
 }
-class j1 extends be {
+class e1 extends Ae {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -444,7 +444,7 @@ class j1 extends be {
     this.element[this.name] = e === d ? void 0 : e;
   }
 }
-class K1 extends be {
+class i1 extends Ae {
   constructor() {
     super(...arguments), this.type = 4;
   }
@@ -452,12 +452,12 @@ class K1 extends be {
     this.element.toggleAttribute(this.name, !!e && e !== d);
   }
 }
-class W1 extends be {
+class a1 extends Ae {
   constructor(e, i, a, s, n) {
     super(e, i, a, s, n), this.type = 5;
   }
   _$AI(e, i = this) {
-    if ((e = ft(this, e, i, 0) ?? d) === st) return;
+    if ((e = vt(this, e, i, 0) ?? d) === st) return;
     const a = this._$AH, s = e === d && a !== d || e.capture !== a.capture || e.once !== a.once || e.passive !== a.passive, n = e !== d && (a === d || s);
     s && this.element.removeEventListener(this.name, this, a), n && this.element.addEventListener(this.name, this, e), this._$AH = e;
   }
@@ -465,7 +465,7 @@ class W1 extends be {
     typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
   }
 }
-class X1 {
+class s1 {
   constructor(e, i, a) {
     this.element = e, this.type = 6, this._$AN = void 0, this._$AM = i, this.options = a;
   }
@@ -473,17 +473,17 @@ class X1 {
     return this._$AM._$AU;
   }
   _$AI(e) {
-    ft(this, e);
+    vt(this, e);
   }
 }
-const B1 = { I: $t }, Y1 = Ye.litHtmlPolyfillSupport;
-Y1?.(Nt, $t), (Ye.litHtmlVersions ??= []).push("3.3.3");
-const Q1 = (t, e, i) => {
+const n1 = { I: Vt }, r1 = oi.litHtmlPolyfillSupport;
+r1?.(qt, Vt), (oi.litHtmlVersions ??= []).push("3.3.3");
+const o1 = (t, e, i) => {
   const a = i?.renderBefore ?? e;
   let s = a._$litPart$;
   if (s === void 0) {
     const n = i?.renderBefore ?? null;
-    a._$litPart$ = s = new $t(e.insertBefore(Zt(), n), n, void 0, i ?? {});
+    a._$litPart$ = s = new Vt(e.insertBefore(Jt(), n), n, void 0, i ?? {});
   }
   return s._$AI(t), s;
 };
@@ -492,8 +492,8 @@ const Q1 = (t, e, i) => {
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const Ge = globalThis;
-let A = class extends mt {
+const li = globalThis;
+let H = class extends gt {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -503,7 +503,7 @@ let A = class extends mt {
   }
   update(e) {
     const i = this.render();
-    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Q1(i, this.renderRoot, this.renderOptions);
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = o1(i, this.renderRoot, this.renderOptions);
   }
   connectedCallback() {
     super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -515,16 +515,16 @@ let A = class extends mt {
     return st;
   }
 };
-A._$litElement$ = !0, A.finalized = !0, Ge.litElementHydrateSupport?.({ LitElement: A });
-const G1 = Ge.litElementPolyfillSupport;
-G1?.({ LitElement: A });
-(Ge.litElementVersions ??= []).push("4.2.2");
+H._$litElement$ = !0, H.finalized = !0, li.litElementHydrateSupport?.({ LitElement: H });
+const c1 = li.litElementPolyfillSupport;
+c1?.({ LitElement: H });
+(li.litElementVersions ??= []).push("4.2.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const J1 = { attribute: !0, type: String, converter: se, reflect: !1, hasChanged: Be }, ta = (t = J1, e, i) => {
+const l1 = { attribute: !0, type: String, converter: ce, reflect: !1, hasChanged: ri }, d1 = (t = l1, e, i) => {
   const { kind: a, metadata: s } = i;
   let n = globalThis.litPropertyMetadata.get(s);
   if (n === void 0 && globalThis.litPropertyMetadata.set(s, n = /* @__PURE__ */ new Map()), a === "setter" && ((t = Object.create(t)).wrapped = !0), n.set(i.name, t), a === "accessor") {
@@ -545,8 +545,8 @@ const J1 = { attribute: !0, type: String, converter: se, reflect: !1, hasChanged
   }
   throw Error("Unsupported decorator location: " + a);
 };
-function m(t) {
-  return (e, i) => typeof i == "object" ? ta(t, e, i) : ((a, s, n) => {
+function p(t) {
+  return (e, i) => typeof i == "object" ? d1(t, e, i) : ((a, s, n) => {
     const r = s.hasOwnProperty(n);
     return s.constructor.createProperty(n, a), r ? Object.getOwnPropertyDescriptor(s, n) : void 0;
   })(t, e, i);
@@ -556,24 +556,24 @@ function m(t) {
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-function C(t) {
-  return m({ ...t, state: !0, attribute: !1 });
+function x(t) {
+  return p({ ...t, state: !0, attribute: !1 });
 }
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const ea = (t, e, i) => (i.configurable = !0, i.enumerable = !0, Reflect.decorate && typeof e != "object" && Object.defineProperty(t, e, i), i);
+const h1 = (t, e, i) => (i.configurable = !0, i.enumerable = !0, Reflect.decorate && typeof e != "object" && Object.defineProperty(t, e, i), i);
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-function Je(t, e) {
+function Le(t, e) {
   return (i, a, s) => {
     const n = (r) => r.renderRoot?.querySelector(t) ?? null;
-    return ea(i, a, { get() {
+    return h1(i, a, { get() {
       return n(this);
     } });
   };
@@ -583,7 +583,7 @@ function b(t) {
     return customElements.get(t) || customElements.define(t, e), e;
   };
 }
-const ia = x`
+const u1 = y`
   :host {
     /* ---- Canvas & surfaces (light) ---- */
     --canvas: #f2f3f5;
@@ -733,7 +733,7 @@ const ia = x`
       --motion-surface: 0ms;
     }
   }
-`, aa = x`
+`, p1 = y`
   .visually-hidden {
     position: absolute !important;
     width: 1px;
@@ -759,7 +759,7 @@ const ia = x`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-`, sa = {
+`, m1 = {
   defaultView: "overview",
   title: "Home",
   // Wall-tablet / kiosk behaviour. Off by default; opt-in per install.
@@ -1211,129 +1211,85 @@ const ia = x`
       type: "system",
       label: "Energy",
       icon: "mdi:lightning-bolt-outline",
+      // The house is a page ASSET (not a widget): a full-bleed hero rendered
+      // above the grid, with today's Grid / Solar / Home totals overlaid and
+      // live flows animated over the conduit lines. Home = Grid + Solar.
+      hero: {
+        type: "energy",
+        grid: "sensor.whole_home_energy_daily_usage",
+        // daily net grid (kWh)
+        solar: "sensor.goodwe_today_s_pv_generation",
+        // daily solar (kWh)
+        gridPower: "sensor.p1_meter_power",
+        // signed W: + import / − export
+        solarPower: "sensor.goodwe_pv_power",
+        // W
+        carConnected: "binary_sensor.tesla_wall_connector_vehicle_connected",
+        // swaps to the EV art
+        carPower: "sensor.tesla_wall_connector_total_power"
+        // kW, auto-normalized
+      },
       widgets: [
-        // Hero: the live power-flow diagram (Grid ↔ Solar ↔ House ↔ Car). The
-        // stat tiles below are its numeric breakdown.
+        // The three Homey-style status tiles, in their own container. (No home
+        // battery in this install, so the fourth "Battery" tile is omitted.)
         {
-          id: "en-flow",
-          type: "powerflow",
-          name: "Power flow",
-          // Full-width 2x2 on a phone; the roomier XL square on tablet/desktop,
-          // where the size-capped nodes stay put and the gaps open up.
-          size: { compact: "2x2", medium: "3x3", wide: "3x3" },
+          id: "en-tiles",
+          type: "group",
+          size: { compact: "4x2", medium: "4x2", wide: "4x2" },
           options: {
-            gridPower: "sensor.p1_meter_power",
-            // signed W: + import / − export (HomeWizard P1)
-            solarPower: "sensor.goodwe_pv_power",
-            houseConsumption: "sensor.house_power_consumption",
-            carPower: "sensor.tesla_wall_connector_total_power",
-            // kW, auto-normalized
-            carPowerAlt: "sensor.other_tesla_model_3_charger_power",
-            // kW fallback
-            carActive: "sensor.tesla_wall_connector_status",
-            carActiveAlt: "sensor.other_tesla_model_3_charging"
+            variant: "tiles",
+            children: [
+              {
+                id: "en-t-electricity",
+                type: "metrictile",
+                entity: "sensor.p1_meter_power",
+                name: "Electricity",
+                icon: "mdi:flash",
+                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+                options: { accent: "accent", format: "power", status: "gridDirection" }
+              },
+              {
+                id: "en-t-solar",
+                type: "metrictile",
+                entity: "sensor.goodwe_pv_power",
+                name: "Solar",
+                icon: "mdi:weather-sunny",
+                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+                options: { accent: "light", format: "power", status: "none" }
+              },
+              {
+                id: "en-t-ev",
+                type: "metrictile",
+                entity: "sensor.other_tesla_model_3_battery_level",
+                name: "Electric Vehicle",
+                icon: "mdi:car-electric",
+                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+                options: {
+                  accent: "alert",
+                  format: "percent",
+                  status: "carCharge",
+                  chargeStatus: "sensor.tesla_wall_connector_status",
+                  connected: "binary_sensor.tesla_wall_connector_vehicle_connected"
+                }
+              }
+            ]
           }
         },
-        // Bespoke: the solar-only EV-charging control system (master arm, live
-        // charge status, and the grid-power start/stop thresholds as sliders).
+        // Today's Imported − Exported = Total, from the Statistics API.
         {
-          id: "en-solar-charging",
-          type: "solarcharging",
-          name: "Solar charging",
-          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+          id: "en-total",
+          type: "electricitytotal",
+          name: "Electricity Total",
+          size: { compact: "4x2", medium: "4x2", wide: "4x2" },
           options: {
-            master: "input_boolean.tesla_solar_charging_active",
-            vehicleConnected: "binary_sensor.tesla_wall_connector_vehicle_connected",
-            chargingState: "sensor.other_tesla_model_3_charging",
-            wallStatus: "sensor.tesla_wall_connector_status",
-            chargePower: "sensor.tesla_wall_connector_total_power",
-            // kW
-            battery: "sensor.other_tesla_model_3_battery_level",
-            chargeLimit: "number.other_tesla_model_3_charge_limit",
-            sessionEnergy: "sensor.tesla_wall_connector_session_energy",
-            chargeRate: "sensor.other_tesla_model_3_charge_rate",
-            chargeCurrent: "number.other_tesla_model_3_charge_current",
-            startThreshold: "input_number.tesla_solar_grid_start_threshold_w",
-            stopThreshold: "input_number.tesla_solar_grid_stop_threshold_w",
-            minCurrent: "input_number.tesla_solar_min_charge_current",
-            deadband: "input_number.tesla_solar_deadband_current_a"
+            importEnergy: "sensor.p1_meter_energy_import",
+            exportEnergy: "sensor.p1_meter_energy_export"
           }
-        },
-        // Long-range history from the Statistics API — solar / import / export /
-        // car-charging in kWh, with a Day / Week / Month selector.
-        {
-          id: "en-history",
-          type: "energychart",
-          name: "Energy history",
-          size: { compact: "2x2", medium: "4x2", wide: "4x2" },
-          options: {
-            solar: "sensor.goodwe_total_pv_generation",
-            gridImport: "sensor.p1_meter_energy_import",
-            gridExport: "sensor.p1_meter_energy_export",
-            car: "sensor.tesla_wall_connector_energy",
-            defaultPeriod: "day"
-          }
-        },
-        {
-          id: "en-grid-now",
-          type: "sensor",
-          entity: "sensor.p1_meter_power",
-          name: "Grid now",
-          icon: "mdi:transmission-tower",
-          size: { compact: "2x1", medium: "2x1", wide: "2x1" }
-        },
-        {
-          id: "en-solar-now",
-          type: "sensor",
-          entity: "sensor.goodwe_pv_power",
-          name: "Solar now",
-          icon: "mdi:solar-power",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" }
-        },
-        {
-          id: "en-house-now",
-          type: "sensor",
-          entity: "sensor.house_power_consumption",
-          name: "House now",
-          icon: "mdi:home-variant",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" }
-        },
-        {
-          id: "en-solar-today",
-          type: "sensor",
-          entity: "sensor.goodwe_today_s_pv_generation",
-          name: "Solar today",
-          icon: "mdi:solar-power-variant",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" }
-        },
-        {
-          id: "en-forecast",
-          type: "sensor",
-          entity: "sensor.energy_forecast_end_of_day",
-          name: "Forecast use",
-          icon: "mdi:chart-bell-curve",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" }
-        },
-        {
-          id: "en-import",
-          type: "sensor",
-          entity: "sensor.p1_meter_energy_import",
-          name: "Imported",
-          icon: "mdi:transmission-tower-import",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" }
-        },
-        {
-          id: "en-export",
-          type: "sensor",
-          entity: "sensor.p1_meter_energy_export",
-          name: "Exported",
-          icon: "mdi:transmission-tower-export",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" }
         }
       ]
     }
   ]
-}, Ie = ["1x1", "2x1", "1x2", "2x2", "3x3", "4x2"], na = ["compact", "medium", "wide"], ra = [
+}, je = ["1x1", "2x1", "1x2", "2x2", "3x3", "4x2"], g1 = ["compact", "medium", "wide"], f1 = [
   "group",
   "light",
   "switch",
@@ -1355,12 +1311,14 @@ const ia = x`
   "powerflow",
   "solarcharging",
   "energychart",
+  "metrictile",
+  "electricitytotal",
   "alarm",
   "action"
-], oa = ["media", "devices", "sensors", "energy"], vi = {
+], v1 = ["media", "devices", "sensors", "energy", "tiles"], ki = {
   // A container is full-width and self-sizing; the grid ignores its footprint,
   // so every size is permitted (synthetic groups carry a nominal one).
-  group: Ie,
+  group: je,
   light: ["1x1", "2x1", "1x2", "2x2"],
   switch: ["1x1", "2x1"],
   fan: ["1x1", "2x1", "1x2"],
@@ -1381,23 +1339,28 @@ const ia = x`
   powerflow: ["2x2", "3x3"],
   solarcharging: ["2x1", "1x2", "2x2"],
   energychart: ["2x2", "4x2"],
+  // Homey-style wide status tile (icon + name + "value • status"); one per grid cell.
+  metrictile: ["1x1", "2x1"],
+  // Full-width "Imported − Exported = Total" breakdown band.
+  electricitytotal: ["2x2", "4x2"],
   alarm: ["1x1", "2x1", "2x2"],
   action: ["1x1", "2x1"]
-}, ca = [
+}, b1 = [
   "group",
   "energy",
   "powerflow",
   "solarcharging",
   "energychart",
+  "electricitytotal",
   "action"
-], la = /^[a-z_]+\.[a-z0-9_]+$/;
-function da(t) {
-  return typeof t == "string" && la.test(t);
+], y1 = /^[a-z_]+\.[a-z0-9_]+$/;
+function w1(t) {
+  return typeof t == "string" && y1.test(t);
 }
-function ha(t) {
+function C1(t) {
   return !!t && /replace_me/i.test(t);
 }
-function ua(t) {
+function x1(t) {
   const e = [], i = (l, h) => e.push({ level: "error", path: l, message: h }), a = (l, h) => e.push({ level: "warning", path: l, message: h });
   if (!t || typeof t != "object")
     return {
@@ -1422,12 +1385,12 @@ function ua(t) {
       continue;
     }
     s.add(h.id), ["overview", "room", "system"].includes(h.type) || i(`${u}.type`, `Unknown view type "${h.type}".`), h.label || a(`${u}.label`, `View "${h.id}" has no label.`);
-    const p = [];
+    const m = [];
     for (let f = 0; f < (h.widgets ?? []).length; f++) {
       const g = h.widgets[f], v = `${u}.widgets[${f}]`;
-      Ki(g, v, n, i) && p.push(g);
+      ea(g, v, n, i) && m.push(g);
     }
-    r.push({ ...h, widgets: p });
+    r.push({ ...h, widgets: m });
   }
   s.has(t.defaultView) || (r.length > 0 ? a(
     "defaultView",
@@ -1440,62 +1403,62 @@ function ua(t) {
   };
   return { ok: !e.some((l) => l.level === "error"), issues: e, sanitized: c };
 }
-function Ki(t, e, i, a) {
+function ea(t, e, i, a) {
   if (!t || typeof t != "object")
     return a(e, "Widget must be an object."), !1;
   if (!t.id)
     return a(e, "Widget is missing an `id`."), !1;
   if (i.has(t.id))
     return a(`${e}.id`, `Duplicate widget id "${t.id}".`), !1;
-  if (i.add(t.id), !ra.includes(t.type))
+  if (i.add(t.id), !f1.includes(t.type))
     return a(`${e}.type`, `Unknown widget type "${t.type}".`), !1;
   const s = t.type;
-  if (!ca.includes(s) && !t.entity ? a(`${e}.entity`, `Widget "${t.id}" (${s}) requires an \`entity\`.`) : t.entity && !da(t.entity) && a(
+  if (!b1.includes(s) && !t.entity ? a(`${e}.entity`, `Widget "${t.id}" (${s}) requires an \`entity\`.`) : t.entity && !w1(t.entity) && a(
     `${e}.entity`,
     `"${t.entity}" is not a valid entity_id (expected e.g. light.living_room).`
   ), !t.size || typeof t.size != "object")
     a(`${e}.size`, `Widget "${t.id}" is missing a size set.`);
   else
-    for (const r of na) {
+    for (const r of g1) {
       const c = t.size[r];
       if (!c) {
         a(`${e}.size.${r}`, `Missing "${r}" size for widget "${t.id}".`);
         continue;
       }
-      if (!Ie.includes(c)) {
-        a(`${e}.size.${r}`, `Invalid size "${c}" (allowed: ${Ie.join(", ")}).`);
+      if (!je.includes(c)) {
+        a(`${e}.size.${r}`, `Invalid size "${c}" (allowed: ${je.join(", ")}).`);
         continue;
       }
-      vi[s].includes(c) || a(
+      ki[s].includes(c) || a(
         `${e}.size.${r}`,
-        `Widget type "${s}" does not support size "${c}" at ${r}. Supported: ${vi[s].join(", ")}.`
+        `Widget type "${s}" does not support size "${c}" at ${r}. Supported: ${ki[s].join(", ")}.`
       );
     }
   if (s === "group") {
     const r = t.options?.children;
     !Array.isArray(r) || r.length === 0 ? a(`${e}.options.children`, `Group "${t.id}" must have a non-empty \`children\` array.`) : r.forEach(
-      (c, l) => Ki(c, `${e}.options.children[${l}]`, i, a)
+      (c, l) => ea(c, `${e}.options.children[${l}]`, i, a)
     );
   }
   return !0;
 }
-function pa(t, e, i = window.location) {
-  return t && typeof t.path == "string" ? ga(t.path) : ma(i.pathname, e);
+function A1(t, e, i = window.location) {
+  return t && typeof t.path == "string" ? H1(t.path) : L1(i.pathname, e);
 }
-function ma(t, e) {
+function L1(t, e) {
   const i = t.replace(/^\/+/, "").split("/").filter(Boolean);
   return i[0] === e ? i[1] ?? "" : i.length > 1 ? i[1] : "";
 }
-function ga(t) {
+function H1(t) {
   return t.replace(/^\/+/, "").split("/").filter(Boolean)[0] ?? "";
 }
-function fa(t, e, i) {
+function M1(t, e, i) {
   return !e || e === i ? `/${t}` : `/${t}/${e}`;
 }
-function va(t) {
+function V1(t) {
   window.location.pathname !== t && (history.pushState(null, "", t), window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: !1 } })));
 }
-const ba = {
+const k1 = {
   // App-launcher glyphs for media_player sources (Apple TV & friends).
   "mdi:netflix": "M6.5,2H10.5L13.44,10.83L13.5,2H17.5V22C16.25,21.78 14.87,21.64 13.41,21.58L10.5,13L10.43,21.59C9.03,21.65 7.7,21.79 6.5,22V2Z",
   "mdi:youtube": "M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.56 21.94,11.16L22,12C22,14.19 21.84,15.8 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.69,18.94 13.59,18.94L12,19C7.81,19 5.2,18.84 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.44 2.06,12.84L2,12C2,9.81 2.16,8.2 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.31,5.06 10.41,5.06L12,5C16.19,5 18.8,5.16 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z",
@@ -1685,20 +1648,20 @@ const ba = {
   "mdi:window-closed-variant": "M21 20V2H3V20H1V23H23V20M19 4V11H13V4M5 4H11V11H5M5 20V13H11V20M13 20V13H19V20Z",
   "mdi:window-shutter": "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z"
 };
-var ya = Object.defineProperty, wa = Object.getOwnPropertyDescriptor, ti = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? wa(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var S1 = Object.defineProperty, E1 = Object.getOwnPropertyDescriptor, di = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? E1(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && ya(e, i, s), s;
+  return a && s && S1(e, i, s), s;
 };
-let Ut = class extends A {
+let Wt = class extends H {
   constructor() {
     super(...arguments), this.icon = "", this.size = 24;
   }
   render() {
-    const t = ba[this.icon], e = `--hd-icon-size:${this.size}px`;
+    const t = k1[this.icon], e = `--hd-icon-size:${this.size}px`;
     if (t)
       return o`<svg viewBox="0 0 24 24" style=${e} aria-hidden="true">
-        ${Ft`<path d=${t}></path>`}
+        ${jt`<path d=${t}></path>`}
       </svg>`;
     if (typeof customElements < "u" && customElements.get("ha-icon") && this.icon) {
       const i = document.createElement("ha-icon");
@@ -1707,7 +1670,7 @@ let Ut = class extends A {
     return this.icon ? o`<span class="dot" style=${e}></span>` : d;
   }
 };
-Ut.styles = x`
+Wt.styles = y`
     :host {
       display: inline-flex;
       align-items: center;
@@ -1729,21 +1692,21 @@ Ut.styles = x`
       opacity: 0.5;
     }
   `;
-ti([
-  m({ type: String })
-], Ut.prototype, "icon", 2);
-ti([
-  m({ type: Number })
-], Ut.prototype, "size", 2);
-Ut = ti([
+di([
+  p({ type: String })
+], Wt.prototype, "icon", 2);
+di([
+  p({ type: Number })
+], Wt.prototype, "size", 2);
+Wt = di([
   b("hd-icon")
-], Ut);
-var xa = Object.defineProperty, Ca = Object.getOwnPropertyDescriptor, lt = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Ca(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], Wt);
+var I1 = Object.defineProperty, P1 = Object.getOwnPropertyDescriptor, lt = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? P1(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && xa(e, i, s), s;
+  return a && s && I1(e, i, s), s;
 };
-let U = class extends A {
+let J = class extends H {
   constructor() {
     super(...arguments), this.icon = "", this.label = "", this.disabled = !1, this.loading = !1, this.variant = "plain", this.size = 22;
   }
@@ -1759,7 +1722,7 @@ let U = class extends A {
     `;
   }
 };
-U.styles = x`
+J.styles = y`
     :host {
       display: inline-flex;
     }
@@ -1833,32 +1796,32 @@ U.styles = x`
     }
   `;
 lt([
-  m({ type: String })
-], U.prototype, "icon", 2);
+  p({ type: String })
+], J.prototype, "icon", 2);
 lt([
-  m({ type: String })
-], U.prototype, "label", 2);
+  p({ type: String })
+], J.prototype, "label", 2);
 lt([
-  m({ type: Boolean, reflect: !0 })
-], U.prototype, "disabled", 2);
+  p({ type: Boolean, reflect: !0 })
+], J.prototype, "disabled", 2);
 lt([
-  m({ type: Boolean, reflect: !0 })
-], U.prototype, "loading", 2);
+  p({ type: Boolean, reflect: !0 })
+], J.prototype, "loading", 2);
 lt([
-  m({ type: String })
-], U.prototype, "variant", 2);
+  p({ type: String })
+], J.prototype, "variant", 2);
 lt([
-  m({ type: Number })
-], U.prototype, "size", 2);
-U = lt([
+  p({ type: Number })
+], J.prototype, "size", 2);
+J = lt([
   b("hd-icon-button")
-], U);
-var _a = Object.defineProperty, $a = Object.getOwnPropertyDescriptor, F = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? $a(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], J);
+var T1 = Object.defineProperty, D1 = Object.getOwnPropertyDescriptor, U = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? D1(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && _a(e, i, s), s;
+  return a && s && T1(e, i, s), s;
 };
-let I = class extends A {
+let Z = class extends H {
   constructor() {
     super(...arguments), this.open = !1, this.variant = "auto", this.heading = "", this.subheading = "", this.headless = !1, this._resolved = "sheet", this._dragY = 0, this._closing = !1, this._opener = null, this._dragStartY = 0, this._dragging = !1, this._onKeyDown = (t) => {
       this.open && t.key === "Escape" && (t.stopPropagation(), this.requestClose());
@@ -1962,7 +1925,7 @@ let I = class extends A {
     `;
   }
 };
-I.styles = x`
+Z.styles = y`
     :host {
       position: fixed;
       inset: 0;
@@ -2149,42 +2112,42 @@ I.styles = x`
       opacity: 0;
     }
   `;
-F([
-  m({ type: Boolean, reflect: !0 })
-], I.prototype, "open", 2);
-F([
-  m({ type: String })
-], I.prototype, "variant", 2);
-F([
-  m({ type: String })
-], I.prototype, "heading", 2);
-F([
-  m({ type: String })
-], I.prototype, "subheading", 2);
-F([
-  m({ type: Boolean })
-], I.prototype, "headless", 2);
-F([
-  C()
-], I.prototype, "_resolved", 2);
-F([
-  C()
-], I.prototype, "_dragY", 2);
-F([
-  C()
-], I.prototype, "_closing", 2);
-F([
-  Je(".container")
-], I.prototype, "_container", 2);
-I = F([
+U([
+  p({ type: Boolean, reflect: !0 })
+], Z.prototype, "open", 2);
+U([
+  p({ type: String })
+], Z.prototype, "variant", 2);
+U([
+  p({ type: String })
+], Z.prototype, "heading", 2);
+U([
+  p({ type: String })
+], Z.prototype, "subheading", 2);
+U([
+  p({ type: Boolean })
+], Z.prototype, "headless", 2);
+U([
+  x()
+], Z.prototype, "_resolved", 2);
+U([
+  x()
+], Z.prototype, "_dragY", 2);
+U([
+  x()
+], Z.prototype, "_closing", 2);
+U([
+  Le(".container")
+], Z.prototype, "_container", 2);
+Z = U([
   b("hd-surface")
-], I);
-var Aa = Object.defineProperty, Ha = Object.getOwnPropertyDescriptor, K = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Ha(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], Z);
+var O1 = Object.defineProperty, z1 = Object.getOwnPropertyDescriptor, j = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? z1(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Aa(e, i, s), s;
+  return a && s && O1(e, i, s), s;
 };
-let q = class extends A {
+let F = class extends H {
   constructor() {
     super(...arguments), this.views = [], this.currentViewId = "", this.productTitle = "Home", this.subtitle = "", this.connected = !0, this.appearance = "auto", this._mode = "sidebar", this._switcherOpen = !1;
   }
@@ -2299,7 +2262,7 @@ let q = class extends A {
     `;
   }
 };
-q.styles = x`
+F.styles = y`
     :host {
       display: block;
       height: 100%;
@@ -2556,40 +2519,40 @@ q.styles = x`
       background: var(--surface);
     }
   `;
-K([
-  m({ attribute: !1 })
-], q.prototype, "views", 2);
-K([
-  m({ type: String })
-], q.prototype, "currentViewId", 2);
-K([
-  m({ type: String })
-], q.prototype, "productTitle", 2);
-K([
-  m({ type: String })
-], q.prototype, "subtitle", 2);
-K([
-  m({ type: Boolean })
-], q.prototype, "connected", 2);
-K([
-  m({ type: String })
-], q.prototype, "appearance", 2);
-K([
-  C()
-], q.prototype, "_mode", 2);
-K([
-  C()
-], q.prototype, "_switcherOpen", 2);
-q = K([
+j([
+  p({ attribute: !1 })
+], F.prototype, "views", 2);
+j([
+  p({ type: String })
+], F.prototype, "currentViewId", 2);
+j([
+  p({ type: String })
+], F.prototype, "productTitle", 2);
+j([
+  p({ type: String })
+], F.prototype, "subtitle", 2);
+j([
+  p({ type: Boolean })
+], F.prototype, "connected", 2);
+j([
+  p({ type: String })
+], F.prototype, "appearance", 2);
+j([
+  x()
+], F.prototype, "_mode", 2);
+j([
+  x()
+], F.prototype, "_switcherOpen", 2);
+F = j([
   b("hd-app-shell")
-], q);
+], F);
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const La = { CHILD: 2 }, Va = (t) => (...e) => ({ _$litDirective$: t, values: e });
-let Ma = class {
+const R1 = { CHILD: 2 }, B1 = (t) => (...e) => ({ _$litDirective$: t, values: e });
+let Z1 = class {
   constructor(e) {
   }
   get _$AU() {
@@ -2610,11 +2573,11 @@ let Ma = class {
  * Copyright 2020 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { I: ka } = B1, bi = (t) => t, yi = () => document.createComment(""), Mt = (t, e, i) => {
+const { I: Q1 } = n1, Si = (t) => t, Ei = () => document.createComment(""), It = (t, e, i) => {
   const a = t._$AA.parentNode, s = e === void 0 ? t._$AB : e._$AA;
   if (i === void 0) {
-    const n = a.insertBefore(yi(), s), r = a.insertBefore(yi(), s);
-    i = new ka(n, r, t, t.options);
+    const n = a.insertBefore(Ei(), s), r = a.insertBefore(Ei(), s);
+    i = new Q1(n, r, t, t.options);
   } else {
     const n = i._$AB.nextSibling, r = i._$AM, c = r !== t;
     if (c) {
@@ -2624,13 +2587,13 @@ const { I: ka } = B1, bi = (t) => t, yi = () => document.createComment(""), Mt =
     if (n !== s || c) {
       let l = i._$AA;
       for (; l !== n; ) {
-        const h = bi(l).nextSibling;
-        bi(a).insertBefore(l, s), l = h;
+        const h = Si(l).nextSibling;
+        Si(a).insertBefore(l, s), l = h;
       }
     }
   }
   return i;
-}, G = (t, e, i = t) => (t._$AI(e, i), t), Sa = {}, Pa = (t, e = Sa) => t._$AH = e, Ta = (t) => t._$AH, Se = (t) => {
+}, Y = (t, e, i = t) => (t._$AI(e, i), t), _1 = {}, F1 = (t, e = _1) => t._$AH = e, U1 = (t) => t._$AH, Ze = (t) => {
   t._$AR(), t._$AA.remove();
 };
 /**
@@ -2638,13 +2601,13 @@ const { I: ka } = B1, bi = (t) => t, yi = () => document.createComment(""), Mt =
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const wi = (t, e, i) => {
+const Ii = (t, e, i) => {
   const a = /* @__PURE__ */ new Map();
   for (let s = e; s <= i; s++) a.set(t[s], s);
   return a;
-}, Wi = Va(class extends Ma {
+}, ia = B1(class extends Z1 {
   constructor(t) {
-    if (super(t), t.type !== La.CHILD) throw Error("repeat() can only be used in text expressions");
+    if (super(t), t.type !== R1.CHILD) throw Error("repeat() can only be used in text expressions");
   }
   dt(t, e, i) {
     let a;
@@ -2658,64 +2621,66 @@ const wi = (t, e, i) => {
     return this.dt(t, e, i).values;
   }
   update(t, [e, i, a]) {
-    const s = Ta(t), { values: n, keys: r } = this.dt(e, i, a);
+    const s = U1(t), { values: n, keys: r } = this.dt(e, i, a);
     if (!Array.isArray(s)) return this.ut = r, n;
     const c = this.ut ??= [], l = [];
-    let h, u, p = 0, f = s.length - 1, g = 0, v = n.length - 1;
-    for (; p <= f && g <= v; ) if (s[p] === null) p++;
+    let h, u, m = 0, f = s.length - 1, g = 0, v = n.length - 1;
+    for (; m <= f && g <= v; ) if (s[m] === null) m++;
     else if (s[f] === null) f--;
-    else if (c[p] === r[g]) l[g] = G(s[p], n[g]), p++, g++;
-    else if (c[f] === r[v]) l[v] = G(s[f], n[v]), f--, v--;
-    else if (c[p] === r[v]) l[v] = G(s[p], n[v]), Mt(t, l[v + 1], s[p]), p++, v--;
-    else if (c[f] === r[g]) l[g] = G(s[f], n[g]), Mt(t, s[p], s[f]), f--, g++;
-    else if (h === void 0 && (h = wi(r, g, v), u = wi(c, p, f)), h.has(c[p])) if (h.has(c[f])) {
-      const y = u.get(r[g]), M = y !== void 0 ? s[y] : null;
-      if (M === null) {
-        const T = Mt(t, s[p]);
-        G(T, n[g]), l[g] = T;
-      } else l[g] = G(M, n[g]), Mt(t, s[p], M), s[y] = null;
+    else if (c[m] === r[g]) l[g] = Y(s[m], n[g]), m++, g++;
+    else if (c[f] === r[v]) l[v] = Y(s[f], n[v]), f--, v--;
+    else if (c[m] === r[v]) l[v] = Y(s[m], n[v]), It(t, l[v + 1], s[m]), m++, v--;
+    else if (c[f] === r[g]) l[g] = Y(s[f], n[g]), It(t, s[m], s[f]), f--, g++;
+    else if (h === void 0 && (h = Ii(r, g, v), u = Ii(c, m, f)), h.has(c[m])) if (h.has(c[f])) {
+      const w = u.get(r[g]), S = w !== void 0 ? s[w] : null;
+      if (S === null) {
+        const D = It(t, s[m]);
+        Y(D, n[g]), l[g] = D;
+      } else l[g] = Y(S, n[g]), It(t, s[m], S), s[w] = null;
       g++;
-    } else Se(s[f]), f--;
-    else Se(s[p]), p++;
+    } else Ze(s[f]), f--;
+    else Ze(s[m]), m++;
     for (; g <= v; ) {
-      const y = Mt(t, l[v + 1]);
-      G(y, n[g]), l[g++] = y;
+      const w = It(t, l[v + 1]);
+      Y(w, n[g]), l[g++] = w;
     }
-    for (; p <= f; ) {
-      const y = s[p++];
-      y !== null && Se(y);
+    for (; m <= f; ) {
+      const w = s[m++];
+      w !== null && Ze(w);
     }
-    return this.ut = r, Pa(t, l), st;
+    return this.ut = r, F1(t, l), st;
   }
 });
-function Xi(t) {
+function aa(t) {
   const e = t || 1024;
   return e < 600 ? { columns: 2, gap: 10, pad: 12, bucket: "compact" } : e < 900 ? { columns: 4, gap: 14, pad: 20, bucket: "medium" } : e < 1200 ? { columns: 6, gap: 16, pad: 24, bucket: "wide" } : e < 1600 ? { columns: 8, gap: 16, pad: 28, bucket: "wide" } : { columns: 10, gap: 16, pad: 32, bucket: "wide" };
 }
-function ei(t, e) {
+function hi(t, e) {
   return t.size?.[e] ?? t.size?.medium ?? "1x1";
 }
-function Ea(t, e) {
+function J1(t, e) {
   const i = t.options ?? {};
   if (!(i.hero === !0 || typeof i.brand == "string")) return null;
-  const s = ei(t, e);
+  const s = hi(t, e);
   return s === "1x1" ? null : s;
 }
-function Bi(t, e) {
+function sa(t, e) {
   const [i, a] = t.split("x").map((s) => parseInt(s, 10));
   return { colSpan: Math.min(Math.max(1, i || 1), e), rowSpan: Math.max(1, a || 1) };
 }
-function Oa(t, e) {
+function $1(t, e) {
   const i = t - e.pad * 2 - e.gap * (e.columns - 1);
   return Math.max(96, Math.floor(i / e.columns));
 }
-const za = oa, Da = {
+const j1 = v1, q1 = {
   media: "Media",
   devices: "Devices",
   sensors: "Sensors",
-  energy: "Energy"
+  energy: "Energy",
+  // Hand-composed only (never auto-collected); heading comes from GroupOptions.
+  tiles: ""
 };
-function Yi(t) {
+function na(t) {
   switch (t) {
     case "media":
       return "media";
@@ -2733,10 +2698,10 @@ function Yi(t) {
       return "devices";
   }
 }
-function Ia(t) {
+function W1(t) {
   return t === "devices" ? "tile" : t === "sensors" ? "value" : "row";
 }
-function Ra(t, e) {
+function K1(t, e) {
   const i = e || 1024;
   switch (t) {
     case "media":
@@ -2747,30 +2712,32 @@ function Ra(t, e) {
       return i < 600 ? 2 : i < 900 ? 3 : i < 1200 ? 4 : 6;
     case "energy":
       return i < 900 ? 2 : 4;
+    case "tiles":
+      return i < 640 ? 2 : 3;
   }
 }
-const Za = { compact: "4x2", medium: "4x2", wide: "4x2" };
-function qa(t, e) {
-  const i = { label: Da[t], variant: t, children: e };
+const N1 = { compact: "4x2", medium: "4x2", wide: "4x2" };
+function X1(t, e) {
+  const i = { label: q1[t], variant: t, children: e };
   return {
     id: `__section_${t}`,
     type: "group",
-    size: Za,
+    size: N1,
     options: i
   };
 }
-function Fa(t) {
+function Y1(t) {
   const e = t ?? [];
   if (e.some((s) => s.type === "group")) return e;
   const i = /* @__PURE__ */ new Map();
   for (const s of e) {
-    const n = Yi(s.type), r = i.get(n) ?? [];
+    const n = na(s.type), r = i.get(n) ?? [];
     r.push(s), i.set(n, r);
   }
   const a = [];
-  for (const s of za) {
+  for (const s of j1) {
     const n = i.get(s);
-    n && n.length && a.push(qa(s, n));
+    n && n.length && a.push(X1(s, n));
   }
   return a;
 }
@@ -2779,29 +2746,29 @@ function Fa(t) {
  * Copyright 2020 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const Qi = Symbol.for(""), Na = (t) => {
-  if (t?.r === Qi) return t?._$litStatic$;
-}, Ua = (t) => ({ _$litStatic$: t, r: Qi }), xi = /* @__PURE__ */ new Map(), ja = (t) => (e, ...i) => {
+const ra = Symbol.for(""), G1 = (t) => {
+  if (t?.r === ra) return t?._$litStatic$;
+}, ts = (t) => ({ _$litStatic$: t, r: ra }), Pi = /* @__PURE__ */ new Map(), es = (t) => (e, ...i) => {
   const a = i.length;
   let s, n;
   const r = [], c = [];
   let l, h = 0, u = !1;
   for (; h < a; ) {
-    for (l = e[h]; h < a && (n = i[h], (s = Na(n)) !== void 0); ) l += s + e[++h], u = !0;
+    for (l = e[h]; h < a && (n = i[h], (s = G1(n)) !== void 0); ) l += s + e[++h], u = !0;
     h !== a && c.push(n), r.push(l), h++;
   }
   if (h === a && r.push(e[a]), u) {
-    const p = r.join("$$lit$$");
-    (e = xi.get(p)) === void 0 && (r.raw = r, xi.set(p, e = r)), i = c;
+    const m = r.join("$$lit$$");
+    (e = Pi.get(m)) === void 0 && (r.raw = r, Pi.set(m, e = r)), i = c;
   }
   return t(e, ...i);
-}, Ka = ja(o);
-var Wa = Object.defineProperty, Xa = Object.getOwnPropertyDescriptor, At = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Xa(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+}, is = es(o);
+var as = Object.defineProperty, ss = Object.getOwnPropertyDescriptor, kt = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? ss(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Wa(e, i, s), s;
+  return a && s && as(e, i, s), s;
 };
-let X = class extends A {
+let W = class extends H {
   constructor() {
     super(...arguments), this.currentSize = "4x2", this.layout = "row", this._width = 0;
   }
@@ -2821,27 +2788,27 @@ let X = class extends A {
     return this._opts.children ?? [];
   }
   get _variant() {
-    return this._opts.variant ?? Yi(this._children[0]?.type ?? "sensor");
+    return this._opts.variant ?? na(this._children[0]?.type ?? "sensor");
   }
   render() {
     const t = this._children;
     if (!t.length) return d;
-    const e = this._variant, i = Ra(e, this._width), a = 12, s = Xi(this._width).bucket, n = Ia(e), r = this._opts.label, c = n !== "row", l = e === "sensors" ? 84 : e === "media" ? 116 : Oa(this._width || 1024, { columns: i, gap: a, pad: 0 }), h = `--cols:${i}; --gap:${a}px; --unit:${l}px`;
+    const e = this._variant, i = K1(e, this._width), a = 12, s = aa(this._width).bucket, n = W1(e), r = this._opts.label, c = n !== "row", l = e === "sensors" ? 84 : e === "media" ? 116 : e === "tiles" ? 100 : $1(this._width || 1024, { columns: i, gap: a, pad: 0 }), h = `--cols:${i}; --gap:${a}px; --unit:${l}px`;
     return o`
       <section class="section">
         ${r ? o`<h2 class="head">${r}</h2>` : d}
         <div class="grid" style=${h}>
-          ${Wi(
+          ${ia(
       t,
       (u) => u.id,
       (u) => {
-        const p = c ? Ea(u, s) : null;
-        return M1(
+        const m = c ? J1(u, s) : null;
+        return Za(
           u,
-          p ?? (c ? "1x1" : ei(u, s)),
+          m ?? (c ? "1x1" : hi(u, s)),
           i,
           this.hass,
-          p ? "row" : n
+          m ? "row" : n
         );
       }
     )}
@@ -2850,7 +2817,7 @@ let X = class extends A {
     `;
   }
 };
-X.styles = x`
+W.styles = y`
     :host {
       display: block;
       grid-column: 1 / -1;
@@ -2877,37 +2844,37 @@ X.styles = x`
       min-height: 0;
     }
   `;
-At([
-  m({ attribute: !1 })
-], X.prototype, "hass", 2);
-At([
-  m({ attribute: !1 })
-], X.prototype, "config", 2);
-At([
-  m({ type: String })
-], X.prototype, "currentSize", 2);
-At([
-  m({ type: String })
-], X.prototype, "layout", 2);
-At([
-  C()
-], X.prototype, "_width", 2);
-X = At([
+kt([
+  p({ attribute: !1 })
+], W.prototype, "hass", 2);
+kt([
+  p({ attribute: !1 })
+], W.prototype, "config", 2);
+kt([
+  p({ type: String })
+], W.prototype, "currentSize", 2);
+kt([
+  p({ type: String })
+], W.prototype, "layout", 2);
+kt([
+  x()
+], W.prototype, "_width", 2);
+W = kt([
   b("hd-group")
-], X);
-function w(t, e) {
+], W);
+function C(t, e) {
   return t ? ((t.attributes.supported_features ?? 0) & e) === e : !1;
 }
-function Ht(t) {
+function St(t) {
   return t.split(".")[0];
 }
-function ye(t) {
+function He(t) {
   return !t || t.state === "unavailable";
 }
-function we(t) {
+function Me(t) {
   return !!t && t.state === "unknown";
 }
-const Ba = { EFFECT: 4 }, Ya = /* @__PURE__ */ new Set([
+const ns = { EFFECT: 4 }, rs = /* @__PURE__ */ new Set([
   "brightness",
   "color_temp",
   "hs",
@@ -2916,17 +2883,17 @@ const Ba = { EFFECT: 4 }, Ya = /* @__PURE__ */ new Set([
   "rgbw",
   "rgbww",
   "white"
-]), Qa = /* @__PURE__ */ new Set(["hs", "xy", "rgb", "rgbw", "rgbww"]);
-function Gi(t) {
+]), os = /* @__PURE__ */ new Set(["hs", "xy", "rgb", "rgbw", "rgbww"]);
+function oa(t) {
   const e = t?.attributes.supported_color_modes ?? [];
   return {
-    brightness: e.some((i) => Ya.has(i)),
+    brightness: e.some((i) => rs.has(i)),
     colorTemp: e.includes("color_temp"),
-    color: e.some((i) => Qa.has(i)),
-    effects: w(t, Ba.EFFECT)
+    color: e.some((i) => os.has(i)),
+    effects: C(t, ns.EFFECT)
   };
 }
-const J = {
+const G = {
   OPEN: 1,
   CLOSE: 2,
   SET_POSITION: 4,
@@ -2935,17 +2902,17 @@ const J = {
   CLOSE_TILT: 32,
   SET_TILT_POSITION: 128
 };
-function Ji(t) {
+function ca(t) {
   return {
-    open: w(t, J.OPEN),
-    close: w(t, J.CLOSE),
-    stop: w(t, J.STOP),
-    setPosition: w(t, J.SET_POSITION),
-    tilt: w(t, J.OPEN_TILT) || w(t, J.CLOSE_TILT),
-    setTilt: w(t, J.SET_TILT_POSITION)
+    open: C(t, G.OPEN),
+    close: C(t, G.CLOSE),
+    stop: C(t, G.STOP),
+    setPosition: C(t, G.SET_POSITION),
+    tilt: C(t, G.OPEN_TILT) || C(t, G.CLOSE_TILT),
+    setTilt: C(t, G.SET_TILT_POSITION)
   };
 }
-const ut = {
+const pt = {
   TARGET_TEMPERATURE: 1,
   TARGET_TEMPERATURE_RANGE: 2,
   TARGET_HUMIDITY: 4,
@@ -2953,17 +2920,17 @@ const ut = {
   PRESET_MODE: 16,
   SWING_MODE: 32
 };
-function t1(t) {
+function la(t) {
   return {
-    targetTemp: w(t, ut.TARGET_TEMPERATURE),
-    targetTempRange: w(t, ut.TARGET_TEMPERATURE_RANGE),
-    fanMode: w(t, ut.FAN_MODE),
-    presetMode: w(t, ut.PRESET_MODE),
-    swingMode: w(t, ut.SWING_MODE),
-    humidity: w(t, ut.TARGET_HUMIDITY)
+    targetTemp: C(t, pt.TARGET_TEMPERATURE),
+    targetTempRange: C(t, pt.TARGET_TEMPERATURE_RANGE),
+    fanMode: C(t, pt.FAN_MODE),
+    presetMode: C(t, pt.PRESET_MODE),
+    swingMode: C(t, pt.SWING_MODE),
+    humidity: C(t, pt.TARGET_HUMIDITY)
   };
 }
-const D = {
+const B = {
   PAUSE: 1,
   VOLUME_SET: 4,
   VOLUME_MUTE: 8,
@@ -2977,19 +2944,19 @@ const D = {
   PLAY: 16384,
   SELECT_SOUND_MODE: 65536
 };
-function e1(t) {
+function da(t) {
   return {
-    play: w(t, D.PLAY),
-    pause: w(t, D.PAUSE),
-    stop: w(t, D.STOP),
-    next: w(t, D.NEXT_TRACK),
-    previous: w(t, D.PREVIOUS_TRACK),
-    volumeSet: w(t, D.VOLUME_SET),
-    volumeStep: w(t, D.VOLUME_STEP),
-    mute: w(t, D.VOLUME_MUTE),
-    selectSource: w(t, D.SELECT_SOURCE),
-    selectSoundMode: w(t, D.SELECT_SOUND_MODE),
-    power: w(t, D.TURN_ON) || w(t, D.TURN_OFF)
+    play: C(t, B.PLAY),
+    pause: C(t, B.PAUSE),
+    stop: C(t, B.STOP),
+    next: C(t, B.NEXT_TRACK),
+    previous: C(t, B.PREVIOUS_TRACK),
+    volumeSet: C(t, B.VOLUME_SET),
+    volumeStep: C(t, B.VOLUME_STEP),
+    mute: C(t, B.VOLUME_MUTE),
+    selectSource: C(t, B.SELECT_SOURCE),
+    selectSoundMode: C(t, B.SELECT_SOUND_MODE),
+    power: C(t, B.TURN_ON) || C(t, B.TURN_OFF)
   };
 }
 const tt = {
@@ -3001,168 +2968,168 @@ const tt = {
   LOCATE: 512,
   START: 8192
 };
-function i1(t) {
+function ha(t) {
   return {
-    start: w(t, tt.START),
-    pause: w(t, tt.PAUSE),
-    stop: w(t, tt.STOP),
-    returnHome: w(t, tt.RETURN_HOME),
-    fanSpeed: w(t, tt.FAN_SPEED),
-    battery: w(t, tt.BATTERY),
-    locate: w(t, tt.LOCATE)
+    start: C(t, tt.START),
+    pause: C(t, tt.PAUSE),
+    stop: C(t, tt.STOP),
+    returnHome: C(t, tt.RETURN_HOME),
+    fanSpeed: C(t, tt.FAN_SPEED),
+    battery: C(t, tt.BATTERY),
+    locate: C(t, tt.LOCATE)
   };
 }
-const Gt = { SET_SPEED: 1, OSCILLATE: 2, DIRECTION: 4, PRESET_MODE: 8 };
-function Ga(t) {
+const ie = { SET_SPEED: 1, OSCILLATE: 2, DIRECTION: 4, PRESET_MODE: 8 };
+function cs(t) {
   return {
-    speed: w(t, Gt.SET_SPEED),
-    oscillate: w(t, Gt.OSCILLATE),
-    direction: w(t, Gt.DIRECTION),
-    presetMode: w(t, Gt.PRESET_MODE)
+    speed: C(t, ie.SET_SPEED),
+    oscillate: C(t, ie.OSCILLATE),
+    direction: C(t, ie.DIRECTION),
+    presetMode: C(t, ie.PRESET_MODE)
   };
 }
-function a1(t, e) {
+function ua(t, e) {
   const i = { ...e.data ?? {} }, a = e.target ?? {};
   return t.callService(e.domain, e.service, i, a);
 }
-const _ = (t, e = {}) => ({
+const L = (t, e = {}) => ({
   entity_id: t,
   ...e
 });
-function B(t) {
-  const e = Ht(t);
-  return { domain: (/* @__PURE__ */ new Set(["light", "switch", "fan", "input_boolean", "media_player", "cover", "climate"])).has(e) ? e : "homeassistant", service: "toggle", data: _(t) };
+function K(t) {
+  const e = St(t);
+  return { domain: (/* @__PURE__ */ new Set(["light", "switch", "fan", "input_boolean", "media_player", "cover", "climate"])).has(e) ? e : "homeassistant", service: "toggle", data: L(t) };
 }
-function s1(t, e = {}) {
-  const i = Ht(t);
-  return { domain: ["light", "switch", "fan", "media_player", "input_boolean", "climate", "humidifier"].includes(i) ? i : "homeassistant", service: "turn_on", data: _(t, e) };
+function pa(t, e = {}) {
+  const i = St(t);
+  return { domain: ["light", "switch", "fan", "media_player", "input_boolean", "climate", "humidifier"].includes(i) ? i : "homeassistant", service: "turn_on", data: L(t, e) };
 }
-function n1(t) {
-  const e = Ht(t);
-  return { domain: ["light", "switch", "fan", "media_player", "input_boolean", "climate", "humidifier"].includes(e) ? e : "homeassistant", service: "turn_off", data: _(t) };
+function ma(t) {
+  const e = St(t);
+  return { domain: ["light", "switch", "fan", "media_player", "input_boolean", "climate", "humidifier"].includes(e) ? e : "homeassistant", service: "turn_off", data: L(t) };
 }
-function gt(t, e = {}) {
+function ft(t, e = {}) {
   const i = {};
-  return e.brightnessPct != null && (i.brightness_pct = it(Math.round(e.brightnessPct), 0, 100)), e.colorTempKelvin != null && (i.color_temp_kelvin = Math.round(e.colorTempKelvin)), e.rgbColor && (i.rgb_color = e.rgbColor), e.hsColor && (i.hs_color = [it(e.hsColor[0], 0, 360), it(e.hsColor[1], 0, 100)]), e.effect && (i.effect = e.effect), e.transition != null && (i.transition = e.transition), { domain: "light", service: "turn_on", data: _(t, i) };
+  return e.brightnessPct != null && (i.brightness_pct = it(Math.round(e.brightnessPct), 0, 100)), e.colorTempKelvin != null && (i.color_temp_kelvin = Math.round(e.colorTempKelvin)), e.rgbColor && (i.rgb_color = e.rgbColor), e.hsColor && (i.hs_color = [it(e.hsColor[0], 0, 360), it(e.hsColor[1], 0, 100)]), e.effect && (i.effect = e.effect), e.transition != null && (i.transition = e.transition), { domain: "light", service: "turn_on", data: L(t, i) };
 }
-function Re(t, e) {
+function qe(t, e) {
   const i = it(Math.round(e), 0, 100);
-  return i <= 0 ? n1(t) : gt(t, { brightnessPct: i });
+  return i <= 0 ? ma(t) : ft(t, { brightnessPct: i });
 }
-function r1(t, e) {
-  return { domain: "climate", service: "set_temperature", data: _(t, { temperature: e }) };
+function ga(t, e) {
+  return { domain: "climate", service: "set_temperature", data: L(t, { temperature: e }) };
 }
-function o1(t, e) {
-  return { domain: "climate", service: "set_hvac_mode", data: _(t, { hvac_mode: e }) };
+function fa(t, e) {
+  return { domain: "climate", service: "set_hvac_mode", data: L(t, { hvac_mode: e }) };
 }
-function Ja(t, e) {
-  return { domain: "climate", service: "set_fan_mode", data: _(t, { fan_mode: e }) };
+function ls(t, e) {
+  return { domain: "climate", service: "set_fan_mode", data: L(t, { fan_mode: e }) };
 }
-function ts(t, e) {
-  return { domain: "climate", service: "set_preset_mode", data: _(t, { preset_mode: e }) };
+function ds(t, e) {
+  return { domain: "climate", service: "set_preset_mode", data: L(t, { preset_mode: e }) };
 }
-function es(t, e) {
-  return { domain: "climate", service: "set_swing_mode", data: _(t, { swing_mode: e }) };
+function hs(t, e) {
+  return { domain: "climate", service: "set_swing_mode", data: L(t, { swing_mode: e }) };
 }
-function c1(t) {
-  return { domain: "cover", service: "open_cover", data: _(t) };
+function va(t) {
+  return { domain: "cover", service: "open_cover", data: L(t) };
 }
-function l1(t) {
-  return { domain: "cover", service: "close_cover", data: _(t) };
+function ba(t) {
+  return { domain: "cover", service: "close_cover", data: L(t) };
 }
-function d1(t) {
-  return { domain: "cover", service: "stop_cover", data: _(t) };
+function ya(t) {
+  return { domain: "cover", service: "stop_cover", data: L(t) };
 }
-function h1(t, e) {
+function wa(t, e) {
   return {
     domain: "cover",
     service: "set_cover_position",
-    data: _(t, { position: it(Math.round(e), 0, 100) })
+    data: L(t, { position: it(Math.round(e), 0, 100) })
   };
 }
-function u1(t) {
-  return { domain: "media_player", service: "media_play_pause", data: _(t) };
+function Ca(t) {
+  return { domain: "media_player", service: "media_play_pause", data: L(t) };
 }
-function p1(t) {
-  return { domain: "media_player", service: "media_next_track", data: _(t) };
+function xa(t) {
+  return { domain: "media_player", service: "media_next_track", data: L(t) };
 }
-function m1(t) {
-  return { domain: "media_player", service: "media_previous_track", data: _(t) };
+function Aa(t) {
+  return { domain: "media_player", service: "media_previous_track", data: L(t) };
 }
-function is(t, e) {
+function us(t, e) {
   return {
     domain: "media_player",
     service: "volume_set",
-    data: _(t, { volume_level: it(e, 0, 1) })
+    data: L(t, { volume_level: it(e, 0, 1) })
   };
 }
-function as(t, e) {
-  return { domain: "media_player", service: "volume_mute", data: _(t, { is_volume_muted: e }) };
+function ps(t, e) {
+  return { domain: "media_player", service: "volume_mute", data: L(t, { is_volume_muted: e }) };
 }
-function ss(t, e) {
-  return { domain: "media_player", service: "select_source", data: _(t, { source: e }) };
+function ms(t, e) {
+  return { domain: "media_player", service: "select_source", data: L(t, { source: e }) };
 }
-function ns(t, e) {
-  return { domain: "media_player", service: "select_sound_mode", data: _(t, { sound_mode: e }) };
+function gs(t, e) {
+  return { domain: "media_player", service: "select_sound_mode", data: L(t, { sound_mode: e }) };
 }
-function re(t) {
-  return { domain: "vacuum", service: "start", data: _(t) };
+function de(t) {
+  return { domain: "vacuum", service: "start", data: L(t) };
 }
-function Ze(t) {
-  return { domain: "vacuum", service: "pause", data: _(t) };
+function We(t) {
+  return { domain: "vacuum", service: "pause", data: L(t) };
 }
-function oe(t) {
-  return { domain: "vacuum", service: "return_to_base", data: _(t) };
+function he(t) {
+  return { domain: "vacuum", service: "return_to_base", data: L(t) };
 }
-function g1(t, e) {
-  return { domain: "vacuum", service: "set_fan_speed", data: _(t, { fan_speed: e }) };
+function La(t, e) {
+  return { domain: "vacuum", service: "set_fan_speed", data: L(t, { fan_speed: e }) };
 }
-function f1(t) {
-  return { domain: "vacuum", service: "locate", data: _(t) };
+function Ha(t) {
+  return { domain: "vacuum", service: "locate", data: L(t) };
 }
-function v1(t) {
-  return { domain: "lock", service: "lock", data: _(t) };
+function Ma(t) {
+  return { domain: "lock", service: "lock", data: L(t) };
 }
-function b1(t) {
-  return { domain: "lock", service: "unlock", data: _(t) };
+function Va(t) {
+  return { domain: "lock", service: "unlock", data: L(t) };
 }
-function rs(t) {
-  return { domain: "scene", service: "turn_on", data: _(t) };
+function fs(t) {
+  return { domain: "scene", service: "turn_on", data: L(t) };
 }
-function os(t) {
-  return { domain: "script", service: "turn_on", data: _(t) };
+function vs(t) {
+  return { domain: "script", service: "turn_on", data: L(t) };
 }
-function cs(t) {
-  return { domain: "button", service: "press", data: _(t) };
+function bs(t) {
+  return { domain: "button", service: "press", data: L(t) };
 }
-function ls(t, e) {
-  return { domain: Ht(t) === "number" ? "number" : "input_number", service: "set_value", data: _(t, { value: e }) };
+function ys(t, e) {
+  return { domain: St(t) === "number" ? "number" : "input_number", service: "set_value", data: L(t, { value: e }) };
 }
-function ds(t, e) {
+function ws(t, e) {
   return {
     domain: "fan",
     service: "set_percentage",
-    data: _(t, { percentage: it(Math.round(e), 0, 100) })
+    data: L(t, { percentage: it(Math.round(e), 0, 100) })
   };
 }
 function it(t, e, i) {
   return Math.min(i, Math.max(e, t));
 }
-function hs(t, e) {
+function Cs(t, e) {
   return t?.attributes.friendly_name?.trim() || e;
 }
-function Lt(t, e) {
+function dt(t, e) {
   if (!e) return "—";
-  if (ye(e)) return "Unavailable";
-  if (we(e)) return "Unknown";
+  if (He(e)) return "Unavailable";
+  if (Me(e)) return "Unknown";
   if (t?.formatEntityState)
     try {
       return t.formatEntityState(e);
     } catch {
     }
-  return ps(e);
+  return As(e);
 }
-function us(t, e, i) {
+function xs(t, e, i) {
   if (!e) return "—";
   if (t?.formatEntityAttributeValue)
     try {
@@ -3172,11 +3139,11 @@ function us(t, e, i) {
   const a = e.attributes[i];
   return a == null ? "—" : String(a);
 }
-function ps(t) {
+function As(t) {
   const e = t.attributes.unit_of_measurement, i = Number(t.state);
-  return !Number.isNaN(i) && t.state.trim() !== "" ? e ? `${$(i)} ${e}` : $(i) : V(t.state);
+  return !Number.isNaN(i) && t.state.trim() !== "" ? e ? `${A(i)} ${e}` : A(i) : k(t.state);
 }
-function $(t, e = 1) {
+function A(t, e = 1) {
   if (!Number.isFinite(t)) return "—";
   const i = Math.abs(t), a = i >= 100 ? 0 : i >= 10 ? 1 : e;
   try {
@@ -3188,72 +3155,72 @@ function $(t, e = 1) {
     return t.toFixed(a);
   }
 }
-function V(t) {
+function k(t) {
   return t.replace(/[_-]+/g, " ").replace(/\b\w/g, (e) => e.toUpperCase()).trim();
 }
-function xe(t) {
+function Ve(t) {
   if (!t) return "";
   const e = new Date(t).getTime();
   if (Number.isNaN(e)) return "";
-  const i = Math.round((Date.now() - e) / 1e3), a = Math.abs(i), s = ms(), n = () => a < 60 ? [-i, "second"] : a < 3600 ? [-Math.round(i / 60), "minute"] : a < 86400 ? [-Math.round(i / 3600), "hour"] : [-Math.round(i / 86400), "day"], [r, c] = n();
+  const i = Math.round((Date.now() - e) / 1e3), a = Math.abs(i), s = Ls(), n = () => a < 60 ? [-i, "second"] : a < 3600 ? [-Math.round(i / 60), "minute"] : a < 86400 ? [-Math.round(i / 3600), "hour"] : [-Math.round(i / 86400), "day"], [r, c] = n();
   return a < 45 ? "just now" : s ? s.format(r, c) : `${Math.abs(r)} ${c}${Math.abs(r) === 1 ? "" : "s"} ${r < 0 ? "ago" : "from now"}`;
 }
-let kt;
-function ms() {
-  if (kt !== void 0) return kt;
+let Pt;
+function Ls() {
+  if (Pt !== void 0) return Pt;
   try {
-    kt = new Intl.RelativeTimeFormat(void 0, { numeric: "auto" });
+    Pt = new Intl.RelativeTimeFormat(void 0, { numeric: "auto" });
   } catch {
-    kt = null;
+    Pt = null;
   }
-  return kt;
+  return Pt;
 }
-function Ci(t) {
+function Ti(t) {
   if (!Number.isFinite(t) || t < 0) return "0:00";
   const e = Math.floor(t % 60), i = Math.floor(t / 60 % 60), a = Math.floor(t / 3600), s = a > 0 ? String(i).padStart(2, "0") : String(i), n = String(e).padStart(2, "0");
   return a > 0 ? `${a}:${s}:${n}` : `${s}:${n}`;
 }
-const gs = [
+const Hs = [
   ["main_brush_time_left", "Main brush"],
   ["side_brush_time_left", "Side brush"],
   ["filter_time_left", "Filter"],
   ["sensor_time_left", "Sensors"],
   ["dock_maintenance_brush_time_left", "Dock brush"],
   ["dock_strainer_time_left", "Dock strainer"]
-], fs = 20;
-function St(t, e, i) {
+], Ms = 20;
+function Tt(t, e, i) {
   const a = t?.states[e];
-  if (!a || (i.push(e), ye(a) || we(a))) return;
+  if (!a || (i.push(e), He(a) || Me(a))) return;
   const s = Number(a.state);
   return Number.isFinite(s) ? s : void 0;
 }
-function _i(t, e, i) {
+function Di(t, e, i) {
   const a = t?.states[e];
-  if (a && (i.push(e), !(ye(a) || we(a))))
+  if (a && (i.push(e), !(He(a) || Me(a))))
     return a.state || void 0;
 }
-function Rt(t, e) {
+function Ut(t, e) {
   const i = [], a = { consumables: [], ids: i };
   if (!t || !e) return a;
   const s = e.split(".")[1];
   if (!s) return a;
   const n = `sensor.${s}_`, r = [];
-  for (const [c, l] of gs) {
-    const h = St(t, n + c, i);
+  for (const [c, l] of Hs) {
+    const h = Tt(t, n + c, i);
     h != null && r.push({ key: c, label: l, hoursLeft: h });
   }
   return {
-    battery: St(t, n + "battery", i),
-    status: _i(t, n + "status", i),
-    room: _i(t, n + "current_room", i),
-    progress: St(t, n + "cleaning_progress", i),
-    area: St(t, n + "cleaning_area", i),
-    cleaningTime: St(t, n + "cleaning_time", i),
+    battery: Tt(t, n + "battery", i),
+    status: Di(t, n + "status", i),
+    room: Di(t, n + "current_room", i),
+    progress: Tt(t, n + "cleaning_progress", i),
+    area: Tt(t, n + "cleaning_area", i),
+    cleaningTime: Tt(t, n + "cleaning_time", i),
     consumables: r,
     ids: i
   };
 }
-const $i = {
+const Oi = {
   binary_sensor: {
     motion: "mdi:motion-sensor",
     door: "mdi:door",
@@ -3295,7 +3262,7 @@ const $i = {
     awning: "mdi:awning-outline",
     gate: "mdi:gate"
   }
-}, vs = {
+}, Vs = {
   light: "mdi:lightbulb",
   switch: "mdi:toggle-switch-variant",
   fan: "mdi:fan",
@@ -3317,11 +3284,11 @@ const $i = {
   automation: "mdi:robot",
   input_boolean: "mdi:toggle-switch"
 };
-function ae(t, e) {
+function oe(t, e) {
   const i = e?.attributes.device_class;
-  return i && $i[t]?.[i] ? $i[t][i] : vs[t] ?? "mdi:help-circle-outline";
+  return i && Oi[t]?.[i] ? Oi[t][i] : Vs[t] ?? "mdi:help-circle-outline";
 }
-function qe(t) {
+function Ke(t) {
   return {
     "clear-night": "mdi:weather-night",
     cloudy: "mdi:weather-cloudy",
@@ -3340,18 +3307,18 @@ function qe(t) {
     exceptional: "mdi:alert-circle-outline"
   }[t] ?? "mdi:weather-cloudy";
 }
-function bs(t, e) {
+function ks(t, e) {
   const i = Math.round(t / 10) * 10;
   return e ? i >= 100 ? "mdi:battery-charging-100" : i <= 10 ? "mdi:battery-charging-10" : `mdi:battery-charging-${i}` : i >= 100 ? "mdi:battery" : i <= 5 ? "mdi:battery-alert-variant-outline" : `mdi:battery-${i}`;
 }
-const ys = /* @__PURE__ */ new Set(["on", "open", "playing", "home", "cleaning", "heat", "cool", "auto", "active"]);
-function y1(t, e, i) {
+const Ss = /* @__PURE__ */ new Set(["on", "open", "playing", "home", "cleaning", "heat", "cool", "auto", "active"]);
+function ka(t, e, i) {
   const a = i?.name ?? "Unknown";
   if (!e)
-    return Ai("", a, "mdi:help-circle-outline", "Not configured");
-  const s = Ht(e), n = ha(e), r = t?.states[e];
+    return zi("", a, "mdi:help-circle-outline", "Not configured");
+  const s = St(e), n = C1(e), r = t?.states[e];
   if (n)
-    return Ai(e, i?.name ?? "Configure me", i?.icon ?? ae(s, void 0), "Replace placeholder id");
+    return zi(e, i?.name ?? "Configure me", i?.icon ?? oe(s, void 0), "Replace placeholder id");
   if (!r)
     return {
       entityId: e,
@@ -3360,8 +3327,8 @@ function y1(t, e, i) {
       available: !1,
       unknown: !1,
       isPlaceholder: !1,
-      name: i?.name ?? V(e.split(".")[1] ?? e),
-      icon: i?.icon ?? ae(s, void 0),
+      name: i?.name ?? k(e.split(".")[1] ?? e),
+      icon: i?.icon ?? oe(s, void 0),
       rawState: "missing",
       displayState: "Not found",
       secondary: "Entity unavailable",
@@ -3369,7 +3336,7 @@ function y1(t, e, i) {
       accent: "unavailable",
       quickAction: { kind: "none", label: "Unavailable" }
     };
-  const c = i?.name ?? hs(r, V(e.split(".")[1] ?? e)), l = ye(r), h = we(r), u = {
+  const c = i?.name ?? Cs(r, k(e.split(".")[1] ?? e)), l = He(r), h = Me(r), u = {
     entityId: e,
     domain: s,
     stateObj: r,
@@ -3378,138 +3345,138 @@ function y1(t, e, i) {
     unknown: h,
     isPlaceholder: !1,
     name: c,
-    icon: i?.icon ?? r.attributes.icon ?? ae(s, r),
+    icon: i?.icon ?? r.attributes.icon ?? oe(s, r),
     rawState: r.state,
-    displayState: Lt(t, r),
+    displayState: dt(t, r),
     active: !1,
     accent: l ? "unavailable" : "idle",
     quickAction: { kind: "none", label: c }
   };
-  return l ? (u.secondary = "Unavailable", u) : ws(u, r, i, t);
+  return l ? (u.secondary = "Unavailable", u) : Es(u, r, i, t);
 }
-function ws(t, e, i, a) {
-  const s = ys.has(e.state);
+function Es(t, e, i, a) {
+  const s = Ss.has(e.state);
   switch (t.domain) {
     case "light":
-      return xs(t, e, i);
+      return Is(t, e, i);
     case "switch":
     case "input_boolean":
-      return t.active = e.state === "on", t.accent = t.active ? "accent" : "idle", t.icon = i?.icon ?? e.attributes.icon ?? ae(t.domain, e), t.quickAction = { kind: "toggle", label: t.active ? "Turn off" : "Turn on", call: B(t.entityId) }, t;
+      return t.active = e.state === "on", t.accent = t.active ? "accent" : "idle", t.icon = i?.icon ?? e.attributes.icon ?? oe(t.domain, e), t.quickAction = { kind: "toggle", label: t.active ? "Turn off" : "Turn on", call: K(t.entityId) }, t;
     case "fan":
-      return t.active = e.state === "on", t.accent = t.active ? "accent" : "idle", typeof e.attributes.percentage == "number" && (t.level = e.attributes.percentage), t.secondary = t.active && t.level != null ? `${Math.round(t.level)}%` : void 0, t.quickAction = { kind: "toggle", label: t.active ? "Turn off" : "Turn on", call: B(t.entityId) }, t;
+      return t.active = e.state === "on", t.accent = t.active ? "accent" : "idle", typeof e.attributes.percentage == "number" && (t.level = e.attributes.percentage), t.secondary = t.active && t.level != null ? `${Math.round(t.level)}%` : void 0, t.quickAction = { kind: "toggle", label: t.active ? "Turn off" : "Turn on", call: K(t.entityId) }, t;
     case "climate":
-      return Cs(t, e);
+      return Ps(t, e);
     case "cover":
-      return _s(t, e);
+      return Ts(t, e);
     case "media_player":
-      return $s(t, e);
+      return Ds(t, e);
     case "lock":
-      return As(t, e, i);
+      return Os(t, e, i);
     case "vacuum":
-      return Hs(t, e, a);
+      return zs(t, e, a);
     case "binary_sensor":
-      return Vs(t, e);
+      return Bs(t, e);
     case "person":
     case "device_tracker":
-      return Ms(t, e);
+      return Zs(t, e);
     case "sensor":
-      return ks(t, e);
+      return Qs(t, e);
     case "weather":
-      return t.icon = qe(e.state), t.accent = "accent", t.secondary = e.attributes.temperature != null ? `${$(e.attributes.temperature)}°` : void 0, t;
+      return t.icon = Ke(e.state), t.accent = "accent", t.secondary = e.attributes.temperature != null ? `${A(e.attributes.temperature)}°` : void 0, t;
     case "scene":
-      return t.accent = "accent", t.displayState = "Scene", t.quickAction = { kind: "activate", label: "Activate", call: rs(t.entityId) }, t;
+      return t.accent = "accent", t.displayState = "Scene", t.quickAction = { kind: "activate", label: "Activate", call: fs(t.entityId) }, t;
     case "script":
       return t.active = e.state === "on", t.accent = t.active ? "accent" : "idle", t.displayState = t.active ? "Running" : "Run", t.quickAction = {
         kind: "activate",
         label: "Run",
-        call: os(t.entityId),
+        call: vs(t.entityId),
         requiresConfirmation: i?.requiresConfirmation
       }, t;
     case "button":
       return t.accent = "accent", t.displayState = "Press", t.quickAction = {
         kind: "activate",
         label: "Press",
-        call: cs(t.entityId),
+        call: bs(t.entityId),
         requiresConfirmation: i?.requiresConfirmation
       }, t;
     default:
       return t.active = s, t.accent = s ? "accent" : "idle", t;
   }
 }
-function xs(t, e, i) {
+function Is(t, e, i) {
   const a = e.state === "on";
   t.active = a, t.accent = a ? "light" : "idle", t.icon = i?.icon ?? e.attributes.icon ?? "mdi:lightbulb";
   const s = e.attributes.brightness;
   a && typeof s == "number" ? (t.level = Math.round(s / 255 * 100), t.secondary = `${t.level}%`) : t.secondary = a ? "On" : "Off";
   const n = e.attributes.rgb_color, r = e.attributes.color_mode;
-  return a && n && r && ["hs", "xy", "rgb", "rgbw", "rgbww"].includes(r) && (t.rgbCss = `rgb(${n[0]}, ${n[1]}, ${n[2]})`), t.quickAction = { kind: "toggle", label: a ? "Turn off" : "Turn on", call: B(t.entityId) }, t;
+  return a && n && r && ["hs", "xy", "rgb", "rgbw", "rgbww"].includes(r) && (t.rgbCss = `rgb(${n[0]}, ${n[1]}, ${n[2]})`), t.quickAction = { kind: "toggle", label: a ? "Turn off" : "Turn on", call: K(t.entityId) }, t;
 }
-function Cs(t, e) {
+function Ps(t, e) {
   const i = e.state;
   t.active = i !== "off";
   const a = ["heat", "heat_cool"].includes(i), s = i === "cool";
   t.accent = i === "off" ? "idle" : a ? "heat" : s ? "cool" : "accent";
   const n = e.attributes.current_temperature, r = e.attributes.temperature;
-  t.displayState = V(i);
+  t.displayState = k(i);
   const c = [];
-  return n != null && c.push(`${$(n)}°`), r != null && i !== "off" && c.push(`→ ${$(r)}°`), t.secondary = c.join("  "), typeof r == "number" && (t.level = r), t.quickAction = { kind: "none", label: t.name }, t;
+  return n != null && c.push(`${A(n)}°`), r != null && i !== "off" && c.push(`→ ${A(r)}°`), t.secondary = c.join("  "), typeof r == "number" && (t.level = r), t.quickAction = { kind: "none", label: t.name }, t;
 }
-function _s(t, e) {
+function Ts(t, e) {
   const i = e.attributes.current_position, a = e.state === "open" || typeof i == "number" && i > 0;
-  return t.active = a, t.accent = a ? "accent" : "idle", typeof i == "number" ? (t.level = i, t.secondary = `${i}% open`) : t.secondary = V(e.state), t.quickAction = { kind: "none", label: t.name }, t;
+  return t.active = a, t.accent = a ? "accent" : "idle", typeof i == "number" ? (t.level = i, t.secondary = `${i}% open`) : t.secondary = k(e.state), t.quickAction = { kind: "none", label: t.name }, t;
 }
-function $s(t, e) {
+function Ds(t, e) {
   const i = e.state, a = i === "playing";
   t.active = ["playing", "paused", "on", "buffering"].includes(i), t.accent = a || t.active ? "accent" : "idle", t.icon = t.active ? "mdi:cast-connected" : "mdi:cast";
   const s = e.attributes.media_title, n = e.attributes.app_name, r = e.attributes.source;
-  return t.displayState = a ? "Playing" : V(i), t.secondary = s ?? n ?? r ?? void 0, t.quickAction = { kind: "none", label: t.name }, t;
+  return t.displayState = a ? "Playing" : k(i), t.secondary = s ?? n ?? r ?? void 0, t.quickAction = { kind: "none", label: t.name }, t;
 }
-function As(t, e, i) {
+function Os(t, e, i) {
   const a = e.state === "locked";
-  return t.active = !a, t.accent = a ? "eco" : "warn", t.icon = a ? "mdi:lock" : "mdi:lock-open-variant", t.displayState = V(e.state), t.quickAction = {
+  return t.active = !a, t.accent = a ? "eco" : "warn", t.icon = a ? "mdi:lock" : "mdi:lock-open-variant", t.displayState = k(e.state), t.quickAction = {
     kind: "toggle",
     label: a ? "Unlock" : "Lock",
-    call: a ? b1(t.entityId) : v1(t.entityId),
+    call: a ? Va(t.entityId) : Ma(t.entityId),
     // Unlocking is sensitive; honor explicit config too.
     requiresConfirmation: a || i?.requiresConfirmation
   }, t;
 }
-function Hs(t, e, i) {
-  const a = e.state, s = a === "cleaning", n = a === "error", r = Rt(i, t.entityId);
+function zs(t, e, i) {
+  const a = e.state, s = a === "cleaning", n = a === "error", r = Ut(i, t.entityId);
   t.active = s, t.accent = n ? "alert" : s ? "accent" : "idle";
-  const c = V((r.status ?? a).replace(/_/g, " "));
+  const c = k((r.status ?? a).replace(/_/g, " "));
   t.displayState = s && r.room ? `Cleaning ${r.room}` : c, typeof r.progress == "number" && s && (t.level = r.progress);
   const l = r.battery ?? e.attributes.battery_level;
   if (s && typeof r.progress == "number") {
-    const h = typeof r.area == "number" && r.area > 0 ? ` · ${$(r.area)} m²` : "";
+    const h = typeof r.area == "number" && r.area > 0 ? ` · ${A(r.area)} m²` : "";
     t.secondary = `${Math.round(r.progress)}%${h}`;
   } else
     t.secondary = l != null ? `${Math.round(l)}% battery` : void 0;
-  return t.quickAction = a === "docked" || a === "idle" ? { kind: "toggle", label: "Start", call: re(t.entityId) } : { kind: "toggle", label: "Return to dock", call: oe(t.entityId) }, t;
+  return t.quickAction = a === "docked" || a === "idle" ? { kind: "toggle", label: "Start", call: de(t.entityId) } : { kind: "toggle", label: "Return to dock", call: he(t.entityId) }, t;
 }
-const Ls = /* @__PURE__ */ new Set(["smoke", "gas", "moisture", "problem", "safety", "carbon_monoxide", "tamper"]);
-function Vs(t, e) {
+const Rs = /* @__PURE__ */ new Set(["smoke", "gas", "moisture", "problem", "safety", "carbon_monoxide", "tamper"]);
+function Bs(t, e) {
   const i = e.state === "on";
   t.active = i;
   const a = e.attributes.device_class;
-  return i && a && Ls.has(a) ? t.accent = "alert" : i ? t.accent = "accent" : t.accent = "idle", t.secondary = xe(e.last_changed), t;
+  return i && a && Rs.has(a) ? t.accent = "alert" : i ? t.accent = "accent" : t.accent = "idle", t.secondary = Ve(e.last_changed), t;
 }
-function Ms(t, e) {
+function Zs(t, e) {
   const i = e.state === "home";
-  return t.active = i, t.accent = i ? "eco" : "idle", t.icon = i ? "mdi:home-account" : "mdi:home-export-outline", t.displayState = i ? "Home" : V(e.state), t.secondary = xe(e.last_changed), t;
+  return t.active = i, t.accent = i ? "eco" : "idle", t.icon = i ? "mdi:home-account" : "mdi:home-export-outline", t.displayState = i ? "Home" : k(e.state), t.secondary = Ve(e.last_changed), t;
 }
-function ks(t, e) {
+function Qs(t, e) {
   const i = e.attributes.device_class, a = Number(e.state);
   if (t.accent = "idle", i === "battery" && !Number.isNaN(a)) {
     const s = e.attributes.battery_charging ?? !1;
-    t.icon = bs(a, s), t.accent = a <= 15 ? "warn" : "eco";
+    t.icon = ks(a, s), t.accent = a <= 15 ? "warn" : "eco";
   }
   return t.secondary = void 0, t.quickAction = { kind: "none", label: t.name }, t;
 }
-function Ai(t, e, i, a) {
+function zi(t, e, i, a) {
   return {
     entityId: t,
-    domain: t ? Ht(t) : "",
+    domain: t ? St(t) : "",
     exists: !1,
     available: !1,
     unknown: !1,
@@ -3524,7 +3491,7 @@ function Ai(t, e, i, a) {
     quickAction: { kind: "none", label: "Configure" }
   };
 }
-function w1(t) {
+function ui(t) {
   switch (t) {
     case "light":
       return { fg: "var(--state-light)", bg: "var(--state-light-soft)" };
@@ -3547,7 +3514,7 @@ function w1(t) {
       return { fg: "var(--idle-fg)", bg: "var(--idle-bg)" };
   }
 }
-function Xt(t, e) {
+function Yt(t, e) {
   return new Promise((i) => {
     const a = new CustomEvent("hd-confirm", {
       detail: { opts: e, resolve: i },
@@ -3557,15 +3524,15 @@ function Xt(t, e) {
     t.dispatchEvent(a) || i(!1);
   });
 }
-function jt(t, e) {
+function Kt(t, e) {
   t.dispatchEvent(new CustomEvent("hd-toast", { detail: e, bubbles: !0, composed: !0 }));
 }
-var Ss = Object.defineProperty, Ps = Object.getOwnPropertyDescriptor, P = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Ps(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var _s = Object.defineProperty, Fs = Object.getOwnPropertyDescriptor, T = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Fs(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Ss(e, i, s), s;
+  return a && s && _s(e, i, s), s;
 };
-let k = class extends A {
+let E = class extends H {
   constructor() {
     super(...arguments), this.icon = "", this.name = "", this.stateText = "", this.secondary = "", this.size = "1x1", this.accent = "idle", this.glyphColor = "", this.active = !1, this.unavailable = !1, this.hasDetail = !1, this.quickKind = "none", this.quickLabel = "", this.actionState = "idle", this.bleed = !1, this.layout = "row";
   }
@@ -3600,7 +3567,7 @@ let k = class extends A {
     t.stopPropagation();
   }
   render() {
-    const t = w1(this.accent), e = this.glyphColor || t.fg, i = `--icon-bg:${t.bg};--icon-fg:${e};--accent-ring:${t.fg};--state-color:${this.active ? t.fg : "var(--text-secondary)"}`, a = (this.quickKind !== "none" || this.hasDetail) && !this.unavailable, s = this._bodyAction, n = this.quickKind !== "none" ? this.quickLabel || this.name : this.hasDetail ? `${this.name} details` : this.name, r = s === "detail" ? `${this.name} details` : this.name;
+    const t = ui(this.accent), e = this.glyphColor || t.fg, i = `--icon-bg:${t.bg};--icon-fg:${e};--accent-ring:${t.fg};--state-color:${this.active ? t.fg : "var(--text-secondary)"}`, a = (this.quickKind !== "none" || this.hasDetail) && !this.unavailable, s = this._bodyAction, n = this.quickKind !== "none" ? this.quickLabel || this.name : this.hasDetail ? `${this.name} details` : this.name, r = s === "detail" ? `${this.name} details` : this.name;
     return this.bleed ? o`<div
         class="card bleed"
         data-clickable=${s ? "true" : "false"}
@@ -3674,7 +3641,7 @@ let k = class extends A {
     `;
   }
 };
-k.styles = x`
+E.styles = y`
     :host {
       display: block;
       height: 100%;
@@ -3960,60 +3927,60 @@ k.styles = x`
       color: var(--icon-fg, var(--idle-fg));
     }
   `;
-P([
-  m({ type: String })
-], k.prototype, "icon", 2);
-P([
-  m({ type: String })
-], k.prototype, "name", 2);
-P([
-  m({ type: String })
-], k.prototype, "stateText", 2);
-P([
-  m({ type: String })
-], k.prototype, "secondary", 2);
-P([
-  m({ type: String })
-], k.prototype, "size", 2);
-P([
-  m({ type: String })
-], k.prototype, "accent", 2);
-P([
-  m({ type: String })
-], k.prototype, "glyphColor", 2);
-P([
-  m({ type: Boolean, reflect: !0 })
-], k.prototype, "active", 2);
-P([
-  m({ type: Boolean, reflect: !0 })
-], k.prototype, "unavailable", 2);
-P([
-  m({ type: Boolean })
-], k.prototype, "hasDetail", 2);
-P([
-  m({ type: String })
-], k.prototype, "quickKind", 2);
-P([
-  m({ type: String })
-], k.prototype, "quickLabel", 2);
-P([
-  m({ type: String })
-], k.prototype, "actionState", 2);
-P([
-  m({ type: Boolean })
-], k.prototype, "bleed", 2);
-P([
-  m({ type: String })
-], k.prototype, "layout", 2);
-k = P([
+T([
+  p({ type: String })
+], E.prototype, "icon", 2);
+T([
+  p({ type: String })
+], E.prototype, "name", 2);
+T([
+  p({ type: String })
+], E.prototype, "stateText", 2);
+T([
+  p({ type: String })
+], E.prototype, "secondary", 2);
+T([
+  p({ type: String })
+], E.prototype, "size", 2);
+T([
+  p({ type: String })
+], E.prototype, "accent", 2);
+T([
+  p({ type: String })
+], E.prototype, "glyphColor", 2);
+T([
+  p({ type: Boolean, reflect: !0 })
+], E.prototype, "active", 2);
+T([
+  p({ type: Boolean, reflect: !0 })
+], E.prototype, "unavailable", 2);
+T([
+  p({ type: Boolean })
+], E.prototype, "hasDetail", 2);
+T([
+  p({ type: String })
+], E.prototype, "quickKind", 2);
+T([
+  p({ type: String })
+], E.prototype, "quickLabel", 2);
+T([
+  p({ type: String })
+], E.prototype, "actionState", 2);
+T([
+  p({ type: Boolean })
+], E.prototype, "bleed", 2);
+T([
+  p({ type: String })
+], E.prototype, "layout", 2);
+E = T([
   b("hd-widget-frame")
-], k);
-var Ts = Object.defineProperty, Bt = (t, e, i, a) => {
+], E);
+var Us = Object.defineProperty, Gt = (t, e, i, a) => {
   for (var s = void 0, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = r(e, i, s) || s);
-  return s && Ts(e, i, s), s;
+  return s && Us(e, i, s), s;
 };
-class H extends A {
+class M extends H {
   constructor() {
     super(...arguments), this.currentSize = "1x1", this.layout = "row", this.actionState = "idle", this._resetTimer = 0;
   }
@@ -4021,7 +3988,7 @@ class H extends A {
     return this.config?.entity;
   }
   get vm() {
-    return y1(this.hass, this.entityId, this.config);
+    return ka(this.hass, this.entityId, this.config);
   }
   get isConnected2() {
     return this.hass?.connected !== !1;
@@ -4088,7 +4055,7 @@ class H extends A {
       }
       if (i.requiresConfirmation) {
         const a = e.domain === "lock" || e.domain === "alarm_control_panel";
-        if (!await Xt(this, {
+        if (!await Yt(this, {
           title: `${i.label} ${e.name}?`,
           confirmLabel: i.label,
           destructive: a,
@@ -4107,9 +4074,9 @@ class H extends A {
     if (this.hass) {
       window.clearTimeout(this._resetTimer), this.actionState = "pending";
       try {
-        await a1(this.hass, e), this.actionState = "success";
+        await ua(this.hass, e), this.actionState = "success";
       } catch (a) {
-        throw this.actionState = "error", jt(this, {
+        throw this.actionState = "error", Kt(this, {
           message: `Couldn't ${i.errorVerb ?? "update"} ${this.vm.name}`,
           tone: "alert",
           icon: "mdi:alert-circle-outline"
@@ -4127,27 +4094,27 @@ class H extends A {
     super.disconnectedCallback(), window.clearTimeout(this._resetTimer);
   }
 }
-Bt([
-  m({ attribute: !1 })
-], H.prototype, "hass");
-Bt([
-  m({ attribute: !1 })
-], H.prototype, "config");
-Bt([
-  m({ type: String })
-], H.prototype, "currentSize");
-Bt([
-  m({ type: String })
-], H.prototype, "layout");
-Bt([
-  C()
-], H.prototype, "actionState");
-var Es = Object.defineProperty, Os = Object.getOwnPropertyDescriptor, z = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Os(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+Gt([
+  p({ attribute: !1 })
+], M.prototype, "hass");
+Gt([
+  p({ attribute: !1 })
+], M.prototype, "config");
+Gt([
+  p({ type: String })
+], M.prototype, "currentSize");
+Gt([
+  p({ type: String })
+], M.prototype, "layout");
+Gt([
+  x()
+], M.prototype, "actionState");
+var Js = Object.defineProperty, $s = Object.getOwnPropertyDescriptor, R = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? $s(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Es(e, i, s), s;
+  return a && s && Js(e, i, s), s;
 };
-let E = class extends A {
+let O = class extends H {
   constructor() {
     super(...arguments), this.value = 0, this.min = 0, this.max = 100, this.step = 1, this.vertical = !1, this.disabled = !1, this.label = "", this.icon = "", this.valueText = "", this.color = "var(--accent)", this._dragging = !1, this._dragValue = 0, this._raf = 0;
   }
@@ -4249,7 +4216,7 @@ let E = class extends A {
     `;
   }
 };
-E.styles = x`
+O.styles = y`
     :host {
       display: block;
       touch-action: none;
@@ -4317,51 +4284,51 @@ E.styles = x`
       pointer-events: none;
     }
   `;
-z([
-  m({ type: Number })
-], E.prototype, "value", 2);
-z([
-  m({ type: Number })
-], E.prototype, "min", 2);
-z([
-  m({ type: Number })
-], E.prototype, "max", 2);
-z([
-  m({ type: Number })
-], E.prototype, "step", 2);
-z([
-  m({ type: Boolean, reflect: !0 })
-], E.prototype, "vertical", 2);
-z([
-  m({ type: Boolean, reflect: !0 })
-], E.prototype, "disabled", 2);
-z([
-  m({ type: String })
-], E.prototype, "label", 2);
-z([
-  m({ type: String })
-], E.prototype, "icon", 2);
-z([
-  m({ type: String })
-], E.prototype, "valueText", 2);
-z([
-  m({ type: String })
-], E.prototype, "color", 2);
-z([
-  C()
-], E.prototype, "_dragging", 2);
-z([
-  C()
-], E.prototype, "_dragValue", 2);
-E = z([
+R([
+  p({ type: Number })
+], O.prototype, "value", 2);
+R([
+  p({ type: Number })
+], O.prototype, "min", 2);
+R([
+  p({ type: Number })
+], O.prototype, "max", 2);
+R([
+  p({ type: Number })
+], O.prototype, "step", 2);
+R([
+  p({ type: Boolean, reflect: !0 })
+], O.prototype, "vertical", 2);
+R([
+  p({ type: Boolean, reflect: !0 })
+], O.prototype, "disabled", 2);
+R([
+  p({ type: String })
+], O.prototype, "label", 2);
+R([
+  p({ type: String })
+], O.prototype, "icon", 2);
+R([
+  p({ type: String })
+], O.prototype, "valueText", 2);
+R([
+  p({ type: String })
+], O.prototype, "color", 2);
+R([
+  x()
+], O.prototype, "_dragging", 2);
+R([
+  x()
+], O.prototype, "_dragValue", 2);
+O = R([
   b("hd-slider")
-], E);
-var zs = Object.defineProperty, Ds = Object.getOwnPropertyDescriptor, x1 = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Ds(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], O);
+var js = Object.defineProperty, qs = Object.getOwnPropertyDescriptor, Sa = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? qs(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && zs(e, i, s), s;
+  return a && s && js(e, i, s), s;
 };
-let ce = class extends H {
+let ue = class extends M {
   constructor() {
     super(...arguments), this._optimistic = null, this._optimisticTs = 0, this._debounce = 0;
   }
@@ -4371,14 +4338,14 @@ let ce = class extends H {
   }
   _onInput(t) {
     this._optimistic = t, this._optimisticTs = Date.now(), window.clearTimeout(this._debounce), this._debounce = window.setTimeout(() => {
-      this.entityId && this.callService(Re(this.entityId, t), { errorVerb: "dim" });
+      this.entityId && this.callService(qe(this.entityId, t), { errorVerb: "dim" });
     }, 180);
   }
   _onChange(t) {
-    this._optimistic = t, this._optimisticTs = Date.now(), window.clearTimeout(this._debounce), this.entityId && this.callService(Re(this.entityId, t), { errorVerb: "dim" });
+    this._optimistic = t, this._optimisticTs = Date.now(), window.clearTimeout(this._debounce), this.entityId && this.callService(qe(this.entityId, t), { errorVerb: "dim" });
   }
   _onTemp(t) {
-    this.entityId && this.callService(gt(this.entityId, { colorTempKelvin: t }), {
+    this.entityId && this.callService(ft(this.entityId, { colorTempKelvin: t }), {
       errorVerb: "set color of"
     });
   }
@@ -4419,7 +4386,7 @@ let ce = class extends H {
     </div>`;
   }
   renderContent() {
-    const t = this.vm, e = Gi(t.stateObj), i = this.currentSize, a = e.brightness && (i === "2x1" || i === "1x2" || i === "2x2"), s = i === "1x2", n = e.colorTemp && i === "2x2";
+    const t = this.vm, e = oa(t.stateObj), i = this.currentSize, a = e.brightness && (i === "2x1" || i === "1x2" || i === "2x2"), s = i === "1x2", n = e.colorTemp && i === "2x2";
     return o`
       <hd-widget-frame
         .icon=${t.icon}
@@ -4450,7 +4417,7 @@ let ce = class extends H {
     super.disconnectedCallback(), window.clearTimeout(this._debounce);
   }
 };
-ce.styles = x`
+ue.styles = y`
     .col {
       display: flex;
       flex-direction: column;
@@ -4472,18 +4439,18 @@ ce.styles = x`
       flex: none;
     }
   `;
-x1([
-  C()
-], ce.prototype, "_optimistic", 2);
-ce = x1([
+Sa([
+  x()
+], ue.prototype, "_optimistic", 2);
+ue = Sa([
   b("hd-widget-light")
-], ce);
-var Is = Object.getOwnPropertyDescriptor, Y = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Is(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], ue);
+var Ws = Object.getOwnPropertyDescriptor, N = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Ws(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = r(s) || s);
   return s;
 };
-function Ce(t, e) {
+function ke(t, e) {
   const i = t.vm;
   return o`<hd-widget-frame
     .icon=${i.icon}
@@ -4503,47 +4470,47 @@ function Ce(t, e) {
     @hd-activate=${() => t.openDetail()}
   ></hd-widget-frame>`;
 }
-let Hi = class extends H {
+let Ri = class extends M {
   renderContent() {
-    return Ce(this, { quickKind: "toggle", hasDetail: !0 });
+    return ke(this, { quickKind: "toggle", hasDetail: !0 });
   }
 };
-Hi = Y([
+Ri = N([
   b("hd-widget-switch")
-], Hi);
-let Li = class extends H {
+], Ri);
+let Bi = class extends M {
   renderContent() {
-    return Ce(this, { quickKind: "toggle", hasDetail: !0 });
+    return ke(this, { quickKind: "toggle", hasDetail: !0 });
   }
 };
-Li = Y([
+Bi = N([
   b("hd-widget-lock")
-], Li);
-let Vi = class extends H {
+], Bi);
+let Zi = class extends M {
   renderContent() {
-    return Ce(this, { quickKind: "none", hasDetail: !0 });
+    return ke(this, { quickKind: "none", hasDetail: !0 });
   }
 };
-Vi = Y([
+Zi = N([
   b("hd-widget-person")
-], Vi);
-let Mi = class extends H {
+], Zi);
+let Qi = class extends M {
   renderContent() {
-    return Ce(this, { quickKind: "none", hasDetail: !0 });
+    return ke(this, { quickKind: "none", hasDetail: !0 });
   }
 };
-Mi = Y([
+Qi = N([
   b("hd-widget-binary")
-], Mi);
-class ii extends H {
+], Qi);
+class pi extends M {
   hasDetail() {
     return !1;
   }
   async activate() {
     const e = this.vm, i = e.quickAction;
-    if (!(!i.call || !this.isConnected2) && !(i.requiresConfirmation && !await Xt(this, { title: `${i.label} ${e.name}?`, confirmLabel: i.label })))
+    if (!(!i.call || !this.isConnected2) && !(i.requiresConfirmation && !await Yt(this, { title: `${i.label} ${e.name}?`, confirmLabel: i.label })))
       try {
-        await this.callService(i.call, { errorVerb: i.label.toLowerCase() }), jt(this, { message: `${e.name} — ${i.label.toLowerCase()}`, tone: "eco", icon: "mdi:check" });
+        await this.callService(i.call, { errorVerb: i.label.toLowerCase() }), Kt(this, { message: `${e.name} — ${i.label.toLowerCase()}`, tone: "eco", icon: "mdi:check" });
       } catch {
       }
   }
@@ -4566,22 +4533,22 @@ class ii extends H {
     ></hd-widget-frame>`;
   }
 }
-let ki = class extends ii {
+let _i = class extends pi {
 };
-ki = Y([
+_i = N([
   b("hd-widget-scene")
-], ki);
-let Si = class extends ii {
+], _i);
+let Fi = class extends pi {
 };
-Si = Y([
+Fi = N([
   b("hd-widget-script")
-], Si);
-let Pi = class extends ii {
+], Fi);
+let Ui = class extends pi {
 };
-Pi = Y([
+Ui = N([
   b("hd-widget-button")
-], Pi);
-let Ti = class extends H {
+], Ui);
+let Ji = class extends M {
   hasDetail() {
     return !1;
   }
@@ -4592,15 +4559,15 @@ let Ti = class extends H {
     const t = this.config.options ?? {};
     if (!t.service || !this.hass) return;
     const [e, i] = t.service.split(".");
-    if (!(!e || !i) && !(this.config.requiresConfirmation && !await Xt(this, {
+    if (!(!e || !i) && !(this.config.requiresConfirmation && !await Yt(this, {
       title: `${this.config.name ?? "Run"}?`,
       confirmLabel: this.config.name ?? "Run"
     }))) {
       this.actionState = "pending";
       try {
-        await this.hass.callService(e, i, { ...t.data ?? {}, ...t.target ?? {} }), this.actionState = "success", jt(this, { message: `${this.config.name ?? "Done"}`, tone: "eco", icon: "mdi:check" });
+        await this.hass.callService(e, i, { ...t.data ?? {}, ...t.target ?? {} }), this.actionState = "success", Kt(this, { message: `${this.config.name ?? "Done"}`, tone: "eco", icon: "mdi:check" });
       } catch {
-        this.actionState = "error", jt(this, { message: `Couldn't run ${this.config.name ?? "action"}`, tone: "alert", icon: "mdi:alert-circle-outline" });
+        this.actionState = "error", Kt(this, { message: `Couldn't run ${this.config.name ?? "action"}`, tone: "alert", icon: "mdi:alert-circle-outline" });
       } finally {
         window.setTimeout(() => this.actionState = "idle", 850);
       }
@@ -4624,10 +4591,10 @@ let Ti = class extends H {
     ></hd-widget-frame>`;
   }
 };
-Ti = Y([
+Ji = N([
   b("hd-widget-action")
-], Ti);
-async function ai(t, e, i = 24) {
+], Ji);
+async function mi(t, e, i = 24) {
   const a = /* @__PURE__ */ new Date(), s = new Date(a.getTime() - i * 3600 * 1e3);
   try {
     return ((await t.callWS({
@@ -4652,12 +4619,12 @@ async function ai(t, e, i = 24) {
     }
   }
 }
-var Rs = Object.defineProperty, Zs = Object.getOwnPropertyDescriptor, S = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Zs(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var Ks = Object.defineProperty, Ns = Object.getOwnPropertyDescriptor, I = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Ns(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Rs(e, i, s), s;
+  return a && s && Ks(e, i, s), s;
 };
-let vt = class extends A {
+let bt = class extends H {
   constructor() {
     super(...arguments), this.value = 0, this.color = "var(--accent)", this.label = "";
   }
@@ -4675,7 +4642,7 @@ let vt = class extends A {
     </div>`;
   }
 };
-vt.styles = x`
+bt.styles = y`
     :host {
       display: block;
     }
@@ -4692,19 +4659,19 @@ vt.styles = x`
       transition: width var(--motion-state) var(--ease-standard);
     }
   `;
-S([
-  m({ type: Number })
-], vt.prototype, "value", 2);
-S([
-  m({ type: String })
-], vt.prototype, "color", 2);
-S([
-  m({ type: String })
-], vt.prototype, "label", 2);
-vt = S([
+I([
+  p({ type: Number })
+], bt.prototype, "value", 2);
+I([
+  p({ type: String })
+], bt.prototype, "color", 2);
+I([
+  p({ type: String })
+], bt.prototype, "label", 2);
+bt = I([
   b("hd-progress")
-], vt);
-let bt = class extends A {
+], bt);
+let yt = class extends H {
   constructor() {
     super(...arguments), this.icon = "", this.text = "", this.tone = "neutral";
   }
@@ -4715,7 +4682,7 @@ let bt = class extends A {
     >`;
   }
 };
-bt.styles = x`
+yt.styles = y`
     :host {
       display: inline-flex;
     }
@@ -4753,19 +4720,19 @@ bt.styles = x`
       color: var(--accent-text);
     }
   `;
-S([
-  m({ type: String })
-], bt.prototype, "icon", 2);
-S([
-  m({ type: String })
-], bt.prototype, "text", 2);
-S([
-  m({ type: String })
-], bt.prototype, "tone", 2);
-bt = S([
+I([
+  p({ type: String })
+], yt.prototype, "icon", 2);
+I([
+  p({ type: String })
+], yt.prototype, "text", 2);
+I([
+  p({ type: String })
+], yt.prototype, "tone", 2);
+yt = I([
   b("hd-status-badge")
-], bt);
-let yt = class extends A {
+], yt);
+let wt = class extends H {
   constructor() {
     super(...arguments), this.w = "100%", this.h = "16px", this.radius = "8px";
   }
@@ -4773,7 +4740,7 @@ let yt = class extends A {
     return o`<div class="sk" style=${`--w:${this.w};--h:${this.h};--r:${this.radius}`}></div>`;
   }
 };
-yt.styles = x`
+wt.styles = y`
     :host {
       display: block;
     }
@@ -4802,19 +4769,19 @@ yt.styles = x`
       }
     }
   `;
-S([
-  m({ type: String })
-], yt.prototype, "w", 2);
-S([
-  m({ type: String })
-], yt.prototype, "h", 2);
-S([
-  m({ type: String })
-], yt.prototype, "radius", 2);
-yt = S([
+I([
+  p({ type: String })
+], wt.prototype, "w", 2);
+I([
+  p({ type: String })
+], wt.prototype, "h", 2);
+I([
+  p({ type: String })
+], wt.prototype, "radius", 2);
+wt = I([
   b("hd-skeleton")
-], yt);
-let nt = class extends A {
+], wt);
+let nt = class extends H {
   constructor() {
     super(...arguments), this.points = [], this.color = "var(--accent)", this.area = !0, this.summary = "";
   }
@@ -4822,18 +4789,18 @@ let nt = class extends A {
     const t = this.points.filter((u) => Number.isFinite(u));
     if (t.length < 2)
       return o`<svg viewBox="0 0 100 32" preserveAspectRatio="none" aria-label=${this.summary}></svg>`;
-    const e = Math.min(...t), a = Math.max(...t) - e || 1, s = 100, n = 32, r = s / (t.length - 1), l = t.map((u, p) => {
-      const f = p * r, g = n - (u - e) / a * (n - 4) - 2;
+    const e = Math.min(...t), a = Math.max(...t) - e || 1, s = 100, n = 32, r = s / (t.length - 1), l = t.map((u, m) => {
+      const f = m * r, g = n - (u - e) / a * (n - 4) - 2;
       return [f, g];
-    }).map(([u, p], f) => `${f === 0 ? "M" : "L"}${u.toFixed(2)},${p.toFixed(2)}`).join(" "), h = `${l} L${s},${n} L0,${n} Z`;
+    }).map(([u, m], f) => `${f === 0 ? "M" : "L"}${u.toFixed(2)},${m.toFixed(2)}`).join(" "), h = `${l} L${s},${n} L0,${n} Z`;
     return o`<svg viewBox="0 0 ${s} ${n}" preserveAspectRatio="none" role="img" aria-label=${this.summary}
       style=${`--trend-color:${this.color}`}
-      >${this.area ? Ft`<path class="fill" d=${h}></path>` : d}
-      ${Ft`<path class="line" d=${l}></path>`}</svg
+      >${this.area ? jt`<path class="fill" d=${h}></path>` : d}
+      ${jt`<path class="line" d=${l}></path>`}</svg
     >`;
   }
 };
-nt.styles = x`
+nt.styles = y`
     :host {
       display: block;
       width: 100%;
@@ -4857,27 +4824,27 @@ nt.styles = x`
       opacity: 0.14;
     }
   `;
-S([
-  m({ attribute: !1 })
+I([
+  p({ attribute: !1 })
 ], nt.prototype, "points", 2);
-S([
-  m({ type: String })
+I([
+  p({ type: String })
 ], nt.prototype, "color", 2);
-S([
-  m({ type: Boolean })
+I([
+  p({ type: Boolean })
 ], nt.prototype, "area", 2);
-S([
-  m({ type: String })
+I([
+  p({ type: String })
 ], nt.prototype, "summary", 2);
-nt = S([
+nt = I([
   b("hd-trend")
 ], nt);
-var qs = Object.defineProperty, Fs = Object.getOwnPropertyDescriptor, C1 = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Fs(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var Xs = Object.defineProperty, Ys = Object.getOwnPropertyDescriptor, Ea = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Ys(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && qs(e, i, s), s;
+  return a && s && Xs(e, i, s), s;
 };
-let le = class extends H {
+let pe = class extends M {
   constructor() {
     super(...arguments), this._trend = [], this._fetchedFor = "";
   }
@@ -4893,12 +4860,12 @@ let le = class extends H {
   }
   async _loadTrend() {
     if (!this.hass || !this.entityId) return;
-    const t = await ai(this.hass, this.entityId, 24);
+    const t = await mi(this.hass, this.entityId, 24);
     this._trend = t.map((e) => e.value);
   }
   renderContent() {
-    const t = this.vm, e = t.stateObj, i = e ? Number(e.state) : NaN, a = Number.isFinite(i) && e.state.trim() !== "", s = e?.attributes.unit_of_measurement, n = w1(t.accent), r = t.available ? a ? o`<div class="value">
-            <span>${Ns(i)}</span>${s ? o`<span class="unit">${s}</span>` : d}
+    const t = this.vm, e = t.stateObj, i = e ? Number(e.state) : NaN, a = Number.isFinite(i) && e.state.trim() !== "", s = e?.attributes.unit_of_measurement, n = ui(t.accent), r = t.available ? a ? o`<div class="value">
+            <span>${Gs(i)}</span>${s ? o`<span class="unit">${s}</span>` : d}
           </div>` : o`<div class="value"><span class="txt">${t.displayState}</span></div>` : o`<div class="value"><span class="txt">${t.displayState}</span></div>`;
     return o`
       <hd-widget-frame
@@ -4926,7 +4893,7 @@ let le = class extends H {
     `;
   }
 };
-le.styles = x`
+pe.styles = y`
     .value {
       font: var(--text-value);
       color: var(--text-primary);
@@ -4959,13 +4926,13 @@ le.styles = x`
       margin-top: 6px;
     }
   `;
-C1([
-  C()
-], le.prototype, "_trend", 2);
-le = C1([
+Ea([
+  x()
+], pe.prototype, "_trend", 2);
+pe = Ea([
   b("hd-widget-sensor")
-], le);
-function Ns(t) {
+], pe);
+function Gs(t) {
   const e = Math.abs(t), i = e >= 100 ? 0 : e >= 10 ? 1 : 2;
   try {
     return new Intl.NumberFormat(void 0, { maximumFractionDigits: i }).format(t);
@@ -4973,12 +4940,12 @@ function Ns(t) {
     return t.toFixed(i);
   }
 }
-var Us = Object.defineProperty, js = Object.getOwnPropertyDescriptor, Yt = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? js(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var tn = Object.defineProperty, en = Object.getOwnPropertyDescriptor, te = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? en(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Us(e, i, s), s;
+  return a && s && tn(e, i, s), s;
 };
-let rt = class extends A {
+let rt = class extends H {
   constructor() {
     super(...arguments), this.options = [], this.value = "", this.disabled = !1, this.label = "";
   }
@@ -5012,7 +4979,7 @@ let rt = class extends A {
     `;
   }
 };
-rt.styles = x`
+rt.styles = y`
     :host {
       display: block;
     }
@@ -5062,27 +5029,27 @@ rt.styles = x`
       pointer-events: none;
     }
   `;
-Yt([
-  m({ attribute: !1 })
+te([
+  p({ attribute: !1 })
 ], rt.prototype, "options", 2);
-Yt([
-  m({ type: String })
+te([
+  p({ type: String })
 ], rt.prototype, "value", 2);
-Yt([
-  m({ type: Boolean, reflect: !0 })
+te([
+  p({ type: Boolean, reflect: !0 })
 ], rt.prototype, "disabled", 2);
-Yt([
-  m({ type: String })
+te([
+  p({ type: String })
 ], rt.prototype, "label", 2);
-rt = Yt([
+rt = te([
   b("hd-segmented")
 ], rt);
-var Ks = Object.defineProperty, Ws = Object.getOwnPropertyDescriptor, _1 = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Ws(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var an = Object.defineProperty, sn = Object.getOwnPropertyDescriptor, Ia = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? sn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Ks(e, i, s), s;
+  return a && s && an(e, i, s), s;
 };
-const Xs = {
+const nn = {
   off: "mdi:power",
   heat: "mdi:fire",
   cool: "mdi:snowflake",
@@ -5091,7 +5058,7 @@ const Xs = {
   dry: "mdi:water-percent",
   fan_only: "mdi:fan"
 };
-let de = class extends H {
+let me = class extends M {
   constructor() {
     super(...arguments), this._optimisticTarget = null, this._optimisticTs = 0, this._debounce = 0;
   }
@@ -5104,13 +5071,13 @@ let de = class extends H {
     if (!e.available || e.rawState === "off") return;
     const i = e.stateObj?.attributes.target_temp_step ?? 0.5, a = e.stateObj?.attributes.min_temp ?? 7, s = e.stateObj?.attributes.max_temp ?? 35, n = Math.min(s, Math.max(a, this._target + t * i));
     this._optimisticTarget = Number(n.toFixed(1)), this._optimisticTs = Date.now(), this.requestUpdate(), window.clearTimeout(this._debounce), this._debounce = window.setTimeout(() => {
-      this.entityId && this.callService(r1(this.entityId, this._optimisticTarget), {
+      this.entityId && this.callService(ga(this.entityId, this._optimisticTarget), {
         errorVerb: "set temperature for"
       });
     }, 350);
   }
   _setMode(t) {
-    this.entityId && this.callService(o1(this.entityId, t), { errorVerb: "set mode for" });
+    this.entityId && this.callService(fa(this.entityId, t), { errorVerb: "set mode for" });
   }
   _renderStepper(t) {
     const e = this.vm, i = e.rawState === "off", a = e.stateObj?.attributes.current_temperature;
@@ -5123,7 +5090,7 @@ let de = class extends H {
           .disabled=${i || !e.available}
           @click=${() => this._step(-1)}
         ></hd-icon-button>
-        <span class="target">${i ? "—" : `${$(this._target)}°`}</span>
+        <span class="target">${i ? "—" : `${A(this._target)}°`}</span>
         <hd-icon-button
           icon="mdi:plus"
           label="Raise target temperature"
@@ -5132,13 +5099,13 @@ let de = class extends H {
           @click=${() => this._step(1)}
         ></hd-icon-button>
       </div>
-      ${a != null ? o`<div class="now">Now ${$(a)}°</div>` : d}
+      ${a != null ? o`<div class="now">Now ${A(a)}°</div>` : d}
     </div>`;
   }
   _renderModes() {
     const t = this.vm, e = t.stateObj?.attributes.hvac_modes ?? [];
     if (e.length < 2) return d;
-    const i = e.map((a) => ({ value: a, icon: Xs[a] ?? "mdi:thermostat" }));
+    const i = e.map((a) => ({ value: a, icon: nn[a] ?? "mdi:thermostat" }));
     return o`<div class="modes">
       <hd-segmented
         .options=${i}
@@ -5150,13 +5117,13 @@ let de = class extends H {
     </div>`;
   }
   renderContent() {
-    const t = this.vm, e = this.currentSize, a = t1(t.stateObj).targetTemp, s = e === "2x2";
+    const t = this.vm, e = this.currentSize, a = la(t.stateObj).targetTemp, s = e === "2x2";
     return o`
       <hd-widget-frame
         .icon=${t.icon}
         .layout=${this.layout}
         .name=${t.name}
-        .stateText=${V(t.rawState)}
+        .stateText=${k(t.rawState)}
         .secondary=${t.secondary ?? ""}
         .size=${e}
         .accent=${t.accent}
@@ -5175,7 +5142,7 @@ let de = class extends H {
     super.disconnectedCallback(), window.clearTimeout(this._debounce);
   }
 };
-de.styles = x`
+me.styles = y`
     .stepper {
       display: flex;
       align-items: center;
@@ -5202,18 +5169,18 @@ de.styles = x`
       margin-top: 4px;
     }
   `;
-_1([
-  C()
-], de.prototype, "_optimisticTarget", 2);
-de = _1([
+Ia([
+  x()
+], me.prototype, "_optimisticTarget", 2);
+me = Ia([
   b("hd-widget-climate")
-], de);
-var Bs = Object.defineProperty, Ys = Object.getOwnPropertyDescriptor, $1 = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Ys(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], me);
+var rn = Object.defineProperty, on = Object.getOwnPropertyDescriptor, Pa = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? on(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Bs(e, i, s), s;
+  return a && s && rn(e, i, s), s;
 };
-let he = class extends H {
+let ge = class extends M {
   constructor() {
     super(...arguments), this._optimistic = null, this._optimisticTs = 0, this._debounce = 0;
   }
@@ -5224,7 +5191,7 @@ let he = class extends H {
   _setPosition(t, e) {
     this._optimistic = t, this._optimisticTs = Date.now(), window.clearTimeout(this._debounce);
     const i = () => {
-      this.entityId && this.callService(h1(this.entityId, t), { errorVerb: "move" });
+      this.entityId && this.callService(wa(this.entityId, t), { errorVerb: "move" });
     };
     e ? i() : this._debounce = window.setTimeout(i, 200);
   }
@@ -5236,26 +5203,26 @@ let he = class extends H {
             label="Open"
             variant="soft"
             .disabled=${a}
-            @click=${() => this.entityId && this.callService(c1(this.entityId), { errorVerb: "open" })}
+            @click=${() => this.entityId && this.callService(va(this.entityId), { errorVerb: "open" })}
           ></hd-icon-button>` : d}
       ${t.stop ? o`<hd-icon-button
             icon="mdi:stop"
             label="Stop"
             variant="soft"
             .disabled=${a}
-            @click=${() => this.entityId && this.callService(d1(this.entityId), { errorVerb: "stop" })}
+            @click=${() => this.entityId && this.callService(ya(this.entityId), { errorVerb: "stop" })}
           ></hd-icon-button>` : d}
       ${t.close ? o`<hd-icon-button
             icon="mdi:arrow-down"
             label="Close"
             variant="soft"
             .disabled=${a}
-            @click=${() => this.entityId && this.callService(l1(this.entityId), { errorVerb: "close" })}
+            @click=${() => this.entityId && this.callService(ba(this.entityId), { errorVerb: "close" })}
           ></hd-icon-button>` : d}
     </div>`;
   }
   renderContent() {
-    const t = this.vm, e = Ji(t.stateObj), i = this.currentSize, a = i === "1x2", s = e.setPosition && i !== "1x1";
+    const t = this.vm, e = ca(t.stateObj), i = this.currentSize, a = i === "1x2", s = e.setPosition && i !== "1x1";
     let n;
     return a && s ? n = o`<div class="stack">
         <hd-slider
@@ -5302,7 +5269,7 @@ let he = class extends H {
     super.disconnectedCallback(), window.clearTimeout(this._debounce);
   }
 };
-he.styles = x`
+ge.styles = y`
     .controls {
       display: flex;
       gap: 8px;
@@ -5323,13 +5290,13 @@ he.styles = x`
       height: 100%;
     }
   `;
-$1([
-  C()
-], he.prototype, "_optimistic", 2);
-he = $1([
+Pa([
+  x()
+], ge.prototype, "_optimistic", 2);
+ge = Pa([
   b("hd-widget-cover")
-], he);
-const Qs = {
+], ge);
+const cn = {
   netflix: "mdi:netflix",
   youtube: "mdi:youtube",
   "youtube tv": "mdi:youtube-tv",
@@ -5356,65 +5323,65 @@ const Qs = {
   nordvpn: "mdi:vpn",
   speedtest: "mdi:speedometer"
 };
-function ue(t) {
-  return Qs[t.replace(/ /g, " ").trim().toLowerCase()];
+function fe(t) {
+  return cn[t.replace(/ /g, " ").trim().toLowerCase()];
 }
-function Gs(t) {
-  return t.some((e) => ue(e) !== void 0);
+function ln(t) {
+  return t.some((e) => fe(e) !== void 0);
 }
-function Js(t) {
+function dn(t) {
   return t.replace(/ /g, " ").trim().toLowerCase();
 }
-const tn = [
+const hn = [
   { key: "tv", label: "Apple TV+", icon: "mdi:apple" },
   { key: "infuse", label: "Infuse", icon: "mdi:play-box-multiple" },
   { key: "netflix", label: "Netflix", icon: "mdi:netflix" }
 ];
-function en(t) {
+function un(t) {
   const e = /* @__PURE__ */ new Map();
   for (const n of t) {
-    const r = Js(n);
+    const r = dn(n);
     e.has(r) || e.set(r, n);
   }
   const i = [], a = /* @__PURE__ */ new Set();
-  for (const n of tn) {
+  for (const n of hn) {
     const r = e.get(n.key);
     r && (i.push({ ...n, source: r }), a.add(r));
   }
   const s = t.filter((n) => !a.has(n));
   return { featured: i, rest: s };
 }
-function Fe(t) {
+function Ne(t) {
   const e = t?.attributes.media_duration;
   if (!t || !e || e <= 0) return null;
   let i = t.attributes.media_position ?? 0;
   const a = t.attributes.media_position_updated_at;
   return t.state === "playing" && a && (i += (Date.now() - new Date(a).getTime()) / 1e3), i = Math.max(0, Math.min(i, e)), {
     pct: i / e * 100,
-    elapsed: Ci(i),
-    total: Ci(e),
+    elapsed: Ti(i),
+    total: Ti(e),
     positionSec: i,
     durationSec: e
   };
 }
-const Dt = /* @__PURE__ */ new Map(), Jt = /* @__PURE__ */ new Map();
-function an(t) {
-  return Dt.get(t);
+const _t = /* @__PURE__ */ new Map(), ae = /* @__PURE__ */ new Map();
+function pn(t) {
+  return _t.get(t);
 }
-function sn(t) {
-  if (Dt.has(t)) return Promise.resolve(Dt.get(t) ?? null);
-  const e = Jt.get(t);
+function mn(t) {
+  if (_t.has(t)) return Promise.resolve(_t.get(t) ?? null);
+  const e = ae.get(t);
   if (e) return e;
-  const i = nn(t).then((a) => (Dt.set(t, a), Jt.delete(t), a)).catch(() => (Dt.set(t, null), Jt.delete(t), null));
-  return Jt.set(t, i), i;
+  const i = gn(t).then((a) => (_t.set(t, a), ae.delete(t), a)).catch(() => (_t.set(t, null), ae.delete(t), null));
+  return ae.set(t, i), i;
 }
-function nn(t) {
+function gn(t) {
   return new Promise((e) => {
     const i = new Image();
-    i.crossOrigin = "anonymous", i.decoding = "async", i.onload = () => e(rn(i)), i.onerror = () => e(null), i.src = t;
+    i.crossOrigin = "anonymous", i.decoding = "async", i.onload = () => e(fn(i)), i.onerror = () => e(null), i.src = t;
   });
 }
-function rn(t) {
+function fn(t) {
   const i = document.createElement("canvas");
   i.width = 24, i.height = 24;
   const a = i.getContext("2d", { willReadFrequently: !0 });
@@ -5424,37 +5391,37 @@ function rn(t) {
     const { data: s } = a.getImageData(0, 0, 24, 24);
     let n = 0, r = 0, c = 0, l = 0, h = null, u = -1;
     for (let f = 0; f < s.length; f += 4) {
-      const g = s[f], v = s[f + 1], y = s[f + 2];
+      const g = s[f], v = s[f + 1], w = s[f + 2];
       if (s[f + 3] < 200) continue;
-      n += g, r += v, c += y, l += 1;
-      const M = Math.max(g, v, y), T = Math.min(g, v, y), L = (M + T) / 2, ht = (M === 0 ? 0 : (M - T) / M) * (1 - Math.abs(L - 140) / 140);
-      ht > u && (u = ht, h = { r: g, g: v, b: y });
+      n += g, r += v, c += w, l += 1;
+      const S = Math.max(g, v, w), D = Math.min(g, v, w), V = (S + D) / 2, ut = (S === 0 ? 0 : (S - D) / S) * (1 - Math.abs(V - 140) / 140);
+      ut > u && (u = ut, h = { r: g, g: v, b: w });
     }
     if (!l) return null;
-    const p = { r: n / l | 0, g: r / l | 0, b: c / l | 0 };
+    const m = { r: n / l | 0, g: r / l | 0, b: c / l | 0 };
     return h && u > 0.15 ? {
-      r: h.r * 0.6 + p.r * 0.4 | 0,
-      g: h.g * 0.6 + p.g * 0.4 | 0,
-      b: h.b * 0.6 + p.b * 0.4 | 0
-    } : p;
+      r: h.r * 0.6 + m.r * 0.4 | 0,
+      g: h.g * 0.6 + m.g * 0.4 | 0,
+      b: h.b * 0.6 + m.b * 0.4 | 0
+    } : m;
   } catch {
     return null;
   }
 }
-function Pe({ r: t, g: e, b: i }, a) {
+function Qe({ r: t, g: e, b: i }, a) {
   const s = 1 - a;
   return { r: t * s | 0, g: e * s | 0, b: i * s | 0 };
 }
-function Te({ r: t, g: e, b: i }, a = 1) {
+function _e({ r: t, g: e, b: i }, a = 1) {
   return a >= 1 ? `rgb(${t}, ${e}, ${i})` : `rgba(${t}, ${e}, ${i}, ${a})`;
 }
-var on = Object.defineProperty, cn = Object.getOwnPropertyDescriptor, _e = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? cn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var vn = Object.defineProperty, bn = Object.getOwnPropertyDescriptor, Se = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? bn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && on(e, i, s), s;
+  return a && s && vn(e, i, s), s;
 };
-const ln = { r: 32, g: 36, b: 44 }, dn = 1600;
-let wt = class extends H {
+const yn = { r: 32, g: 36, b: 44 }, wn = 1600;
+let Ct = class extends M {
   constructor() {
     super(...arguments), this._artColor = null, this._colorFor = "", this._optimistic = null, this._optimisticTs = 0, this._tick = 0, this._marquee = !1, this._marqueeKey = "\0";
   }
@@ -5466,7 +5433,7 @@ let wt = class extends H {
   get _isPlaying() {
     const t = this._rawState === "playing";
     if (this._optimistic != null) {
-      if (Date.now() - this._optimisticTs > dn)
+      if (Date.now() - this._optimisticTs > wn)
         return this._optimistic = null, t;
       const e = this._optimistic === "playing";
       return t === e ? (this._optimistic = null, t) : e;
@@ -5474,15 +5441,15 @@ let wt = class extends H {
     return t;
   }
   _playPause() {
-    this.entityId && (this._optimistic = this._isPlaying ? "paused" : "playing", this._optimisticTs = Date.now(), this.callService(u1(this.entityId), { errorVerb: "control" }));
+    this.entityId && (this._optimistic = this._isPlaying ? "paused" : "playing", this._optimisticTs = Date.now(), this.callService(Ca(this.entityId), { errorVerb: "control" }));
   }
   // ---- Lifecycle ---------------------------------------------------------
   updated() {
     const t = this.vm.stateObj?.attributes.entity_picture;
     if (t && this._colorFor !== t) {
       this._colorFor = t;
-      const e = an(t);
-      e !== void 0 ? this._artColor = e : sn(t).then((i) => {
+      const e = pn(t);
+      e !== void 0 ? this._artColor = e : mn(t).then((i) => {
         this._colorFor === t && (this._artColor = i);
       });
     } else !t && this._colorFor && (this._colorFor = "", this._artColor = null);
@@ -5490,7 +5457,7 @@ let wt = class extends H {
   }
   /** Advance the scrubber once a second while actually playing. */
   _syncTicker() {
-    const t = this._isPlaying && !!Fe(this.vm.stateObj);
+    const t = this._isPlaying && !!Ne(this.vm.stateObj);
     t && !this._tick ? this._tick = window.setInterval(() => this.requestUpdate(), 1e3) : !t && this._tick && (window.clearInterval(this._tick), this._tick = 0);
   }
   _checkMarquee() {
@@ -5510,11 +5477,11 @@ let wt = class extends H {
   }
   // ---- Rendering ---------------------------------------------------------
   _ambientVars() {
-    const t = this._artColor ?? ln, e = Pe(t, 0.62);
+    const t = this._artColor ?? yn, e = Qe(t, 0.62);
     return [
-      `--np-dark:${Te(e)}`,
-      `--np-scrim-strong:${Te(Pe(t, 0.55), 0.9)}`,
-      `--np-scrim-soft:${Te(Pe(t, 0.35), 0.45)}`
+      `--np-dark:${_e(e)}`,
+      `--np-scrim-strong:${_e(Qe(t, 0.55), 0.9)}`,
+      `--np-scrim-soft:${_e(Qe(t, 0.35), 0.45)}`
     ].join(";");
   }
   _transport(t) {
@@ -5525,7 +5492,7 @@ let wt = class extends H {
             label="Previous"
             variant="plain"
             .disabled=${i}
-            @click=${() => this.entityId && this.callService(m1(this.entityId), { errorVerb: "skip" })}
+            @click=${() => this.entityId && this.callService(Aa(this.entityId), { errorVerb: "skip" })}
           ></hd-icon-button>` : d}
       <span class="np-play">
         <hd-icon-button
@@ -5542,12 +5509,12 @@ let wt = class extends H {
             label="Next"
             variant="plain"
             .disabled=${i}
-            @click=${() => this.entityId && this.callService(p1(this.entityId), { errorVerb: "skip" })}
+            @click=${() => this.entityId && this.callService(xa(this.entityId), { errorVerb: "skip" })}
           ></hd-icon-button>` : d}
     </div>`;
   }
   renderContent() {
-    const t = this.vm, e = e1(t.stateObj), i = this.currentSize, a = t.stateObj?.attributes.entity_picture, s = t.stateObj?.attributes.app_name, n = t.stateObj?.attributes.media_title, r = this._rawState, c = s ? ue(s) : void 0;
+    const t = this.vm, e = da(t.stateObj), i = this.currentSize, a = t.stateObj?.attributes.entity_picture, s = t.stateObj?.attributes.app_name, n = t.stateObj?.attributes.media_title, r = this._rawState, c = s ? fe(s) : void 0;
     if (r === "off" || (r === "idle" || r === "standby") && !!!(a || s || n))
       return o`
         <hd-widget-frame
@@ -5566,7 +5533,7 @@ let wt = class extends H {
           ${e.play || e.pause ? this._transportPlain(e) : d}
         </hd-widget-frame>
       `;
-    const u = i === "2x2", p = Fe(t.stateObj), f = a ? `background-image:url("${a}")` : "";
+    const u = i === "2x2", m = Ne(t.stateObj), f = a ? `background-image:url("${a}")` : "";
     return o`
       <hd-widget-frame
         bleed
@@ -5594,7 +5561,7 @@ let wt = class extends H {
             </div>
             ${this._transport(e)}
           </div>
-          ${p ? o`<div class="np-progress"><span style=${`width:${p.pct}%`}></span></div>` : d}
+          ${m ? o`<div class="np-progress"><span style=${`width:${m.pct}%`}></span></div>` : d}
         </div>
       </hd-widget-frame>
     `;
@@ -5613,7 +5580,7 @@ let wt = class extends H {
     </div>`;
   }
 };
-wt.styles = x`
+Ct.styles = y`
     :host {
       display: block;
       height: 100%;
@@ -5804,38 +5771,38 @@ wt.styles = x`
       }
     }
   `;
-_e([
-  C()
-], wt.prototype, "_artColor", 2);
-_e([
-  C()
-], wt.prototype, "_optimistic", 2);
-_e([
-  C()
-], wt.prototype, "_marquee", 2);
-wt = _e([
+Se([
+  x()
+], Ct.prototype, "_artColor", 2);
+Se([
+  x()
+], Ct.prototype, "_optimistic", 2);
+Se([
+  x()
+], Ct.prototype, "_marquee", 2);
+Ct = Se([
   b("hd-widget-media")
-], wt);
-const hn = "data:image/webp;base64,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";
-var un = Object.getOwnPropertyDescriptor, pn = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? un(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], Ct);
+const Cn = "data:image/webp;base64,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";
+var xn = Object.getOwnPropertyDescriptor, An = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? xn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = r(s) || s);
   return s;
 };
-const mn = "#EA0029";
-let Ne = class extends H {
+const Ln = "#EA0029";
+let Xe = class extends M {
   get _branded() {
     const t = this.config.options ?? {};
     return t.brand === "roborock" || t.branded === !0;
   }
   relevantEntityIds() {
-    return [...this.entityId ? [this.entityId] : [], ...Rt(this.hass, this.entityId).ids];
+    return [...this.entityId ? [this.entityId] : [], ...Ut(this.hass, this.entityId).ids];
   }
   _progress() {
-    const t = Rt(this.hass, this.entityId);
+    const t = Ut(this.hass, this.entityId);
     if (this.vm.rawState !== "cleaning" || typeof t.progress != "number") return d;
     const e = Math.max(0, Math.min(100, Math.round(t.progress))), i = [`${e}%`];
-    return typeof t.area == "number" && t.area > 0 && i.push(`${$(t.area)} m²`), typeof t.cleaningTime == "number" && t.cleaningTime > 0 && i.push(`${Math.round(t.cleaningTime)} min`), o`<div class="progress">
+    return typeof t.area == "number" && t.area > 0 && i.push(`${A(t.area)} m²`), typeof t.cleaningTime == "number" && t.cleaningTime > 0 && i.push(`${Math.round(t.cleaningTime)} min`), o`<div class="progress">
       <div class="track"><div class="fill" style=${`width:${e}%`}></div></div>
       <div class="meta"><span>${i[0]}</span><span>${i.slice(1).join(" · ")}</span></div>
     </div>`;
@@ -5848,34 +5815,34 @@ let Ne = class extends H {
             label="Pause"
             variant="soft"
             .disabled=${a}
-            @click=${() => this.entityId && this.callService(Ze(this.entityId), { errorVerb: "pause" })}
+            @click=${() => this.entityId && this.callService(We(this.entityId), { errorVerb: "pause" })}
           ></hd-icon-button>` : o`<hd-icon-button
             icon="mdi:play"
             label="Start"
             variant="filled"
             .disabled=${a || !t.start}
-            @click=${() => this.entityId && this.callService(re(this.entityId), { errorVerb: "start" })}
+            @click=${() => this.entityId && this.callService(de(this.entityId), { errorVerb: "start" })}
           ></hd-icon-button>`}
       ${t.returnHome ? o`<hd-icon-button
             icon="mdi:home-import-outline"
             label="Return to dock"
             variant="soft"
             .disabled=${a || i === "docked"}
-            @click=${() => this.entityId && this.callService(oe(this.entityId), { errorVerb: "dock" })}
+            @click=${() => this.entityId && this.callService(he(this.entityId), { errorVerb: "dock" })}
           ></hd-icon-button>` : d}
     </div>`;
   }
   _fanSpeed() {
     const t = this.vm, i = (t.stateObj?.attributes.fan_speed_list ?? []).filter((s) => !["off", "custom"].includes(s));
     if (i.length < 2) return d;
-    const a = i.map((s) => ({ value: s, label: V(s) }));
+    const a = i.map((s) => ({ value: s, label: k(s) }));
     return o`<div class="fan">
       <hd-segmented
         .options=${a}
         .value=${t.stateObj?.attributes.fan_speed ?? ""}
         .disabled=${!t.available}
         label="Suction power"
-        @hd-select=${(s) => this.entityId && this.callService(g1(this.entityId, s.detail.value), { errorVerb: "set suction for" })}
+        @hd-select=${(s) => this.entityId && this.callService(La(this.entityId, s.detail.value), { errorVerb: "set suction for" })}
       ></hd-segmented>
     </div>`;
   }
@@ -5883,23 +5850,23 @@ let Ne = class extends H {
   _heroControls(t) {
     const e = this.vm, i = e.rawState, a = !e.available, s = i === "cleaning", n = (r, c) => this.entityId && this.callService(r(), { errorVerb: c });
     return o`<div class="controls" @click=${(r) => r.stopPropagation()}>
-      ${s && t.pause ? o`<button class="pill primary" aria-label="Pause" ?disabled=${a} @click=${() => n(() => Ze(this.entityId), "pause")}>
+      ${s && t.pause ? o`<button class="pill primary" aria-label="Pause" ?disabled=${a} @click=${() => n(() => We(this.entityId), "pause")}>
             <hd-icon icon="mdi:pause" .size=${20}></hd-icon>
-          </button>` : o`<button class="pill primary" aria-label="Start" ?disabled=${a || !t.start} @click=${() => n(() => re(this.entityId), "start")}>
+          </button>` : o`<button class="pill primary" aria-label="Start" ?disabled=${a || !t.start} @click=${() => n(() => de(this.entityId), "start")}>
             <hd-icon icon="mdi:play" .size=${20}></hd-icon>
           </button>`}
-      ${t.returnHome ? o`<button class="pill" aria-label="Return to dock" ?disabled=${a || i === "docked"} @click=${() => n(() => oe(this.entityId), "dock")}>
+      ${t.returnHome ? o`<button class="pill" aria-label="Return to dock" ?disabled=${a || i === "docked"} @click=${() => n(() => he(this.entityId), "dock")}>
             <hd-icon icon="mdi:home-import-outline" .size=${20}></hd-icon>
           </button>` : d}
-      ${t.locate ? o`<button class="pill" aria-label="Locate" ?disabled=${a} @click=${() => n(() => f1(this.entityId), "locate")}>
+      ${t.locate ? o`<button class="pill" aria-label="Locate" ?disabled=${a} @click=${() => n(() => Ha(this.entityId), "locate")}>
             <hd-icon icon="mdi:map-marker-radius" .size=${20}></hd-icon>
           </button>` : d}
     </div>`;
   }
   /** Full-bleed Roborock-branded hero (2×2): red panel + product shot. */
   _renderHero(t) {
-    const e = this.vm, i = Rt(this.hass, this.entityId), a = e.rawState === "cleaning", s = a && typeof i.progress == "number" ? Math.max(0, Math.min(100, Math.round(i.progress))) : void 0, n = [];
-    i.battery != null && n.push(`${Math.round(i.battery)}%`), i.area != null && i.area > 0 && n.push(`${$(i.area)} m²`);
+    const e = this.vm, i = Ut(this.hass, this.entityId), a = e.rawState === "cleaning", s = a && typeof i.progress == "number" ? Math.max(0, Math.min(100, Math.round(i.progress))) : void 0, n = [];
+    i.battery != null && n.push(`${Math.round(i.battery)}%`), i.area != null && i.area > 0 && n.push(`${A(i.area)} m²`);
     const r = s != null ? o`<div class="hprogress">
             <div class="prow">
               <span>${s}%</span>
@@ -5920,7 +5887,7 @@ let Ne = class extends H {
       >
         <div class="hero" ?data-cleaning=${a}>
           <div class="glow"></div>
-          <img class="robot" src=${hn} alt="" aria-hidden="true" draggable="false" />
+          <img class="robot" src=${Cn} alt="" aria-hidden="true" draggable="false" />
           <div class="top">
             <div class="brand">roborock</div>
             <div class="htext">
@@ -5938,7 +5905,7 @@ let Ne = class extends H {
     `;
   }
   renderContent() {
-    const t = this.vm, e = this.currentSize, i = i1(t.stateObj), a = e !== "1x1";
+    const t = this.vm, e = this.currentSize, i = ha(t.stateObj), a = e !== "1x1";
     return this._branded && e === "2x2" && t.exists ? this._renderHero(i) : o`
       <hd-widget-frame
         .icon=${t.icon}
@@ -5963,7 +5930,7 @@ let Ne = class extends H {
     `;
   }
 };
-Ne.styles = x`
+Xe.styles = y`
     .controls {
       display: flex;
       gap: 8px;
@@ -6151,7 +6118,7 @@ Ne.styles = x`
     }
     .hero .pill.primary {
       background: #fff;
-      color: ${Zi(mn)};
+      color: ${Ki(Ln)};
     }
     .hero .pill.primary:hover {
       background: rgba(255, 255, 255, 0.88);
@@ -6171,15 +6138,15 @@ Ne.styles = x`
       }
     }
   `;
-Ne = pn([
+Xe = An([
   b("hd-widget-vacuum")
-], Ne);
-var gn = Object.defineProperty, fn = Object.getOwnPropertyDescriptor, A1 = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? fn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], Xe);
+var Hn = Object.defineProperty, Mn = Object.getOwnPropertyDescriptor, Ta = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Mn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && gn(e, i, s), s;
+  return a && s && Hn(e, i, s), s;
 };
-let pe = class extends H {
+let ve = class extends M {
   constructor() {
     super(...arguments), this._forecast = [], this._fetchedFor = "";
   }
@@ -6212,7 +6179,7 @@ let pe = class extends H {
   }
   _metrics() {
     const t = this.vm.stateObj?.attributes ?? {}, e = [];
-    return t.humidity != null && e.push(["mdi:water-percent", `${Math.round(t.humidity)}%`]), t.wind_speed != null && e.push(["mdi:weather-windy", `${$(t.wind_speed)} ${t.wind_speed_unit ?? "km/h"}`]), o`<div class="metrics">
+    return t.humidity != null && e.push(["mdi:water-percent", `${Math.round(t.humidity)}%`]), t.wind_speed != null && e.push(["mdi:weather-windy", `${A(t.wind_speed)} ${t.wind_speed_unit ?? "km/h"}`]), o`<div class="metrics">
       ${e.map(
       ([i, a]) => o`<span class="metric"><hd-icon .icon=${i} .size=${14}></hd-icon>${a}</span>`
     )}
@@ -6224,7 +6191,7 @@ let pe = class extends H {
       const e = new Date(t.datetime), i = Number.isNaN(e.getTime()) ? "" : e.toLocaleDateString(void 0, { weekday: "short" });
       return o`<div class="day">
           <span class="dow">${i}</span>
-          <hd-icon .icon=${qe(t.condition ?? "")} .size=${20}></hd-icon>
+          <hd-icon .icon=${Ke(t.condition ?? "")} .size=${20}></hd-icon>
           <span class="hi">${t.temperature != null ? `${Math.round(t.temperature)}°` : "–"}</span>
           ${t.templow != null ? o`<span class="lo">${Math.round(t.templow)}°</span>` : d}
         </div>`;
@@ -6232,13 +6199,13 @@ let pe = class extends H {
     </div>` : d;
   }
   renderContent() {
-    const t = this.vm, e = t.stateObj?.attributes ?? {}, i = this.currentSize, a = i === "1x2" || i === "2x2", s = e.temperature != null ? `${$(e.temperature)}°` : "—", n = this.layout === "value";
+    const t = this.vm, e = t.stateObj?.attributes ?? {}, i = this.currentSize, a = i === "1x2" || i === "2x2", s = e.temperature != null ? `${A(e.temperature)}°` : "—", n = this.layout === "value";
     return o`
       <hd-widget-frame
-        .icon=${qe(t.rawState)}
+        .icon=${Ke(t.rawState)}
         .layout=${this.layout}
         .name=${t.name}
-        .stateText=${n ? s : V(t.rawState)}
+        .stateText=${n ? s : k(t.rawState)}
         .size=${i}
         .accent=${"accent"}
         .active=${!1}
@@ -6253,7 +6220,7 @@ let pe = class extends H {
     `;
   }
 };
-pe.styles = x`
+ve.styles = y`
     .temp {
       font: var(--text-value-lg);
       font-variant-numeric: tabular-nums;
@@ -6301,18 +6268,18 @@ pe.styles = x`
       font-variant-numeric: tabular-nums;
     }
   `;
-A1([
-  C()
-], pe.prototype, "_forecast", 2);
-pe = A1([
+Ta([
+  x()
+], ve.prototype, "_forecast", 2);
+ve = Ta([
   b("hd-widget-weather")
-], pe);
-var vn = Object.defineProperty, bn = Object.getOwnPropertyDescriptor, H1 = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? bn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], ve);
+var Vn = Object.defineProperty, kn = Object.getOwnPropertyDescriptor, Da = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? kn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && vn(e, i, s), s;
+  return a && s && Vn(e, i, s), s;
 };
-let me = class extends H {
+let be = class extends M {
   constructor() {
     super(...arguments), this._trend = [], this._fetchedFor = "";
   }
@@ -6331,7 +6298,7 @@ let me = class extends H {
   }
   async _loadTrend(t) {
     if (!this.hass) return;
-    const e = await ai(this.hass, t, 24);
+    const e = await mi(this.hass, t, 24);
     this._trend = e.map((i) => i.value);
   }
   _num(t) {
@@ -6343,7 +6310,7 @@ let me = class extends H {
   }
   _powerText(t) {
     const e = Math.abs(t);
-    return e >= 1e3 ? { value: $(e / 1e3), unit: "kW" } : { value: String(Math.round(e)), unit: "W" };
+    return e >= 1e3 ? { value: A(e / 1e3), unit: "kW" } : { value: String(Math.round(e)), unit: "W" };
   }
   renderContent() {
     const t = this._opts, e = this._num(t.gridPower), i = this._num(t.solarPower), a = this._num(t.solarToday), s = this._num(t.forecastEndOfDay), n = this._num(t.solarForecastRemaining), r = this.currentSize, c = (e ?? 0) >= 0, l = e == null || c ? "var(--text-primary)" : "var(--state-eco)", h = e == null ? { value: "—", unit: "" } : this._powerText(e);
@@ -6370,9 +6337,9 @@ let me = class extends H {
 
         <div class="stats">
           ${i != null ? o`<hd-status-badge tone="eco" icon="mdi:solar-power-variant" text=${`${this._powerText(i).value} ${this._powerText(i).unit} now`}></hd-status-badge>` : d}
-          ${a != null ? o`<hd-status-badge tone="eco" icon="mdi:weather-sunny" text=${`${$(a)} kWh today`}></hd-status-badge>` : d}
-          ${n != null && i == null ? o`<hd-status-badge tone="neutral" icon="mdi:chart-bell-curve" text=${`${$(n)} kWh left`}></hd-status-badge>` : d}
-          ${s != null && (r === "2x2" || r === "2x1") ? o`<hd-status-badge tone="neutral" icon="mdi:chart-line" text=${`${$(s)} kWh forecast`}></hd-status-badge>` : d}
+          ${a != null ? o`<hd-status-badge tone="eco" icon="mdi:weather-sunny" text=${`${A(a)} kWh today`}></hd-status-badge>` : d}
+          ${n != null && i == null ? o`<hd-status-badge tone="neutral" icon="mdi:chart-bell-curve" text=${`${A(n)} kWh left`}></hd-status-badge>` : d}
+          ${s != null && (r === "2x2" || r === "2x1") ? o`<hd-status-badge tone="neutral" icon="mdi:chart-line" text=${`${A(s)} kWh forecast`}></hd-status-badge>` : d}
         </div>
 
         ${r === "2x2" && this._trend.length > 1 ? o`<div class="trend">
@@ -6382,7 +6349,7 @@ let me = class extends H {
     `;
   }
 };
-me.styles = x`
+be.styles = y`
     .hero {
       display: flex;
       align-items: baseline;
@@ -6413,30 +6380,30 @@ me.styles = x`
       margin-top: 8px;
     }
   `;
-H1([
-  C()
-], me.prototype, "_trend", 2);
-me = H1([
+Da([
+  x()
+], be.prototype, "_trend", 2);
+be = Da([
   b("hd-widget-energy")
-], me);
-const N = 25;
-function yn(t) {
+], be);
+const P = 25;
+function ye(t) {
   if (!t) return null;
   const e = Number(t.state);
   if (!Number.isFinite(e)) return null;
   const i = String(t.attributes.unit_of_measurement ?? "").toLowerCase();
   return i === "kw" ? e * 1e3 : i === "mw" ? e * 1e6 : e;
 }
-function Pt(t) {
+function Dt(t) {
   return t > 0 ? t : 0;
 }
-function wn(t) {
-  const e = t.grid ?? 0, i = Pt(t.solar ?? 0), a = Pt(t.car ?? 0), s = t.carActive ? a : 0, n = Pt(e), r = Pt(-e), c = Pt(i + e - s), l = n > N || r > N, h = i > N, u = t.carActive && s > N, p = n > N ? "import" : r > N ? "export" : "idle", f = {
-    watts: p === "export" ? r : n,
-    direction: p === "import" ? "toHouse" : p === "export" ? "toGrid" : "idle",
+function Sn(t) {
+  const e = t.grid ?? 0, i = Dt(t.solar ?? 0), a = Dt(t.car ?? 0), s = t.carActive ? a : 0, n = Dt(e), r = Dt(-e), c = Dt(i + e - s), l = n > P || r > P, h = i > P, u = t.carActive && s > P, m = n > P ? "import" : r > P ? "export" : "idle", f = {
+    watts: m === "export" ? r : n,
+    direction: m === "import" ? "toHouse" : m === "export" ? "toGrid" : "idle",
     active: l,
     // Exported energy is solar in origin; imported is grid.
-    source: p === "export" ? "solar" : "grid"
+    source: m === "export" ? "solar" : "grid"
   }, g = {
     watts: i,
     direction: h ? "toHouse" : "idle",
@@ -6447,62 +6414,62 @@ function wn(t) {
     direction: u ? "toCar" : "idle",
     active: u,
     // If we're exporting, there's surplus solar covering the car; else it's grid.
-    source: u && (r > N || i > s) ? "solar" : "grid"
-  }, y = c + s, M = y > 0 ? Math.round(Math.min(i, y) / y * 100) : i > 0 ? 100 : 0;
+    source: u && (r > P || i > s) ? "solar" : "grid"
+  }, w = c + s, S = w > 0 ? Math.round(Math.min(i, w) / w * 100) : i > 0 ? 100 : 0;
   return {
-    grid: { watts: Math.abs(e), active: l, mode: p },
+    grid: { watts: Math.abs(e), active: l, mode: m },
     solar: { watts: i, active: h },
-    house: { watts: c, active: c > N },
+    house: { watts: c, active: c > P },
     car: { watts: s, active: u, connected: t.carConnected ?? t.carActive },
     paths: { gridHouse: f, solarHouse: g, houseCar: v },
-    selfSufficiency: M
+    selfSufficiency: S
   };
 }
-function Ei(t) {
+function Ye(t) {
   if (!t) return !1;
   const e = t.toLowerCase();
   return e === "charging" || e === "starting";
 }
-function Oi(t) {
+function Ge(t) {
   if (!t) return !1;
   const e = t.toLowerCase();
   return e !== "not_connected" && e !== "disconnected" && e !== "unavailable" && e !== "unknown";
 }
-var xn = Object.defineProperty, Cn = Object.getOwnPropertyDescriptor, $e = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Cn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var En = Object.defineProperty, In = Object.getOwnPropertyDescriptor, Ee = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? In(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && xn(e, i, s), s;
+  return a && s && En(e, i, s), s;
 };
-function L1(t, e) {
-  const i = (u) => u ? yn(t.states[u]) : null, a = i(e.gridPower), s = i(e.solarPower);
+function Oa(t, e) {
+  const i = (u) => u ? ye(t.states[u]) : null, a = i(e.gridPower), s = i(e.solarPower);
   let n = i(e.carPower);
   if ((n == null || n === 0) && e.carPowerAlt) {
     const u = i(e.carPowerAlt);
     u != null && u > 0 && (n = u);
   }
-  const r = e.carActive ? t.states[e.carActive]?.state : void 0, c = e.carActiveAlt ? t.states[e.carActiveAlt]?.state : void 0, l = Ei(r) || Ei(c), h = Oi(r) || Oi(c);
-  return wn({ grid: a, solar: s, car: n, carActive: l, carConnected: h });
+  const r = e.carActive ? t.states[e.carActive]?.state : void 0, c = e.carActiveAlt ? t.states[e.carActiveAlt]?.state : void 0, l = Ye(r) || Ye(c), h = Ge(r) || Ge(c);
+  return Sn({ grid: a, solar: s, car: n, carActive: l, carConnected: h });
 }
-function Ee(t) {
+function Fe(t) {
   const e = Math.abs(t);
-  return e >= 1e3 ? `${$(e / 1e3)} kW` : `${Math.round(e)} W`;
+  return e >= 1e3 ? `${A(e / 1e3)} kW` : `${Math.round(e)} W`;
 }
-const Z = {
+const _ = {
   grid: [25, 26],
   solar: [75, 26],
   house: [50, 50],
   car: [50, 80]
-}, Tt = { grid: [40, 40], solar: [60, 40], car: [67, 64] }, Et = 10, Ot = 13;
-function Oe(t, e) {
+}, Ot = { grid: [40, 40], solar: [60, 40], car: [67, 64] }, zt = 10, Rt = 13;
+function Ue(t, e) {
   const i = Math.hypot(t, e) || 1;
   return [t / i, e / i];
 }
-function zt(t, e, i, a, s) {
-  const [n, r] = Oe(e[0] - t[0], e[1] - t[1]), c = [t[0] + n * a, t[1] + r * a], [l, h] = Oe(e[0] - i[0], e[1] - i[1]), u = [i[0] + l * s, i[1] + h * s], p = `M ${c[0].toFixed(2)} ${c[1].toFixed(2)} Q ${e[0]} ${e[1]} ${u[0].toFixed(2)} ${u[1].toFixed(2)}`, [f, g] = Oe(u[0] - e[0], u[1] - e[1]), v = 3.1, y = [u[0] - f * v, u[1] - g * v], M = -g * v * 0.6, T = f * v * 0.6, L = `${u[0].toFixed(2)},${u[1].toFixed(2)} ${(y[0] + M).toFixed(2)},${(y[1] + T).toFixed(2)} ${(y[0] - M).toFixed(2)},${(y[1] - T).toFixed(2)}`;
-  return { d: p, chevron: L };
+function Bt(t, e, i, a, s) {
+  const [n, r] = Ue(e[0] - t[0], e[1] - t[1]), c = [t[0] + n * a, t[1] + r * a], [l, h] = Ue(e[0] - i[0], e[1] - i[1]), u = [i[0] + l * s, i[1] + h * s], m = `M ${c[0].toFixed(2)} ${c[1].toFixed(2)} Q ${e[0]} ${e[1]} ${u[0].toFixed(2)} ${u[1].toFixed(2)}`, [f, g] = Ue(u[0] - e[0], u[1] - e[1]), v = 3.1, w = [u[0] - f * v, u[1] - g * v], S = -g * v * 0.6, D = f * v * 0.6, V = `${u[0].toFixed(2)},${u[1].toFixed(2)} ${(w[0] + S).toFixed(2)},${(w[1] + D).toFixed(2)} ${(w[0] - S).toFixed(2)},${(w[1] - D).toFixed(2)}`;
+  return { d: m, chevron: V };
 }
-const te = (t, e, i) => t + (e - t) * i, _n = (t) => 1 - Math.pow(1 - t, 3);
-let Kt = class extends A {
+const se = (t, e, i) => t + (e - t) * i, Pn = (t) => 1 - Math.pow(1 - t, 3);
+let Nt = class extends H {
   constructor() {
     super(...arguments), this._shown = { grid: 0, solar: 0, house: 0, car: 0 }, this._raf = 0;
   }
@@ -6523,12 +6490,12 @@ let Kt = class extends A {
     const a = { ...this._shown }, s = performance.now(), n = 420;
     cancelAnimationFrame(this._raf);
     const r = (c) => {
-      const l = Math.min(1, (c - s) / n), h = _n(l);
+      const l = Math.min(1, (c - s) / n), h = Pn(l);
       this._shown = {
-        grid: te(a.grid, e.grid, h),
-        solar: te(a.solar, e.solar, h),
-        house: te(a.house, e.house, h),
-        car: te(a.car, e.car, h)
+        grid: se(a.grid, e.grid, h),
+        solar: se(a.solar, e.solar, h),
+        house: se(a.house, e.house, h),
+        car: se(a.car, e.car, h)
       }, l < 1 && (this._raf = requestAnimationFrame(r));
     };
     this._raf = requestAnimationFrame(r);
@@ -6537,29 +6504,29 @@ let Kt = class extends A {
     return Math.min(2.4, Math.max(0.7, 2.6 - t / 2500));
   }
   _conn(t, e, i, a, s) {
-    return Ft`
+    return jt`
       <path class="track" d=${e.d}></path>
       <path class="band ${i ? "on" : ""}" d=${t.d} style=${`stroke:${a};--pc:${a}`}></path>
-      ${i ? Ft`<path class="flow" d=${t.d} style=${`stroke:${a};animation-duration:${this._speed(s)}s`}></path>` : d}
+      ${i ? jt`<path class="flow" d=${t.d} style=${`stroke:${a};animation-duration:${this._speed(s)}s`}></path>` : d}
       <polygon class="chevron ${i ? "on" : ""}" points=${t.chevron} style=${`fill:${a}`}></polygon>
     `;
   }
   _node(t, e, i, a, s, n) {
-    const [r, c] = Z[t], l = t === "house";
+    const [r, c] = _[t], l = t === "house";
     return o`<div class="${`node ${l ? "hub " : ""}${a ? "active" : "idle"}`}" style=${`left:${r}%;top:${c}%;--n-fg:${s}`}>
       <div class="disc"><hd-icon .icon=${e} .size=${l ? 26 : 22}></hd-icon></div>
-      <div class="label">${Ee(this._shown[t])}</div>
+      <div class="label">${Fe(this._shown[t])}</div>
       ${n ?? o`<div class="name">${i}</div>`}
     </div>`;
   }
   render() {
     const t = this.model;
     if (!t) return d;
-    const e = "var(--state-eco)", i = "var(--accent)", a = t.grid.mode !== "export", s = t.grid.mode === "export" ? e : i, n = t.paths.houseCar.source === "solar" ? e : i, r = a ? zt(Z.grid, Tt.grid, Z.house, Et, Ot) : zt(Z.house, Tt.grid, Z.grid, Ot, Et), c = zt(Z.grid, Tt.grid, Z.house, Et, Ot), l = zt(Z.solar, Tt.solar, Z.house, Et, Ot), h = zt(Z.house, Tt.car, Z.car, Ot, Et), u = t.grid.mode === "export" ? e : t.grid.mode === "import" ? i : "var(--text-tertiary)", p = t.grid.mode === "export" ? `Exporting ${Ee(t.grid.watts)}` : t.grid.mode === "import" ? `Importing ${Ee(t.grid.watts)}` : "Grid balanced", f = t.solar.watts > N;
+    const e = "var(--state-eco)", i = "var(--accent)", a = t.grid.mode !== "export", s = t.grid.mode === "export" ? e : i, n = t.paths.houseCar.source === "solar" ? e : i, r = a ? Bt(_.grid, Ot.grid, _.house, zt, Rt) : Bt(_.house, Ot.grid, _.grid, Rt, zt), c = Bt(_.grid, Ot.grid, _.house, zt, Rt), l = Bt(_.solar, Ot.solar, _.house, zt, Rt), h = Bt(_.house, Ot.car, _.car, Rt, zt), u = t.grid.mode === "export" ? e : t.grid.mode === "import" ? i : "var(--text-tertiary)", m = t.grid.mode === "export" ? `Exporting ${Fe(t.grid.watts)}` : t.grid.mode === "import" ? `Importing ${Fe(t.grid.watts)}` : "Grid balanced", f = t.solar.watts > P;
     return o`
       <div class="stage">
         <div class="status" style=${`--status-color:${u}`}>
-          <span class="dot"></span><span class="txt">${p}</span>
+          <span class="dot"></span><span class="txt">${m}</span>
         </div>
 
         <svg class="paths" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -6595,7 +6562,7 @@ let Kt = class extends A {
     `;
   }
 };
-Kt.styles = x`
+Nt.styles = y`
     :host {
       display: block;
       position: relative;
@@ -6784,16 +6751,16 @@ Kt.styles = x`
       line-height: 1;
     }
   `;
-$e([
-  m({ attribute: !1 })
-], Kt.prototype, "model", 2);
-$e([
-  C()
-], Kt.prototype, "_shown", 2);
-Kt = $e([
+Ee([
+  p({ attribute: !1 })
+], Nt.prototype, "model", 2);
+Ee([
+  x()
+], Nt.prototype, "_shown", 2);
+Nt = Ee([
   b("hd-flow-diagram")
-], Kt);
-let zi = class extends H {
+], Nt);
+let $i = class extends M {
   get _opts() {
     return this.config.options ?? {};
   }
@@ -6804,7 +6771,7 @@ let zi = class extends H {
     return !0;
   }
   renderContent() {
-    const t = this.hass ? L1(this.hass, this._opts) : void 0, e = t?.grid.mode === "export" ? "eco" : "accent";
+    const t = this.hass ? Oa(this.hass, this._opts) : void 0, e = t?.grid.mode === "export" ? "eco" : "accent";
     return o`
       <hd-widget-frame
         bleed
@@ -6820,26 +6787,26 @@ let zi = class extends H {
     `;
   }
 };
-zi = $e([
+$i = Ee([
   b("hd-widget-powerflow")
-], zi);
-var $n = Object.getOwnPropertyDescriptor, An = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? $n(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], $i);
+var Tn = Object.getOwnPropertyDescriptor, Dn = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Tn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = r(s) || s);
   return s;
 };
-const pt = (t, e) => {
+const mt = (t, e) => {
   if (!e || !t) return null;
   const i = t.states[e];
   if (!i) return null;
   const a = Number(i.state);
   return Number.isFinite(a) ? a : null;
-}, ze = (t, e) => e ? t?.states[e]?.state : void 0;
-function V1(t, e) {
-  const i = ze(t, e.master) === "on", a = ze(t, e.vehicleConnected) === "on", s = ze(t, e.chargingState), n = pt(t, e.chargePower), r = pt(t, e.battery), c = pt(t, e.chargeLimit), l = pt(t, e.sessionEnergy), h = pt(t, e.chargeRate), u = pt(t, e.chargeCurrent), p = s === "charging" || s === "starting" || (n ?? 0) > 0.1, f = s === "complete";
+}, Je = (t, e) => e ? t?.states[e]?.state : void 0;
+function za(t, e) {
+  const i = Je(t, e.master) === "on", a = Je(t, e.vehicleConnected) === "on", s = Je(t, e.chargingState), n = mt(t, e.chargePower), r = mt(t, e.battery), c = mt(t, e.chargeLimit), l = mt(t, e.sessionEnergy), h = mt(t, e.chargeRate), u = mt(t, e.chargeCurrent), m = s === "charging" || s === "starting" || (n ?? 0) > 0.1, f = s === "complete";
   let g;
-  a ? p ? g = "charging" : f ? g = "complete" : i ? g = "waiting" : g = "off" : g = "unplugged";
-  const v = n != null ? $(n) : "—", y = {
+  a ? m ? g = "charging" : f ? g = "complete" : i ? g = "waiting" : g = "off" : g = "unplugged";
+  const v = n != null ? A(n) : "—", w = {
     unplugged: { label: "Car not connected", tone: "neutral", icon: "mdi:ev-plug-type2" },
     charging: {
       label: i ? `Solar charging · ${v} kW` : `Charging · ${v} kW`,
@@ -6860,10 +6827,10 @@ function V1(t, e) {
     sessionKwh: l,
     rateKmh: h,
     currentA: u,
-    ...y[g]
+    ...w[g]
   };
 }
-let Ue = class extends H {
+let ti = class extends M {
   get _opts() {
     return this.config.options ?? {};
   }
@@ -6875,10 +6842,10 @@ let Ue = class extends H {
   }
   _toggleMaster() {
     const t = this._opts.master;
-    t && this.callService(B(t), { errorVerb: "toggle solar charging" });
+    t && this.callService(K(t), { errorVerb: "toggle solar charging" });
   }
   renderContent() {
-    const t = V1(this.hass, this._opts), e = this.currentSize, i = t.batteryPct, a = t.limitPct, s = t.phase === "charging" && t.armed ? "var(--state-eco)" : "var(--accent)", n = i != null && (e === "2x2" || e === "1x2"), r = e === "2x2" || e === "1x2" || e === "2x1";
+    const t = za(this.hass, this._opts), e = this.currentSize, i = t.batteryPct, a = t.limitPct, s = t.phase === "charging" && t.armed ? "var(--state-eco)" : "var(--accent)", n = i != null && (e === "2x2" || e === "1x2"), r = e === "2x2" || e === "1x2" || e === "2x1";
     return o`
       <hd-widget-frame
         .icon=${t.icon}
@@ -6908,12 +6875,12 @@ let Ue = class extends H {
               ${t.powerKw != null && t.powerKw > 0.05 ? o`<hd-status-badge
                     tone=${t.armed ? "eco" : "accent"}
                     icon="mdi:flash"
-                    text=${`${$(t.powerKw)} kW`}
+                    text=${`${A(t.powerKw)} kW`}
                   ></hd-status-badge>` : d}
               ${t.sessionKwh != null && t.sessionKwh > 0.01 ? o`<hd-status-badge
                     tone="neutral"
                     icon="mdi:counter"
-                    text=${`${$(t.sessionKwh)} kWh session`}
+                    text=${`${A(t.sessionKwh)} kWh session`}
                   ></hd-status-badge>` : d}
               ${t.rateKmh != null && t.rateKmh > 0.5 ? o`<hd-status-badge
                     tone="neutral"
@@ -6925,7 +6892,7 @@ let Ue = class extends H {
     `;
   }
 };
-Ue.styles = x`
+ti.styles = y`
     .battery {
       display: flex;
       flex-direction: column;
@@ -6972,10 +6939,10 @@ Ue.styles = x`
       margin-top: 8px;
     }
   `;
-Ue = An([
+ti = Dn([
   b("hd-widget-solarcharging")
-], Ue);
-function Hn(t) {
+], ti);
+function On(t) {
   const e = {};
   for (const [i, a] of Object.entries(t ?? {}))
     e[i] = (a ?? []).map((s) => ({
@@ -6984,7 +6951,7 @@ function Hn(t) {
     }));
   return e;
 }
-function Ln(t, e, i = /* @__PURE__ */ new Date()) {
+function Ra(t, e, i = /* @__PURE__ */ new Date()) {
   const a = new Date(i);
   if (a.setHours(0, 0, 0, 0), t === "day")
     a.setDate(a.getDate() - (e - 1));
@@ -6995,11 +6962,11 @@ function Ln(t, e, i = /* @__PURE__ */ new Date()) {
     a.setDate(1), a.setMonth(a.getMonth() - (e - 1));
   return a;
 }
-function Vn(t, e) {
+function zn(t, e) {
   const i = new Date(t);
   return Number.isNaN(i.getTime()) ? "" : e === "day" ? i.toLocaleDateString(void 0, { weekday: "short" }) : e === "week" ? i.toLocaleDateString(void 0, { day: "numeric", month: "short" }) : i.toLocaleDateString(void 0, { month: "short" });
 }
-async function Mn(t, e, i, a) {
+async function Ba(t, e, i, a) {
   const s = e.filter(Boolean);
   if (!s.length) return {};
   const n = await t.callWS({
@@ -7009,19 +6976,19 @@ async function Mn(t, e, i, a) {
     period: i,
     types: ["change"]
   });
-  return Hn(n);
+  return On(n);
 }
-var kn = Object.defineProperty, Sn = Object.getOwnPropertyDescriptor, Qt = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? Sn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var Rn = Object.defineProperty, Bn = Object.getOwnPropertyDescriptor, ee = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Bn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && kn(e, i, s), s;
+  return a && s && Rn(e, i, s), s;
 };
-const Pn = (t) => {
+const Zn = (t) => {
   if (t <= 0) return 1;
   const e = Math.pow(10, Math.floor(Math.log10(t))), i = t / e;
   return (i <= 1 ? 1 : i <= 2 ? 2 : i <= 5 ? 5 : 10) * e;
-}, ee = (t) => Math.abs(t) >= 100 ? Math.round(t).toString() : t.toFixed(1);
-let ot = class extends A {
+}, ne = (t) => Math.abs(t) >= 100 ? Math.round(t).toString() : t.toFixed(1);
+let ot = class extends H {
   constructor() {
     super(...arguments), this.series = [], this.labels = [], this.unit = "", this.legend = !0;
   }
@@ -7032,11 +6999,11 @@ let ot = class extends A {
     const t = this.labels.length, e = this.series.filter((n) => n.values.some((r) => r > 0)), i = Math.max(0, ...this.series.flatMap((n) => n.values.filter((r) => Number.isFinite(r))));
     if (!t || !e.length || i <= 0)
       return o`<div class="empty">No data for this period</div>`;
-    const a = Pn(i), s = e.map((n) => `${n.label} ${ee(this._total(n))} ${this.unit}`).join(", ");
+    const a = Zn(i), s = e.map((n) => `${n.label} ${ne(this._total(n))} ${this.unit}`).join(", ");
     return o`
       <div class="wrap" role="img" aria-label=${s}>
         <div class="plot">
-          <span class="ymax">${ee(a)} ${this.unit}</span>
+          <span class="ymax">${ne(a)} ${this.unit}</span>
           ${this.labels.map(
       (n, r) => o`<div class="group">
               <div class="bars">
@@ -7045,7 +7012,7 @@ let ot = class extends A {
         return o`<div
                     class="bar"
                     style=${`--c:${c.color};height:${h}%`}
-                    title=${`${c.label}: ${ee(l)} ${this.unit}`}
+                    title=${`${c.label}: ${ne(l)} ${this.unit}`}
                   ></div>`;
       })}
               </div>
@@ -7056,7 +7023,7 @@ let ot = class extends A {
         ${this.legend ? o`<div class="legend">
               ${this.series.map(
       (n) => o`<span class="key" style=${`--c:${n.color}`}>
-                  <i></i>${n.label} <b>${ee(this._total(n))} ${this.unit}</b>
+                  <i></i>${n.label} <b>${ne(this._total(n))} ${this.unit}</b>
                 </span>`
     )}
             </div>` : d}
@@ -7064,7 +7031,7 @@ let ot = class extends A {
     `;
   }
 };
-ot.styles = x`
+ot.styles = y`
     :host {
       display: block;
       height: 100%;
@@ -7155,33 +7122,33 @@ ot.styles = x`
       font: var(--text-secondary-state);
     }
   `;
-Qt([
-  m({ attribute: !1 })
+ee([
+  p({ attribute: !1 })
 ], ot.prototype, "series", 2);
-Qt([
-  m({ attribute: !1 })
+ee([
+  p({ attribute: !1 })
 ], ot.prototype, "labels", 2);
-Qt([
-  m({ type: String })
+ee([
+  p({ type: String })
 ], ot.prototype, "unit", 2);
-Qt([
-  m({ type: Boolean })
+ee([
+  p({ type: Boolean })
 ], ot.prototype, "legend", 2);
-ot = Qt([
+ot = ee([
   b("hd-bar-chart")
 ], ot);
-var Tn = Object.defineProperty, En = Object.getOwnPropertyDescriptor, Ae = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? En(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var Qn = Object.defineProperty, _n = Object.getOwnPropertyDescriptor, Ie = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? _n(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Tn(e, i, s), s;
+  return a && s && Qn(e, i, s), s;
 };
-const De = [
+const $e = [
   { key: "solar", label: "Solar", color: "#f4b740" },
   { key: "gridImport", label: "Import", color: "var(--accent)" },
   { key: "gridExport", label: "Export", color: "var(--state-eco)" },
   { key: "car", label: "Car", color: "#8b7cf6" }
-], Di = { day: 7, week: 8, month: 12 };
-let xt = class extends H {
+], ji = { day: 7, week: 8, month: 12 };
+let xt = class extends M {
   constructor() {
     super(...arguments), this._period = "day", this._data = {}, this._periodInit = !1, this._fetchKey = "";
   }
@@ -7197,7 +7164,7 @@ let xt = class extends H {
     return !1;
   }
   _ids() {
-    return De.map((t) => this._opts[t.key]).filter((t) => typeof t == "string");
+    return $e.map((t) => this._opts[t.key]).filter((t) => typeof t == "string");
   }
   updated() {
     if (!this._periodInit && (this._periodInit = !0, this._opts.defaultPeriod)) {
@@ -7214,8 +7181,8 @@ let xt = class extends H {
     if (e !== this._fetchKey) {
       this._fetchKey = e;
       try {
-        const i = Ln(this._period, Di[this._period]);
-        this._data = await Mn(this.hass, t, this._period, i);
+        const i = Ra(this._period, ji[this._period]);
+        this._data = await Ba(this.hass, t, this._period, i);
       } catch {
         this._data = {};
       }
@@ -7225,12 +7192,12 @@ let xt = class extends H {
     t !== this._period && (this._period = t);
   }
   _chart() {
-    const t = Di[this._period], e = /* @__PURE__ */ new Set();
-    for (const n of De) {
+    const t = ji[this._period], e = /* @__PURE__ */ new Set();
+    for (const n of $e) {
       const r = this._opts[n.key];
       if (r) for (const c of this._data[r] ?? []) e.add(c.start);
     }
-    const i = [...e].sort((n, r) => n - r).slice(-t), a = i.map((n) => Vn(n, this._period)), s = De.filter((n) => this._opts[n.key]).map((n) => {
+    const i = [...e].sort((n, r) => n - r).slice(-t), a = i.map((n) => zn(n, this._period)), s = $e.filter((n) => this._opts[n.key]).map((n) => {
       const r = new Map((this._data[this._opts[n.key]] ?? []).map((c) => [c.start, c.change]));
       return {
         label: n.label,
@@ -7270,7 +7237,7 @@ let xt = class extends H {
     `;
   }
 };
-xt.styles = x`
+xt.styles = y`
     .head {
       display: flex;
       justify-content: flex-end;
@@ -7281,34 +7248,302 @@ xt.styles = x`
       min-height: 0;
     }
   `;
-Ae([
-  C()
+Ie([
+  x()
 ], xt.prototype, "_period", 2);
-Ae([
-  C()
+Ie([
+  x()
 ], xt.prototype, "_data", 2);
-Ae([
-  C()
+Ie([
+  x()
 ], xt.prototype, "_periodInit", 2);
-xt = Ae([
+xt = Ie([
   b("hd-widget-energychart")
 ], xt);
-var On = Object.defineProperty, zn = Object.getOwnPropertyDescriptor, He = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? zn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
-    (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && On(e, i, s), s;
+var Fn = Object.getOwnPropertyDescriptor, Un = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Fn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+    (r = t[n]) && (s = r(s) || s);
+  return s;
 };
-let je = class extends H {
+let ei = class extends M {
+  get _opts() {
+    return this.config.options ?? {};
+  }
+  relevantEntityIds() {
+    const t = this._opts;
+    return [this.config.entity, t.chargeStatus, t.connected].filter((e) => typeof e == "string");
+  }
+  _valueText() {
+    const t = this._opts, e = this.entityId ? this.hass?.states[this.entityId] : void 0;
+    if (!e) return "—";
+    if (t.format === "power") {
+      const i = ye(e);
+      if (i == null) return "—";
+      const a = Math.abs(i);
+      return a >= 1e3 ? `${A(a / 1e3)} kW` : `${Math.round(a)} W`;
+    }
+    if (t.format === "percent") {
+      const i = Number(e.state);
+      return Number.isFinite(i) ? `${Math.round(i)}%` : "—";
+    }
+    return dt(this.hass, e);
+  }
+  _statusText() {
+    const t = this._opts;
+    if (t.status === "gridDirection") {
+      const e = this.entityId ? this.hass?.states[this.entityId] : void 0, i = e ? ye(e) : null;
+      return i == null ? "" : i > P ? "Importing" : i < -P ? "Exporting" : "Balanced";
+    }
+    if (t.status === "carCharge") {
+      const e = t.chargeStatus ? this.hass?.states[t.chargeStatus]?.state : void 0;
+      return (t.connected ? this.hass?.states[t.connected]?.state : void 0) === "on" || Ge(e) ? Ye(e) ? "Charging" : "Plugged in" : "Disconnected";
+    }
+    return "";
+  }
+  renderContent() {
+    const t = this._opts, e = ui(t.accent ?? "idle").fg, i = this.entityId ? this.hass?.states[this.entityId] : void 0, a = !i || i.state === "unavailable" || i.state === "unknown";
+    this.setAttribute("data-unavailable", a ? "true" : "false");
+    const s = this._valueText(), n = this._statusText(), r = n ? `${s} • ${n}` : s;
+    return o`
+      <button
+        class="tile"
+        style=${`--glyph:${e}`}
+        aria-label=${`${this.config.name ?? ""} details`}
+        @click=${() => this.openDetail()}
+      >
+        <span class="glyph">
+          <hd-icon .icon=${this.config.icon ?? "mdi:flash"} .size=${24}></hd-icon>
+        </span>
+        <span class="text">
+          <span class="name">${this.config.name ?? ""}</span>
+          <span class="sub">${r}</span>
+        </span>
+        ${d}
+      </button>
+    `;
+  }
+};
+ei.styles = y`
+    :host {
+      display: block;
+      height: 100%;
+    }
+    .tile {
+      -webkit-tap-highlight-color: transparent;
+      appearance: none;
+      border: none;
+      text-align: left;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      background: var(--surface);
+      border-radius: var(--radius-widget);
+      box-shadow: var(--shadow-widget);
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      color: inherit;
+      transition: box-shadow var(--motion-state) var(--ease-standard);
+    }
+    .tile:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+    .glyph {
+      flex: none;
+      width: 26px;
+      display: grid;
+      place-items: center;
+      color: var(--glyph, var(--idle-fg));
+    }
+    .text {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .name {
+      font: var(--text-widget-title);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text-primary);
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .sub {
+      font: var(--text-secondary-state);
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    :host([data-unavailable="true"]) .tile {
+      opacity: 0.72;
+      cursor: default;
+    }
+  `;
+ei = Un([
+  b("hd-widget-metrictile")
+], ei);
+var Jn = Object.defineProperty, $n = Object.getOwnPropertyDescriptor, Pe = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? $n(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+    (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
+  return a && s && Jn(e, i, s), s;
+};
+let At = class extends M {
+  constructor() {
+    super(...arguments), this._import = 0, this._export = 0, this._ready = !1, this._timer = 0;
+  }
+  get _opts() {
+    return this.config.options ?? {};
+  }
+  // Periodic history, not live state — never re-render on meter ticks.
+  relevantEntityIds() {
+    return [];
+  }
+  hasDetail() {
+    return !1;
+  }
+  connectedCallback() {
+    super.connectedCallback(), this._timer = window.setInterval(() => void this._fetch(), 300 * 1e3);
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback(), window.clearInterval(this._timer);
+  }
+  updated() {
+    this._ready || this._fetch();
+  }
+  _sum(t) {
+    return (t ?? []).reduce((e, i) => e + (i.change || 0), 0);
+  }
+  async _fetch() {
+    if (!this.hass?.connected) return;
+    const t = this._opts.importEnergy, e = this._opts.exportEnergy, i = [t, e].filter((a) => typeof a == "string");
+    if (i.length)
+      try {
+        const a = await Ba(this.hass, i, "day", Ra("day", 1));
+        this._import = t ? this._sum(a[t]) : 0, this._export = e ? this._sum(a[e]) : 0, this._ready = !0;
+      } catch {
+      }
+  }
+  _term(t, e, i, a) {
+    return o`<div class="term">
+      <span class="num" style=${`--n:${a}`}><b>${A(t)}</b><span class="u">${e}</span></span>
+      <span class="lbl">${i}</span>
+    </div>`;
+  }
+  renderContent() {
+    const t = this._import - this._export, e = !this._ready;
+    return o`
+      <h2 class="title">${this.config.name ?? "Electricity Total"}</h2>
+      <div class="card" style=${e ? "opacity:0.6" : ""}>
+        <span class="lead"><hd-icon icon="mdi:flash" .size=${26}></hd-icon></span>
+        ${this._term(this._import, "kWh", "Imported", "var(--accent)")}
+        <span class="op">−</span>
+        ${this._term(this._export, "kWh", "Exported", "var(--state-eco)")}
+        <span class="op">=</span>
+        ${this._term(t, "kWh", "Total", "var(--accent)")}
+        ${d}
+      </div>
+    `;
+  }
+};
+At.styles = y`
+    :host {
+      display: block;
+    }
+    .title {
+      margin: 0 0 12px 2px;
+      font: var(--text-widget-title);
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--text-primary);
+    }
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-widget);
+      box-shadow: var(--shadow-widget);
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+    }
+    .lead {
+      flex: none;
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      margin-right: 4px;
+    }
+    .term {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      min-width: 0;
+    }
+    .num {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .num b {
+      font: 700 clamp(24px, 7vw, 34px) / 1.05 var(--font-sans);
+      color: var(--n, var(--text-primary));
+    }
+    .num .u {
+      font: var(--text-secondary-state);
+      color: var(--text-tertiary);
+    }
+    .lbl {
+      font: var(--text-meta);
+      color: var(--text-tertiary);
+    }
+    .op {
+      flex: none;
+      font: var(--text-value);
+      color: var(--text-tertiary);
+      padding: 0 6px 14px;
+      align-self: center;
+    }
+  `;
+Pe([
+  x()
+], At.prototype, "_import", 2);
+Pe([
+  x()
+], At.prototype, "_export", 2);
+Pe([
+  x()
+], At.prototype, "_ready", 2);
+At = Pe([
+  b("hd-widget-electricitytotal")
+], At);
+var jn = Object.defineProperty, qn = Object.getOwnPropertyDescriptor, Te = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? qn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+    (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
+  return a && s && jn(e, i, s), s;
+};
+let ii = class extends M {
   constructor() {
     super(...arguments), this._debounce = 0;
   }
   _setPct(t, e) {
     window.clearTimeout(this._debounce);
-    const i = () => this.entityId && this.callService(ds(this.entityId, t), { errorVerb: "set speed for" });
+    const i = () => this.entityId && this.callService(ws(this.entityId, t), { errorVerb: "set speed for" });
     e ? i() : this._debounce = window.setTimeout(i, 200);
   }
   renderContent() {
-    const t = this.vm, e = Ga(t.stateObj), i = this.currentSize, a = i === "1x2", s = e.speed && (i === "2x1" || i === "1x2") && t.active, n = t.stateObj?.attributes.percentage ?? 0;
+    const t = this.vm, e = cs(t.stateObj), i = this.currentSize, a = i === "1x2", s = e.speed && (i === "2x1" || i === "1x2") && t.active, n = t.stateObj?.attributes.percentage ?? 0;
     return o`<hd-widget-frame
       .icon=${t.icon}
       .name=${t.name}
@@ -7341,16 +7576,16 @@ let je = class extends H {
     super.disconnectedCallback(), window.clearTimeout(this._debounce);
   }
 };
-je.styles = x`
+ii.styles = y`
     .vert {
       flex: 1;
       min-height: 120px;
     }
   `;
-je = He([
+ii = Te([
   b("hd-widget-fan")
-], je);
-let ge = class extends H {
+], ii);
+let we = class extends M {
   constructor() {
     super(...arguments), this._cacheBust = Date.now(), this._timer = 0;
   }
@@ -7378,7 +7613,7 @@ let ge = class extends H {
     </hd-widget-frame>`;
   }
 };
-ge.styles = x`
+we.styles = y`
     .tile {
       position: relative;
       height: 100%;
@@ -7411,15 +7646,15 @@ ge.styles = x`
       gap: 6px;
     }
   `;
-He([
-  C()
-], ge.prototype, "_cacheBust", 2);
-ge = He([
+Te([
+  x()
+], we.prototype, "_cacheBust", 2);
+we = Te([
   b("hd-widget-camera")
-], ge);
-let Ke = class extends H {
+], we);
+let ai = class extends M {
   async _call(t, e) {
-    !this.entityId || !this.hass || e && !await Xt(this, { title: `${V(t.replace("alarm_", "").replace("_", " "))}?`, confirmLabel: "Confirm", destructive: t === "alarm_disarm" }) || this.callService(
+    !this.entityId || !this.hass || e && !await Yt(this, { title: `${k(t.replace("alarm_", "").replace("_", " "))}?`, confirmLabel: "Confirm", destructive: t === "alarm_disarm" }) || this.callService(
       { domain: "alarm_control_panel", service: t, data: { entity_id: this.entityId } },
       { errorVerb: "update" }
     );
@@ -7429,7 +7664,7 @@ let Ke = class extends H {
     return o`<hd-widget-frame
       .icon=${e === "triggered" ? "mdi:shield-alert" : s ? "mdi:shield-home" : "mdi:shield-off"}
       .name=${t.name}
-      .stateText=${V(e.replace("_", " "))}
+      .stateText=${k(e.replace("_", " "))}
       .size=${a}
       .accent=${i}
       .active=${s}
@@ -7445,7 +7680,7 @@ let Ke = class extends H {
     </hd-widget-frame>`;
   }
 };
-Ke.styles = x`
+ai.styles = y`
     .controls {
       display: flex;
       gap: 8px;
@@ -7469,10 +7704,10 @@ Ke.styles = x`
       color: var(--state-alert);
     }
   `;
-Ke = He([
+ai = Te([
   b("hd-widget-alarm")
-], Ke);
-const Dn = {
+], ai);
+const Wn = {
   group: "hd-group",
   light: "hd-widget-light",
   switch: "hd-widget-switch",
@@ -7494,16 +7729,18 @@ const Dn = {
   powerflow: "hd-widget-powerflow",
   solarcharging: "hd-widget-solarcharging",
   energychart: "hd-widget-energychart",
+  metrictile: "hd-widget-metrictile",
+  electricitytotal: "hd-widget-electricitytotal",
   alarm: "hd-widget-alarm",
   action: "hd-widget-action"
 };
-function In(t) {
-  return Dn[t] ?? "hd-widget-sensor";
+function Kn(t) {
+  return Wn[t] ?? "hd-widget-sensor";
 }
-function M1(t, e, i, a, s = "row") {
+function Za(t, e, i, a, s = "row") {
   try {
-    const { colSpan: n, rowSpan: r } = Bi(e, i), c = Ua(In(t.type)), l = `grid-column: span ${n}; grid-row: span ${r};`;
-    return Ka`<${c}
+    const { colSpan: n, rowSpan: r } = sa(e, i), c = ts(Kn(t.type)), l = `grid-column: span ${n}; grid-row: span ${r};`;
+    return is`<${c}
       class="cell"
       style=${l}
       .hass=${a}
@@ -7512,13 +7749,13 @@ function M1(t, e, i, a, s = "row") {
       .layout=${s}
     ></${c}>`;
   } catch (n) {
-    return console.error(`[widget-cell] widget "${t?.id ?? t?.type}" failed to render:`, n), Rn(t, e, i);
+    return console.error(`[widget-cell] widget "${t?.id ?? t?.type}" failed to render:`, n), Nn(t, e, i);
   }
 }
-function Rn(t, e, i) {
+function Nn(t, e, i) {
   let a = 1, s = 1;
   try {
-    ({ colSpan: a, rowSpan: s } = Bi(e, i));
+    ({ colSpan: a, rowSpan: s } = sa(e, i));
   } catch {
   }
   const n = `grid-column: span ${a}; grid-row: span ${s};`, r = t?.name || t?.entity || "Widget";
@@ -7534,12 +7771,265 @@ function Rn(t, e, i) {
     ?unavailable=${!0}
   ></hd-widget-frame>`;
 }
-var Zn = Object.defineProperty, qn = Object.getOwnPropertyDescriptor, Le = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? qn(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+const Xn = 960, Yn = 720, Gn = "data:image/webp;base64,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";
+var tr = Object.defineProperty, er = Object.getOwnPropertyDescriptor, De = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? er(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && Zn(e, i, s), s;
+  return a && s && tr(e, i, s), s;
 };
-let Ct = class extends A {
+const ir = "/local/home-dashboard/flows", Zt = 113, ar = 30, Qt = {
+  solar: "solar-generating",
+  grid: "grid-exporting",
+  home: "home-consuming",
+  ev: "ev-charging"
+};
+class sr {
+  constructor(e, i) {
+    this.base = e, this.total = i, this.frames = [], this.started = !1, this.loaded = 0;
+  }
+  start() {
+    if (!this.started) {
+      this.started = !0;
+      for (let e = 0; e < this.total; e++) {
+        const i = new Image();
+        i.decoding = "async", i.onload = () => {
+          this.loaded++;
+        }, i.src = `${this.base}.${e}.webp`, this.frames[e] = i;
+      }
+    }
+  }
+  /** The frame image if it has decoded, else null (skip drawing this tick). */
+  frame(e) {
+    const i = this.frames[e];
+    return i && i.complete && i.naturalWidth > 0 ? i : null;
+  }
+}
+let Lt = class extends H {
+  constructor() {
+    super(...arguments), this._seqs = /* @__PURE__ */ new Map(), this._active = [], this._raf = 0, this._running = !1, this._reduce = !1;
+  }
+  connectedCallback() {
+    super.connectedCallback(), this._reduce = typeof window < "u" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === !0;
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback(), this._stopLoop(), this._ro?.disconnect();
+  }
+  firstUpdated() {
+    const t = this.renderRoot.querySelector(".house");
+    t && (this._ro = new ResizeObserver(() => this._resize()), this._ro.observe(t)), this._resize(), this._computeActive(), this._syncLoop();
+  }
+  updated(t) {
+    (t.has("hass") || t.has("options")) && (this._computeActive(), this._syncLoop());
+  }
+  // ---- live state → active sequences -------------------------------------
+  _watts(t) {
+    return t ? ye(this.hass?.states[t]) : null;
+  }
+  _num(t) {
+    if (!t) return null;
+    const e = Number(this.hass?.states[t]?.state);
+    return Number.isFinite(e) ? e : null;
+  }
+  _computeActive() {
+    const t = this.options, e = this._watts(t?.gridPower) ?? 0, i = this._watts(t?.solarPower) ?? 0, a = this._watts(t?.carPower) ?? 0, s = t?.carConnected ? this.hass?.states[t.carConnected]?.state === "on" : !1, n = i + e - a, r = [];
+    i > P && r.push({ dir: Qt.solar, reverse: !1 }), e < -P ? r.push({ dir: Qt.grid, reverse: !1 }) : e > P && r.push({ dir: Qt.grid, reverse: !0 }), n > P && r.push({ dir: Qt.home, reverse: !1 }), s && a > P && r.push({ dir: Qt.ev, reverse: !1 }), this._active = r;
+    for (const c of r)
+      this._seqs.has(c.dir) || this._seqs.set(c.dir, new sr(`${ir}/${c.dir}/${c.dir}`, Zt)), this._seqs.get(c.dir).start();
+  }
+  // ---- animation loop -----------------------------------------------------
+  _syncLoop() {
+    if (!this._canvas) return;
+    if (this._reduce) {
+      this._stopLoop(), this._drawFrame(Math.floor(Zt * 0.5));
+      return;
+    }
+    const t = this._active.length > 0;
+    t && !this._running ? (this._running = !0, this._raf = requestAnimationFrame((e) => this._tick(e))) : !t && this._running && (this._stopLoop(), this._clear());
+  }
+  _stopLoop() {
+    this._running = !1, cancelAnimationFrame(this._raf);
+  }
+  _tick(t) {
+    if (!this._running) return;
+    const e = Math.floor(t / 1e3 * ar) % Zt;
+    this._drawFrame(e), this._raf = requestAnimationFrame((i) => this._tick(i));
+  }
+  // ---- canvas -------------------------------------------------------------
+  _resize() {
+    const t = this._canvas, e = this.renderRoot.querySelector(".house");
+    if (!t || !e) return;
+    const i = e.clientWidth, a = e.clientHeight;
+    if (!i || !a) return;
+    const s = Math.min(window.devicePixelRatio || 1, 2);
+    t.width = Math.round(i * s), t.height = Math.round(a * s), this._reduce && this._drawFrame(Math.floor(Zt * 0.5));
+  }
+  _clear() {
+    const t = this._canvas?.getContext("2d");
+    this._canvas && t && t.clearRect(0, 0, this._canvas.width, this._canvas.height);
+  }
+  _drawFrame(t) {
+    const e = this._canvas, i = e?.getContext("2d");
+    if (!(!e || !i)) {
+      i.clearRect(0, 0, e.width, e.height), i.imageSmoothingEnabled = !0, i.imageSmoothingQuality = "high";
+      for (const a of this._active) {
+        const s = a.reverse ? Zt - 1 - t : t, n = this._seqs.get(a.dir)?.frame(s);
+        n && i.drawImage(n, 0, 0, e.width, e.height);
+      }
+    }
+  }
+  // ---- markup -------------------------------------------------------------
+  _stat(t, e) {
+    return o`<div class="stat">
+      <span class="v">${t == null ? "—" : A(t)}<span class="u">kWh</span></span>
+      <span class="l">${e}</span>
+    </div>`;
+  }
+  render() {
+    const t = this.options, e = this._num(t?.solar), i = this._num(t?.grid), a = i != null && e != null ? i + e : null;
+    return o`
+      <div class="hero">
+        <div class="inner">
+          <div class="bar">
+            <span class="pill">
+              ${t?.label ?? "Today"}
+              <hd-icon icon="mdi:calendar-blank" .size=${18}></hd-icon>
+            </span>
+          </div>
+          <div class="stats">
+            ${this._stat(i, "Grid")} ${this._stat(e, "Solar Panels")}
+            ${this._stat(a, "Home")}
+          </div>
+          <div class="house">
+            <img src=${Gn} alt="" aria-hidden="true" />
+            <canvas class="flows" aria-hidden="true"></canvas>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+};
+Lt.styles = y`
+    :host {
+      display: block;
+    }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 0 0 28px 28px;
+      background: linear-gradient(
+        180deg,
+        #2f6bff 0%,
+        #4f86ff 22%,
+        #9dc0ff 46%,
+        #e7eefb 70%,
+        var(--canvas) 100%
+      );
+      padding: 18px clamp(16px, 4vw, 40px) 8px;
+    }
+    .inner {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 6px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+      font: var(--text-widget-title);
+      font-weight: 600;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      color: #fff;
+      position: relative;
+      z-index: 2;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 4px 6px 0;
+      position: relative;
+    }
+    .stat .v {
+      font: 700 clamp(20px, 5.5vw, 30px) / 1.05 var(--font-sans);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .stat .v .u {
+      font-size: 0.5em;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+    .stat .l {
+      font: var(--text-secondary-state);
+      opacity: 0.82;
+      margin-top: 2px;
+    }
+    .stat::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      width: 1px;
+      height: clamp(24px, 8vw, 52px);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    }
+    .house {
+      position: relative;
+      width: 100%;
+      max-width: 820px;
+      margin: -4px auto 0;
+      aspect-ratio: ${Xn} / ${Yn};
+    }
+    .house img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    canvas.flows {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+  `;
+De([
+  p({ attribute: !1 })
+], Lt.prototype, "hass", 2);
+De([
+  p({ attribute: !1 })
+], Lt.prototype, "options", 2);
+De([
+  Le("canvas")
+], Lt.prototype, "_canvas", 2);
+Lt = De([
+  b("hd-energy-hero")
+], Lt);
+var nr = Object.defineProperty, rr = Object.getOwnPropertyDescriptor, Oe = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? rr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+    (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
+  return a && s && nr(e, i, s), s;
+};
+let Ht = class extends H {
   constructor() {
     super(...arguments), this._width = 0;
   }
@@ -7553,27 +8043,28 @@ let Ct = class extends A {
     super.disconnectedCallback(), this._ro?.disconnect();
   }
   render() {
-    const t = this.view, e = Xi(this._width), i = `--pad:${e.pad}px`;
-    if (!t || t.widgets.length === 0)
+    const t = this.view, e = aa(this._width), i = `--pad:${e.pad}px`, a = t?.hero ? o`<hd-energy-hero .hass=${this.hass} .options=${t.hero}></hd-energy-hero>` : d;
+    if (!t || t.widgets.length === 0 && !t.hero)
       return o`<div class="empty">
         <hd-icon icon="mdi:view-dashboard-outline" .size=${40}></hd-icon>
         <h3>No widgets yet</h3>
         <p>Add widgets to this view in <code>dashboard.config.ts</code>.</p>
       </div>`;
-    const a = Fa(t.widgets);
+    const s = Y1(t.widgets);
     return o`
+      ${a}
       <div class="stack" style=${i}>
-        ${Wi(
-      a,
-      (s) => s.id,
-      (s) => M1(s, ei(s, e.bucket), 1, this.hass, "row")
+        ${ia(
+      s,
+      (n) => n.id,
+      (n) => Za(n, hi(n, e.bucket), 1, this.hass, "row")
     )}
       </div>
       ${d}
     `;
   }
 };
-Ct.styles = x`
+Ht.styles = y`
     :host {
       display: block;
     }
@@ -7611,19 +8102,19 @@ Ct.styles = x`
       min-height: 0;
     }
   `;
-Le([
-  m({ attribute: !1 })
-], Ct.prototype, "hass", 2);
-Le([
-  m({ attribute: !1 })
-], Ct.prototype, "view", 2);
-Le([
-  C()
-], Ct.prototype, "_width", 2);
-Ct = Le([
+Oe([
+  p({ attribute: !1 })
+], Ht.prototype, "hass", 2);
+Oe([
+  p({ attribute: !1 })
+], Ht.prototype, "view", 2);
+Oe([
+  x()
+], Ht.prototype, "_width", 2);
+Ht = Oe([
   b("hd-view-grid")
-], Ct);
-const Fn = [
+], Ht);
+const or = [
   ["Warm white", [255, 197, 143]],
   ["Sun", [255, 233, 170]],
   ["Red", [255, 74, 74]],
@@ -7634,22 +8125,22 @@ const Fn = [
   ["Indigo", [120, 90, 240]],
   ["Pink", [255, 92, 170]]
 ];
-function Nn(t) {
+function cr(t) {
   const [e, i, a] = t.map((h) => h / 255), s = Math.max(e, i, a), n = Math.min(e, i, a), r = s - n;
   let c = 0;
   r !== 0 && (s === e ? c = (i - a) / r % 6 : s === i ? c = (a - e) / r + 2 : c = (e - i) / r + 4, c = c * 60, c < 0 && (c += 360));
   const l = s === 0 ? 0 : r / s * 100;
   return [Math.round(c), Math.round(l)];
 }
-function Un(t, e) {
-  const i = Gi(e), a = e.state === "on", s = a ? Math.round((e.attributes.brightness ?? 255) / 2.55) : 0, n = e.attributes.min_color_temp_kelvin ?? 2200, r = e.attributes.max_color_temp_kelvin ?? 6500, c = e.attributes.color_temp_kelvin ?? Math.round((n + r) / 2), l = e.attributes.effect_list?.filter((g) => g && g !== "None") ?? [], h = e.attributes.hs_color, u = e.attributes.rgb_color, [p, f] = h ? [h[0], h[1]] : u ? Nn(u) : [0, 0];
+function lr(t, e) {
+  const i = oa(e), a = e.state === "on", s = a ? Math.round((e.attributes.brightness ?? 255) / 2.55) : 0, n = e.attributes.min_color_temp_kelvin ?? 2200, r = e.attributes.max_color_temp_kelvin ?? 6500, c = e.attributes.color_temp_kelvin ?? Math.round((n + r) / 2), l = e.attributes.effect_list?.filter((g) => g && g !== "None") ?? [], h = e.attributes.hs_color, u = e.attributes.rgb_color, [m, f] = h ? [h[0], h[1]] : u ? cr(u) : [0, 0];
   return o`
     <div class="d-section d-row-between">
       <span class="d-label">Power</span>
       <hd-toggle
         .checked=${a}
         label="Toggle light"
-        @hd-toggle=${() => t.call(B(t.entityId), "toggle")}
+        @hd-toggle=${() => t.call(K(t.entityId), "toggle")}
       ></hd-toggle>
     </div>
 
@@ -7664,7 +8155,7 @@ function Un(t, e) {
             .color=${"var(--state-light)"}
             icon="mdi:brightness-6"
             label="Brightness"
-            @hd-change=${(g) => t.call(Re(t.entityId, g.detail.value), "dim")}
+            @hd-change=${(g) => t.call(qe(t.entityId, g.detail.value), "dim")}
           ></hd-slider>
         </div>` : d}
 
@@ -7678,7 +8169,7 @@ function Un(t, e) {
             .disabled=${!a}
             .color=${"linear-gradient(90deg,#ffb85c,#fff5e8,#cfe0ff)"}
             label="Color temperature"
-            @hd-change=${(g) => t.call(gt(t.entityId, { colorTempKelvin: g.detail.value }), "set color of")}
+            @hd-change=${(g) => t.call(ft(t.entityId, { colorTempKelvin: g.detail.value }), "set color of")}
           ></hd-slider>
         </div>` : d}
 
@@ -7686,20 +8177,20 @@ function Un(t, e) {
           <span class="d-label">Color</span>
           <div class="color-wheel-wrap">
             <hd-color-wheel
-              .hue=${p}
+              .hue=${m}
               .sat=${f}
               .disabled=${!a}
-              @hd-color=${(g) => t.call(gt(t.entityId, { hsColor: [g.detail.hue, g.detail.sat] }), "set color of")}
+              @hd-color=${(g) => t.call(ft(t.entityId, { hsColor: [g.detail.hue, g.detail.sat] }), "set color of")}
             ></hd-color-wheel>
           </div>
           <div class="swatches">
-            ${Fn.map(
+            ${or.map(
     ([g, v]) => o`<button
                 class="swatch"
                 style=${`background:rgb(${v[0]},${v[1]},${v[2]})`}
                 aria-label=${g}
                 ?disabled=${!a}
-                @click=${() => t.call(gt(t.entityId, { rgbColor: v }), "set color of")}
+                @click=${() => t.call(ft(t.entityId, { rgbColor: v }), "set color of")}
               ></button>`
   )}
           </div>
@@ -7712,28 +8203,28 @@ function Un(t, e) {
     (g) => o`<button
                 class="chip ${e.attributes.effect === g ? "active" : ""}"
                 ?disabled=${!a}
-                @click=${() => t.call(gt(t.entityId, { effect: g }), "set effect of")}
+                @click=${() => t.call(ft(t.entityId, { effect: g }), "set effect of")}
               >
-                ${V(g)}
+                ${k(g)}
               </button>`
   )}
           </div>
         </div>` : d}
   `;
 }
-function jn(t, e) {
-  const i = t1(e), a = e.state === "off", s = e.attributes.temperature ?? 20, n = e.attributes.current_temperature, r = e.attributes.target_temp_step ?? 0.5, c = e.attributes.hvac_modes ?? [], l = e.attributes.fan_modes ?? [], h = e.attributes.swing_modes ?? [], u = e.attributes.preset_modes ?? [], p = (t.config?.options?.switches ?? []).filter(
+function dr(t, e) {
+  const i = la(e), a = e.state === "off", s = e.attributes.temperature ?? 20, n = e.attributes.current_temperature, r = e.attributes.target_temp_step ?? 0.5, c = e.attributes.hvac_modes ?? [], l = e.attributes.fan_modes ?? [], h = e.attributes.swing_modes ?? [], u = e.attributes.preset_modes ?? [], m = (t.config?.options?.switches ?? []).filter(
     (v) => t.hass.states[v.entity]
   ), f = (v) => {
-    const y = e.attributes.min_temp ?? 7, M = e.attributes.max_temp ?? 35, T = Math.min(M, Math.max(y, s + v * r));
-    t.call(r1(t.entityId, Number(T.toFixed(1))), "set temperature for");
-  }, g = (v) => v.map((y) => ({ value: y, label: V(y) }));
+    const w = e.attributes.min_temp ?? 7, S = e.attributes.max_temp ?? 35, D = Math.min(S, Math.max(w, s + v * r));
+    t.call(ga(t.entityId, Number(D.toFixed(1))), "set temperature for");
+  }, g = (v) => v.map((w) => ({ value: w, label: k(w) }));
   return o`
     ${i.targetTemp ? o`<div class="d-section climate-hero">
           <hd-icon-button icon="mdi:minus" label="Lower" variant="soft" .disabled=${a} @click=${() => f(-1)}></hd-icon-button>
           <div class="climate-target">
-            <span class="big">${a ? "—" : `${$(s)}°`}</span>
-            ${n != null ? o`<span class="sub">Now ${$(n)}°</span>` : d}
+            <span class="big">${a ? "—" : `${A(s)}°`}</span>
+            ${n != null ? o`<span class="sub">Now ${A(n)}°</span>` : d}
           </div>
           <hd-icon-button icon="mdi:plus" label="Raise" variant="soft" .disabled=${a} @click=${() => f(1)}></hd-icon-button>
         </div>` : d}
@@ -7741,73 +8232,73 @@ function jn(t, e) {
     ${c.length > 1 ? o`<div class="d-section">
           <span class="d-label">Mode</span>
           <hd-segmented .options=${g(c)} .value=${e.state} label="Mode"
-            @hd-select=${(v) => t.call(o1(t.entityId, v.detail.value), "set mode for")}></hd-segmented>
+            @hd-select=${(v) => t.call(fa(t.entityId, v.detail.value), "set mode for")}></hd-segmented>
         </div>` : d}
     ${i.fanMode && l.length ? o`<div class="d-section">
           <span class="d-label">Fan</span>
           <hd-segmented .options=${g(l)} .value=${e.attributes.fan_mode ?? ""} label="Fan mode"
-            @hd-select=${(v) => t.call(Ja(t.entityId, v.detail.value), "set fan for")}></hd-segmented>
+            @hd-select=${(v) => t.call(ls(t.entityId, v.detail.value), "set fan for")}></hd-segmented>
         </div>` : d}
     ${i.swingMode && h.length ? o`<div class="d-section">
           <span class="d-label">Swing</span>
           <hd-segmented .options=${g(h)} .value=${e.attributes.swing_mode ?? ""} label="Swing mode"
-            @hd-select=${(v) => t.call(es(t.entityId, v.detail.value), "set swing for")}></hd-segmented>
+            @hd-select=${(v) => t.call(hs(t.entityId, v.detail.value), "set swing for")}></hd-segmented>
         </div>` : d}
     ${i.presetMode && u.length ? o`<div class="d-section">
           <span class="d-label">Preset</span>
           <hd-segmented .options=${g(u)} .value=${e.attributes.preset_mode ?? ""} label="Preset"
-            @hd-select=${(v) => t.call(ts(t.entityId, v.detail.value), "set preset for")}></hd-segmented>
+            @hd-select=${(v) => t.call(ds(t.entityId, v.detail.value), "set preset for")}></hd-segmented>
         </div>` : d}
 
-    ${p.map((v) => {
-    const y = t.hass.states[v.entity].state === "on";
+    ${m.map((v) => {
+    const w = t.hass.states[v.entity].state === "on";
     return o`<div class="d-section d-row-between">
         <span class="d-label">${v.name}</span>
         <hd-toggle
-          .checked=${y}
+          .checked=${w}
           label=${v.name}
-          @hd-toggle=${() => t.call(B(v.entity), `toggle ${v.name.toLowerCase()}`)}
+          @hd-toggle=${() => t.call(K(v.entity), `toggle ${v.name.toLowerCase()}`)}
         ></hd-toggle>
       </div>`;
   })}
   `;
 }
-function Kn(t, e) {
-  const i = e1(e), a = e.attributes.entity_picture, s = e.attributes.media_title, n = e.attributes.app_name, r = e.attributes.volume_level ?? 0, c = e.attributes.is_volume_muted ?? !1, l = e.attributes.source_list ?? [], h = e.attributes.sound_mode_list ?? [], u = e.state === "off", p = i.selectSource && Gs(l), { featured: f, rest: g } = p ? en(l) : { featured: [], rest: l }, v = async (L) => {
-    u && await t.call(s1(t.entityId), "turn on"), await t.call(ss(t.entityId, L), p ? "launch" : "change source of");
-  }, y = !u && e.state !== "idle" && e.state !== "standby", M = n ? ue(n) : void 0, T = Fe(e);
+function hr(t, e) {
+  const i = da(e), a = e.attributes.entity_picture, s = e.attributes.media_title, n = e.attributes.app_name, r = e.attributes.volume_level ?? 0, c = e.attributes.is_volume_muted ?? !1, l = e.attributes.source_list ?? [], h = e.attributes.sound_mode_list ?? [], u = e.state === "off", m = i.selectSource && ln(l), { featured: f, rest: g } = m ? un(l) : { featured: [], rest: l }, v = async (V) => {
+    u && await t.call(pa(t.entityId), "turn on"), await t.call(ms(t.entityId, V), m ? "launch" : "change source of");
+  }, w = !u && e.state !== "idle" && e.state !== "standby", S = n ? fe(n) : void 0, D = Ne(e);
   return o`
-    ${a ? o`<div class="media-art" style=${`background-image:url("${a}")`}></div>` : y && (M || n) ? o`<div class="media-art media-art-fallback">
-            <hd-icon icon=${M ?? "mdi:television-classic"} .size=${56}></hd-icon>
+    ${a ? o`<div class="media-art" style=${`background-image:url("${a}")`}></div>` : w && (S || n) ? o`<div class="media-art media-art-fallback">
+            <hd-icon icon=${S ?? "mdi:television-classic"} .size=${56}></hd-icon>
             ${n ? o`<span>${n}</span>` : d}
           </div>` : d}
     <div class="media-meta">
-      <div class="d-value">${s ?? n ?? Lt(t.hass, e)}</div>
+      <div class="d-value">${s ?? n ?? dt(t.hass, e)}</div>
       ${n && s ? o`<div class="d-sub">${n}</div>` : d}
     </div>
-    ${T ? o`<div class="d-section media-progress">
-          <div class="media-progress-bar"><span style=${`width:${T.pct}%`}></span></div>
-          <div class="media-progress-time"><span>${T.elapsed}</span><span>${T.total}</span></div>
+    ${D ? o`<div class="d-section media-progress">
+          <div class="media-progress-bar"><span style=${`width:${D.pct}%`}></span></div>
+          <div class="media-progress-time"><span>${D.elapsed}</span><span>${D.total}</span></div>
         </div>` : d}
     <div class="d-section media-transport">
-      ${i.power ? o`<hd-icon-button icon="mdi:power" label=${u ? "Turn on" : "Turn off"} variant=${u ? "soft" : "filled"} @click=${() => t.call(B(t.entityId), u ? "turn on" : "turn off")}></hd-icon-button>` : d}
-      ${i.previous ? o`<hd-icon-button icon="mdi:skip-previous" label="Previous" variant="soft" .disabled=${u} @click=${() => t.call(m1(t.entityId), "skip")}></hd-icon-button>` : d}
-      <hd-icon-button icon=${e.state === "playing" ? "mdi:pause" : "mdi:play"} label="Play or pause" variant="filled" .disabled=${u} @click=${() => t.call(u1(t.entityId), "control")}></hd-icon-button>
-      ${i.next ? o`<hd-icon-button icon="mdi:skip-next" label="Next" variant="soft" .disabled=${u} @click=${() => t.call(p1(t.entityId), "skip")}></hd-icon-button>` : d}
+      ${i.power ? o`<hd-icon-button icon="mdi:power" label=${u ? "Turn on" : "Turn off"} variant=${u ? "soft" : "filled"} @click=${() => t.call(K(t.entityId), u ? "turn on" : "turn off")}></hd-icon-button>` : d}
+      ${i.previous ? o`<hd-icon-button icon="mdi:skip-previous" label="Previous" variant="soft" .disabled=${u} @click=${() => t.call(Aa(t.entityId), "skip")}></hd-icon-button>` : d}
+      <hd-icon-button icon=${e.state === "playing" ? "mdi:pause" : "mdi:play"} label="Play or pause" variant="filled" .disabled=${u} @click=${() => t.call(Ca(t.entityId), "control")}></hd-icon-button>
+      ${i.next ? o`<hd-icon-button icon="mdi:skip-next" label="Next" variant="soft" .disabled=${u} @click=${() => t.call(xa(t.entityId), "skip")}></hd-icon-button>` : d}
     </div>
     ${i.volumeSet ? o`<div class="d-section">
           <span class="d-label">Volume</span>
           <div class="vol-row">
-            ${i.mute ? o`<hd-icon-button icon=${c ? "mdi:volume-off" : "mdi:volume-high"} label="Mute" variant="soft" @click=${() => t.call(as(t.entityId, !c), "mute")}></hd-icon-button>` : d}
+            ${i.mute ? o`<hd-icon-button icon=${c ? "mdi:volume-off" : "mdi:volume-high"} label="Mute" variant="soft" @click=${() => t.call(ps(t.entityId, !c), "mute")}></hd-icon-button>` : d}
             <hd-slider style="flex:1" .value=${Math.round(r * 100)} .valueText=${`${Math.round(r * 100)}%`} label="Volume"
-              @hd-change=${(L) => t.call(is(t.entityId, L.detail.value / 100), "set volume of")}></hd-slider>
+              @hd-change=${(V) => t.call(us(t.entityId, V.detail.value / 100), "set volume of")}></hd-slider>
           </div>
         </div>` : d}
     ${i.selectSoundMode && h.length ? o`<div class="d-section">
           <span class="d-label">Sound mode</span>
           <div class="chips">
             ${h.map(
-    (L) => o`<button class="chip ${e.attributes.sound_mode === L ? "active" : ""}" @click=${() => t.call(ns(t.entityId, L), "set sound mode of")}>${L}</button>`
+    (V) => o`<button class="chip ${e.attributes.sound_mode === V ? "active" : ""}" @click=${() => t.call(gs(t.entityId, V), "set sound mode of")}>${V}</button>`
   )}
           </div>
         </div>` : d}
@@ -7815,75 +8306,75 @@ function Kn(t, e) {
           <span class="d-label">Apps</span>
           <div class="media-apps big-buttons">
             ${f.map(
-    (L) => o`<button
-                class="bigbtn app ${e.attributes.source === L.source ? "active" : ""}"
-                @click=${() => v(L.source)}
+    (V) => o`<button
+                class="bigbtn app ${e.attributes.source === V.source ? "active" : ""}"
+                @click=${() => v(V.source)}
               >
-                <hd-icon icon=${L.icon} .size=${26}></hd-icon><span>${L.label}</span>
+                <hd-icon icon=${V.icon} .size=${26}></hd-icon><span>${V.label}</span>
               </button>`
   )}
           </div>
         </div>` : d}
     ${i.selectSource && g.length ? o`<div class="d-section">
-          <span class="d-label">${p ? f.length ? "More apps" : "Apps" : "Source"}</span>
+          <span class="d-label">${m ? f.length ? "More apps" : "Apps" : "Source"}</span>
           <div class="chips">
-            ${g.slice(0, 24).map((L) => {
-    const ni = e.attributes.source === L, ht = p ? ue(L) ?? "mdi:apps" : void 0;
+            ${g.slice(0, 24).map((V) => {
+    const fi = e.attributes.source === V, ut = m ? fe(V) ?? "mdi:apps" : void 0;
     return o`<button
-                class="chip ${ht ? "with-icon" : ""} ${ni ? "active" : ""}"
-                @click=${() => v(L)}
+                class="chip ${ut ? "with-icon" : ""} ${fi ? "active" : ""}"
+                @click=${() => v(V)}
               >
-                ${ht ? o`<hd-icon icon=${ht} .size=${18}></hd-icon>` : d}<span>${L}</span>
+                ${ut ? o`<hd-icon icon=${ut} .size=${18}></hd-icon>` : d}<span>${V}</span>
               </button>`;
   })}
           </div>
         </div>` : d}
   `;
 }
-function Wn(t, e) {
-  const i = Ji(e), a = e.attributes.current_position ?? (e.state === "open" ? 100 : 0);
+function ur(t, e) {
+  const i = ca(e), a = e.attributes.current_position ?? (e.state === "open" ? 100 : 0);
   return o`
     ${i.setPosition ? o`<div class="d-section">
           <span class="d-label">Position</span>
           <hd-slider .value=${a} .valueText=${`${Math.round(a)}% open`} label="Position"
-            @hd-change=${(s) => t.call(h1(t.entityId, s.detail.value), "move")}></hd-slider>
+            @hd-change=${(s) => t.call(wa(t.entityId, s.detail.value), "move")}></hd-slider>
         </div>` : d}
     <div class="d-section big-buttons">
-      ${i.open ? o`<button class="bigbtn" @click=${() => t.call(c1(t.entityId), "open")}><hd-icon icon="mdi:arrow-up" .size=${20}></hd-icon>Open</button>` : d}
-      ${i.stop ? o`<button class="bigbtn" @click=${() => t.call(d1(t.entityId), "stop")}><hd-icon icon="mdi:stop" .size=${20}></hd-icon>Stop</button>` : d}
-      ${i.close ? o`<button class="bigbtn" @click=${() => t.call(l1(t.entityId), "close")}><hd-icon icon="mdi:arrow-down" .size=${20}></hd-icon>Close</button>` : d}
+      ${i.open ? o`<button class="bigbtn" @click=${() => t.call(va(t.entityId), "open")}><hd-icon icon="mdi:arrow-up" .size=${20}></hd-icon>Open</button>` : d}
+      ${i.stop ? o`<button class="bigbtn" @click=${() => t.call(ya(t.entityId), "stop")}><hd-icon icon="mdi:stop" .size=${20}></hd-icon>Stop</button>` : d}
+      ${i.close ? o`<button class="bigbtn" @click=${() => t.call(ba(t.entityId), "close")}><hd-icon icon="mdi:arrow-down" .size=${20}></hd-icon>Close</button>` : d}
     </div>
   `;
 }
-function Xn(t, e) {
+function pr(t, e) {
   const i = e.state === "locked";
   return o`
     <div class="d-section big-buttons">
-      <button class="bigbtn ${i ? "active" : ""}" @click=${() => t.call(v1(t.entityId), "lock")}>
+      <button class="bigbtn ${i ? "active" : ""}" @click=${() => t.call(Ma(t.entityId), "lock")}>
         <hd-icon icon="mdi:lock" .size=${20}></hd-icon>Lock
       </button>
       <button class="bigbtn ${i ? "" : "active"}" @click=${async () => {
-    await Xt(t.host, { title: `Unlock ${e.attributes.friendly_name ?? "lock"}?`, confirmLabel: "Unlock", destructive: !0, icon: "mdi:lock-open-variant" }) && t.call(b1(t.entityId), "unlock");
+    await Yt(t.host, { title: `Unlock ${e.attributes.friendly_name ?? "lock"}?`, confirmLabel: "Unlock", destructive: !0, icon: "mdi:lock-open-variant" }) && t.call(Va(t.entityId), "unlock");
   }}>
         <hd-icon icon="mdi:lock-open-variant" .size=${20}></hd-icon>Unlock
       </button>
     </div>
-    <div class="d-meta">Last changed ${xe(e.last_changed)}</div>
+    <div class="d-meta">Last changed ${Ve(e.last_changed)}</div>
   `;
 }
-function Bn(t, e) {
-  const i = i1(e), a = (e.attributes.fan_speed_list ?? []).filter((l) => !["off", "custom"].includes(l)), s = Rt(t.hass, t.entityId), n = s.battery ?? e.attributes.battery_level, r = e.state === "cleaning", c = [];
-  return typeof s.progress == "number" && r && c.push(["Progress", `${Math.round(s.progress)}%`]), typeof s.area == "number" && s.area > 0 && c.push(["Area", `${$(s.area)} m²`]), typeof s.cleaningTime == "number" && s.cleaningTime > 0 && c.push(["Time", `${Math.round(s.cleaningTime)} min`]), o`
+function mr(t, e) {
+  const i = ha(e), a = (e.attributes.fan_speed_list ?? []).filter((l) => !["off", "custom"].includes(l)), s = Ut(t.hass, t.entityId), n = s.battery ?? e.attributes.battery_level, r = e.state === "cleaning", c = [];
+  return typeof s.progress == "number" && r && c.push(["Progress", `${Math.round(s.progress)}%`]), typeof s.area == "number" && s.area > 0 && c.push(["Area", `${A(s.area)} m²`]), typeof s.cleaningTime == "number" && s.cleaningTime > 0 && c.push(["Time", `${Math.round(s.cleaningTime)} min`]), o`
     <div class="d-section big-buttons">
-      <button class="bigbtn" @click=${() => t.call(re(t.entityId), "start")}><hd-icon icon="mdi:play" .size=${20}></hd-icon>Start</button>
-      ${i.pause ? o`<button class="bigbtn" @click=${() => t.call(Ze(t.entityId), "pause")}><hd-icon icon="mdi:pause" .size=${20}></hd-icon>Pause</button>` : d}
-      ${i.returnHome ? o`<button class="bigbtn" @click=${() => t.call(oe(t.entityId), "dock")}><hd-icon icon="mdi:home-import-outline" .size=${20}></hd-icon>Dock</button>` : d}
-      ${i.locate ? o`<button class="bigbtn" @click=${() => t.call(f1(t.entityId), "locate")}><hd-icon icon="mdi:map-marker-radius" .size=${20}></hd-icon>Locate</button>` : d}
+      <button class="bigbtn" @click=${() => t.call(de(t.entityId), "start")}><hd-icon icon="mdi:play" .size=${20}></hd-icon>Start</button>
+      ${i.pause ? o`<button class="bigbtn" @click=${() => t.call(We(t.entityId), "pause")}><hd-icon icon="mdi:pause" .size=${20}></hd-icon>Pause</button>` : d}
+      ${i.returnHome ? o`<button class="bigbtn" @click=${() => t.call(he(t.entityId), "dock")}><hd-icon icon="mdi:home-import-outline" .size=${20}></hd-icon>Dock</button>` : d}
+      ${i.locate ? o`<button class="bigbtn" @click=${() => t.call(Ha(t.entityId), "locate")}><hd-icon icon="mdi:map-marker-radius" .size=${20}></hd-icon>Locate</button>` : d}
     </div>
     ${a.length ? o`<div class="d-section">
           <span class="d-label">Suction</span>
-          <hd-segmented .options=${a.map((l) => ({ value: l, label: V(l) }))} .value=${e.attributes.fan_speed ?? ""}
-            @hd-select=${(l) => t.call(g1(t.entityId, l.detail.value), "set suction for")}></hd-segmented>
+          <hd-segmented .options=${a.map((l) => ({ value: l, label: k(l) }))} .value=${e.attributes.fan_speed ?? ""}
+            @hd-select=${(l) => t.call(La(t.entityId, l.detail.value), "set suction for")}></hd-segmented>
         </div>` : d}
     ${c.length ? o`<div class="d-section">
           <span class="d-label">${r ? s.room ? `Cleaning ${s.room}` : "Current clean" : "Last clean"}</span>
@@ -7895,7 +8386,7 @@ function Bn(t, e) {
           <span class="d-label">Consumables</span>
           <div class="d-grid">
             ${s.consumables.map((l) => {
-    const h = l.hoursLeft <= fs;
+    const h = l.hoursLeft <= Ms;
     return o`<div class="d-cell">
                 <span class="k">${l.label}</span>
                 <span class="v" style=${h ? "color:var(--state-warn)" : ""}>${Math.round(l.hoursLeft)} h${h ? " · replace" : ""}</span>
@@ -7903,25 +8394,25 @@ function Bn(t, e) {
   })}
           </div>
         </div>` : d}
-    ${n != null ? o`<div class="d-meta">Battery ${Math.round(n)}%${s.status ? ` · ${V(s.status.replace(/_/g, " "))}` : ""}</div>` : d}
+    ${n != null ? o`<div class="d-meta">Battery ${Math.round(n)}%${s.status ? ` · ${k(s.status.replace(/_/g, " "))}` : ""}</div>` : d}
   `;
 }
-function Yn(t, e) {
-  const i = Number(e.state), a = Number.isFinite(i), s = t.trend, n = s.length > 1 ? `Min ${$(Math.min(...s))}, max ${$(Math.max(...s))}, latest ${$(s[s.length - 1])}` : "";
+function gr(t, e) {
+  const i = Number(e.state), a = Number.isFinite(i), s = t.trend, n = s.length > 1 ? `Min ${A(Math.min(...s))}, max ${A(Math.max(...s))}, latest ${A(s[s.length - 1])}` : "";
   return o`
-    <div class="d-value big">${Lt(t.hass, e)}</div>
+    <div class="d-value big">${dt(t.hass, e)}</div>
     ${a && s.length > 1 ? o`<div class="d-section">
           <span class="d-label">Last 24 hours</span>
           <div class="detail-trend"><hd-trend .points=${s} .summary=${n}></hd-trend></div>
           <div class="d-meta">${n}</div>
         </div>` : d}
-    ${k1(t, e)}
+    ${Qa(t, e)}
   `;
 }
-function Qn(t, e) {
+function fr(t, e) {
   const i = e.attributes, a = [];
-  return i.temperature != null && a.push(["Temperature", `${$(i.temperature)}°`]), i.humidity != null && a.push(["Humidity", `${Math.round(i.humidity)}%`]), i.wind_speed != null && a.push(["Wind", `${$(i.wind_speed)} ${i.wind_speed_unit ?? ""}`]), i.pressure != null && a.push(["Pressure", `${$(i.pressure)} ${i.pressure_unit ?? ""}`]), o`
-    <div class="d-value big">${V(e.state)}</div>
+  return i.temperature != null && a.push(["Temperature", `${A(i.temperature)}°`]), i.humidity != null && a.push(["Humidity", `${Math.round(i.humidity)}%`]), i.wind_speed != null && a.push(["Wind", `${A(i.wind_speed)} ${i.wind_speed_unit ?? ""}`]), i.pressure != null && a.push(["Pressure", `${A(i.pressure)} ${i.pressure_unit ?? ""}`]), o`
+    <div class="d-value big">${k(e.state)}</div>
     <div class="d-grid">
       ${a.map(([s, n]) => o`<div class="d-cell"><span class="k">${s}</span><span class="v">${n}</span></div>`)}
     </div>
@@ -7931,14 +8422,14 @@ function Qn(t, e) {
     const n = new Date(s.datetime), r = Number.isNaN(n.getTime()) ? "" : n.toLocaleDateString(void 0, { weekday: "long" });
     return o`<div class="fc-row">
               <span class="fc-day">${r}</span>
-              <hd-icon .icon=${ir(s.condition ?? "")} .size=${20}></hd-icon>
+              <hd-icon .icon=${Cr(s.condition ?? "")} .size=${20}></hd-icon>
               <span class="fc-temp">${s.temperature != null ? `${Math.round(s.temperature)}°` : ""}${s.templow != null ? ` / ${Math.round(s.templow)}°` : ""}</span>
             </div>`;
   })}
         </div>` : d}
   `;
 }
-function Gn(t) {
+function vr(t) {
   const e = t.config?.options ?? {}, i = (s) => {
     if (!s) return null;
     const n = t.hass.states[s];
@@ -7948,7 +8439,7 @@ function Gn(t) {
     <div class="d-section">
       <span class="d-label">Live values</span>
       <div class="d-grid">
-        ${a.map((s) => o`<div class="d-cell"><span class="k">${V(s.k)}</span><span class="v">${Lt(t.hass, s.st)}</span></div>`)}
+        ${a.map((s) => o`<div class="d-cell"><span class="k">${k(s.k)}</span><span class="v">${dt(t.hass, s.st)}</span></div>`)}
       </div>
     </div>
     ${t.trend.length > 1 ? o`<div class="d-section">
@@ -7957,10 +8448,10 @@ function Gn(t) {
         </div>` : d}
   `;
 }
-function Jn(t) {
-  const e = t.config?.options ?? {}, i = L1(t.hass, e), a = (s, n) => {
+function br(t) {
+  const e = t.config?.options ?? {}, i = Oa(t.hass, e), a = (s, n) => {
     const r = n ? t.hass.states[n] : void 0;
-    return r ? o`<div class="d-cell"><span class="k">${s}</span><span class="v">${Lt(t.hass, r)}</span></div>` : d;
+    return r ? o`<div class="d-cell"><span class="k">${s}</span><span class="v">${dt(t.hass, r)}</span></div>` : d;
   };
   return o`
     <div class="detail-flow"><hd-flow-diagram .model=${i}></hd-flow-diagram></div>
@@ -7977,21 +8468,21 @@ function Jn(t) {
         </div>` : d}
   `;
 }
-function tr(t) {
-  const e = t.config?.options ?? {}, i = V1(t.hass, e), a = i.tone === "eco" ? "var(--state-eco)" : i.tone === "accent" ? "var(--accent)" : "var(--text-secondary)", s = (r, c) => c != null ? o`<div class="d-cell"><span class="k">${r}</span><span class="v">${c}</span></div>` : d, n = (r, c, l, h) => {
+function yr(t) {
+  const e = t.config?.options ?? {}, i = za(t.hass, e), a = i.tone === "eco" ? "var(--state-eco)" : i.tone === "accent" ? "var(--accent)" : "var(--text-secondary)", s = (r, c) => c != null ? o`<div class="d-cell"><span class="k">${r}</span><span class="v">${c}</span></div>` : d, n = (r, c, l, h) => {
     const u = r ? t.hass.states[r] : void 0;
     if (!r || !u) return d;
-    const p = Number(u.state), f = u.attributes.min ?? h.min, g = u.attributes.max ?? h.max, v = u.attributes.step ?? h.step;
+    const m = Number(u.state), f = u.attributes.min ?? h.min, g = u.attributes.max ?? h.max, v = u.attributes.step ?? h.step;
     return o`<div class="d-section">
       <span class="d-label">${c}</span>
       <hd-slider
-        .value=${Number.isFinite(p) ? p : f}
+        .value=${Number.isFinite(m) ? m : f}
         .min=${f}
         .max=${g}
         .step=${v}
-        .valueText=${Number.isFinite(p) ? l(p) : "—"}
+        .valueText=${Number.isFinite(m) ? l(m) : "—"}
         label=${c}
-        @hd-change=${(y) => t.call(ls(r, y.detail.value), `set ${c.toLowerCase()}`)}
+        @hd-change=${(w) => t.call(ys(r, w.detail.value), `set ${c.toLowerCase()}`)}
       ></hd-slider>
     </div>`;
   };
@@ -8001,7 +8492,7 @@ function tr(t) {
       <hd-toggle
         .checked=${i.armed}
         label="Toggle solar charging"
-        @hd-toggle=${() => e.master ? t.call(B(e.master), "toggle solar charging") : void 0}
+        @hd-toggle=${() => e.master ? t.call(K(e.master), "toggle solar charging") : void 0}
       ></hd-toggle>
     </div>
 
@@ -8011,10 +8502,10 @@ function tr(t) {
       <div class="d-grid">
         ${s("Battery", i.batteryPct != null ? `${Math.round(i.batteryPct)}%` : null)}
         ${s("Target", i.limitPct != null ? `${Math.round(i.limitPct)}%` : null)}
-        ${s("Power", i.powerKw != null ? `${$(i.powerKw)} kW` : null)}
+        ${s("Power", i.powerKw != null ? `${A(i.powerKw)} kW` : null)}
         ${s("Current", i.currentA != null ? `${Math.round(i.currentA)} A` : null)}
         ${s("Rate", i.rateKmh != null ? `${Math.round(i.rateKmh)} km/h` : null)}
-        ${s("Session", i.sessionKwh != null ? `${$(i.sessionKwh)} kWh` : null)}
+        ${s("Session", i.sessionKwh != null ? `${A(i.sessionKwh)} kWh` : null)}
       </div>
     </div>
 
@@ -8024,27 +8515,27 @@ function tr(t) {
     ${n(e.deadband, "Current deadband", (r) => `${Math.round(r)} A`, { min: 1, max: 5, step: 1 })}
   `;
 }
-function er(t, e) {
+function wr(t, e) {
   const i = t.entityId.split(".")[0], a = ["switch", "input_boolean", "fan", "light", "humidifier", "siren"].includes(i);
   return o`
-    <div class="d-value big">${Lt(t.hass, e)}</div>
+    <div class="d-value big">${dt(t.hass, e)}</div>
     ${a ? o`<div class="d-section big-buttons">
-          <button class="bigbtn" @click=${() => t.call(s1(t.entityId), "turn on")}>Turn on</button>
-          <button class="bigbtn" @click=${() => t.call(n1(t.entityId), "turn off")}>Turn off</button>
+          <button class="bigbtn" @click=${() => t.call(pa(t.entityId), "turn on")}>Turn on</button>
+          <button class="bigbtn" @click=${() => t.call(ma(t.entityId), "turn off")}>Turn off</button>
         </div>` : d}
-    ${k1(t, e)}
+    ${Qa(t, e)}
   `;
 }
-function k1(t, e) {
+function Qa(t, e) {
   const i = ["device_class", "state_class", "unit_of_measurement"].filter((a) => e.attributes[a] != null);
   return o`<div class="d-grid">
     ${i.map(
-    (a) => o`<div class="d-cell"><span class="k">${V(a)}</span><span class="v">${us(t.hass, e, a)}</span></div>`
+    (a) => o`<div class="d-cell"><span class="k">${k(a)}</span><span class="v">${xs(t.hass, e, a)}</span></div>`
   )}
-    <div class="d-cell"><span class="k">Last updated</span><span class="v">${xe(e.last_updated)}</span></div>
+    <div class="d-cell"><span class="k">Last updated</span><span class="v">${Ve(e.last_updated)}</span></div>
   </div>`;
 }
-function ir(t) {
+function Cr(t) {
   return {
     sunny: "mdi:weather-sunny",
     "clear-night": "mdi:weather-night",
@@ -8057,47 +8548,47 @@ function ir(t) {
     windy: "mdi:weather-windy"
   }[t] ?? "mdi:weather-cloudy";
 }
-function ar(t) {
+function xr(t) {
   const e = t.hass.states[t.entityId], i = t.config?.type;
-  if (i === "energy") return Gn(t);
-  if (i === "powerflow") return Jn(t);
-  if (i === "solarcharging") return tr(t);
+  if (i === "energy") return vr(t);
+  if (i === "powerflow") return br(t);
+  if (i === "solarcharging") return yr(t);
   if (!e)
     return o`<div class="d-value big">Entity unavailable</div>
       <div class="d-meta">${t.entityId || "No entity configured"} was not found in Home Assistant.</div>`;
   switch (t.entityId.split(".")[0]) {
     case "light":
-      return Un(t, e);
+      return lr(t, e);
     case "climate":
-      return jn(t, e);
+      return dr(t, e);
     case "media_player":
-      return Kn(t, e);
+      return hr(t, e);
     case "cover":
-      return Wn(t, e);
+      return ur(t, e);
     case "lock":
-      return Xn(t, e);
+      return pr(t, e);
     case "vacuum":
-      return Bn(t, e);
+      return mr(t, e);
     case "sensor":
-      return Yn(t, e);
+      return gr(t, e);
     case "weather":
-      return Qn(t, e);
+      return fr(t, e);
     default:
-      return er(t, e);
+      return wr(t, e);
   }
 }
-function sr(t, e) {
+function Ar(t, e) {
   return e?.type === "energy" || e?.type === "powerflow" ? e.options?.gridPower ?? null : t.split(".")[0] === "sensor" ? t : null;
 }
-function nr(t) {
+function Lr(t) {
   return t.split(".")[0] === "weather";
 }
-var rr = Object.defineProperty, or = Object.getOwnPropertyDescriptor, Ve = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? or(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+var Hr = Object.defineProperty, Mr = Object.getOwnPropertyDescriptor, ze = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Mr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && rr(e, i, s), s;
+  return a && s && Hr(e, i, s), s;
 };
-let _t = class extends A {
+let Mt = class extends H {
   constructor() {
     super(...arguments), this.checked = !1, this.disabled = !1, this.label = "";
   }
@@ -8120,7 +8611,7 @@ let _t = class extends A {
     `;
   }
 };
-_t.styles = x`
+Mt.styles = y`
     :host {
       display: inline-flex;
     }
@@ -8175,31 +8666,31 @@ _t.styles = x`
       box-shadow: var(--focus-ring), var(--shadow-inset-control);
     }
   `;
-Ve([
-  m({ type: Boolean, reflect: !0 })
-], _t.prototype, "checked", 2);
-Ve([
-  m({ type: Boolean, reflect: !0 })
-], _t.prototype, "disabled", 2);
-Ve([
-  m({ type: String })
-], _t.prototype, "label", 2);
-_t = Ve([
+ze([
+  p({ type: Boolean, reflect: !0 })
+], Mt.prototype, "checked", 2);
+ze([
+  p({ type: Boolean, reflect: !0 })
+], Mt.prototype, "disabled", 2);
+ze([
+  p({ type: String })
+], Mt.prototype, "label", 2);
+Mt = ze([
   b("hd-toggle")
-], _t);
-var cr = Object.defineProperty, lr = Object.getOwnPropertyDescriptor, dt = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? lr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], Mt);
+var Vr = Object.defineProperty, kr = Object.getOwnPropertyDescriptor, ht = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? kr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && cr(e, i, s), s;
+  return a && s && Vr(e, i, s), s;
 };
-let j = class extends A {
+let $ = class extends H {
   constructor() {
     super(...arguments), this.open = !1, this.entityId = "", this._trend = [], this._forecast = [], this._loadedKey = "", this._call = async (t, e = "update") => {
       if (this.hass)
         try {
-          await a1(this.hass, t);
+          await ua(this.hass, t);
         } catch {
-          jt(this, { message: `Couldn't ${e} ${this._name}`, tone: "alert", icon: "mdi:alert-circle-outline" });
+          Kt(this, { message: `Couldn't ${e} ${this._name}`, tone: "alert", icon: "mdi:alert-circle-outline" });
         }
     };
   }
@@ -8210,13 +8701,13 @@ let j = class extends A {
     if (!this.hass) return;
     const t = `${this.entityId}:${this.config?.type ?? ""}:${this.config?.id ?? ""}`;
     if (this._loadedKey === t) return;
-    this._loadedKey = t, this._trend.length && (this._trend = []), this._forecast.length && (this._forecast = []), this.entityId.startsWith("light.") && this.hass.states[this.entityId]?.attributes.supported_color_modes?.some((a) => ["hs", "xy", "rgb", "rgbw", "rgbww", "rgbwww"].includes(a)) && Promise.resolve().then(() => br);
-    const e = sr(this.entityId, this.config);
+    this._loadedKey = t, this._trend.length && (this._trend = []), this._forecast.length && (this._forecast = []), this.entityId.startsWith("light.") && this.hass.states[this.entityId]?.attributes.supported_color_modes?.some((a) => ["hs", "xy", "rgb", "rgbw", "rgbww", "rgbwww"].includes(a)) && Promise.resolve().then(() => Rr);
+    const e = Ar(this.entityId, this.config);
     if (e && this.hass.connected) {
-      const i = await ai(this.hass, e, 24);
+      const i = await mi(this.hass, e, 24);
       this._trend = i.map((a) => a.value);
     }
-    this.entityId && nr(this.entityId) && this.hass.connected && await this._loadForecast();
+    this.entityId && Lr(this.entityId) && this.hass.connected && await this._loadForecast();
   }
   async _loadForecast() {
     if (!this.hass) return;
@@ -8248,7 +8739,7 @@ let j = class extends A {
   render() {
     if (!this.hass || !this.entityId && !this.config)
       return o`<hd-surface .open=${this.open} @hd-close=${() => this._close()}></hd-surface>`;
-    const t = y1(this.hass, this.entityId, this.config), e = {
+    const t = ka(this.hass, this.entityId, this.config), e = {
       hass: this.hass,
       entityId: this.entityId,
       config: this.config,
@@ -8265,12 +8756,12 @@ let j = class extends A {
         .subheading=${i}
         @hd-close=${() => this._close()}
       >
-        ${this.open ? ar(e) : d}
+        ${this.open ? xr(e) : d}
       </hd-surface>
     `;
   }
 };
-j.styles = x`
+$.styles = y`
     .d-section {
       margin-top: 18px;
       display: flex;
@@ -8540,33 +9031,33 @@ j.styles = x`
       font-variant-numeric: tabular-nums;
     }
   `;
-dt([
-  m({ attribute: !1 })
-], j.prototype, "hass", 2);
-dt([
-  m({ type: Boolean, reflect: !0 })
-], j.prototype, "open", 2);
-dt([
-  m({ type: String })
-], j.prototype, "entityId", 2);
-dt([
-  m({ attribute: !1 })
-], j.prototype, "config", 2);
-dt([
-  C()
-], j.prototype, "_trend", 2);
-dt([
-  C()
-], j.prototype, "_forecast", 2);
-j = dt([
+ht([
+  p({ attribute: !1 })
+], $.prototype, "hass", 2);
+ht([
+  p({ type: Boolean, reflect: !0 })
+], $.prototype, "open", 2);
+ht([
+  p({ type: String })
+], $.prototype, "entityId", 2);
+ht([
+  p({ attribute: !1 })
+], $.prototype, "config", 2);
+ht([
+  x()
+], $.prototype, "_trend", 2);
+ht([
+  x()
+], $.prototype, "_forecast", 2);
+$ = ht([
   b("hd-detail")
-], j);
-var dr = Object.defineProperty, hr = Object.getOwnPropertyDescriptor, si = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? hr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], $);
+var Sr = Object.defineProperty, Er = Object.getOwnPropertyDescriptor, gi = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Er(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && dr(e, i, s), s;
+  return a && s && Sr(e, i, s), s;
 };
-let Wt = class extends A {
+let Xt = class extends H {
   constructor() {
     super(...arguments), this._open = !1, this._opts = null, this._resolve = null;
   }
@@ -8608,7 +9099,7 @@ let Wt = class extends A {
     ` : d;
   }
 };
-Wt.styles = x`
+Xt.styles = y`
     .content {
       display: flex;
       flex-direction: column;
@@ -8684,21 +9175,21 @@ Wt.styles = x`
       box-shadow: var(--focus-ring);
     }
   `;
-si([
-  C()
-], Wt.prototype, "_open", 2);
-si([
-  C()
-], Wt.prototype, "_opts", 2);
-Wt = si([
+gi([
+  x()
+], Xt.prototype, "_open", 2);
+gi([
+  x()
+], Xt.prototype, "_opts", 2);
+Xt = gi([
   b("hd-confirm")
-], Wt);
-var ur = Object.defineProperty, pr = Object.getOwnPropertyDescriptor, S1 = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? pr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], Xt);
+var Ir = Object.defineProperty, Pr = Object.getOwnPropertyDescriptor, _a = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Pr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && ur(e, i, s), s;
+  return a && s && Ir(e, i, s), s;
 };
-let fe = class extends A {
+let Ce = class extends H {
   constructor() {
     super(...arguments), this._toasts = [], this._seq = 0;
   }
@@ -8721,7 +9212,7 @@ let fe = class extends A {
     </div>`;
   }
 };
-fe.styles = x`
+Ce.styles = y`
     :host {
       position: fixed;
       left: 50%;
@@ -8777,19 +9268,19 @@ fe.styles = x`
       }
     }
   `;
-S1([
-  C()
-], fe.prototype, "_toasts", 2);
-fe = S1([
+_a([
+  x()
+], Ce.prototype, "_toasts", 2);
+Ce = _a([
   b("hd-toasts")
-], fe);
-var mr = Object.defineProperty, gr = Object.getOwnPropertyDescriptor, R = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? gr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], Ce);
+var Tr = Object.defineProperty, Dr = Object.getOwnPropertyDescriptor, Q = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? Dr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && mr(e, i, s), s;
+  return a && s && Tr(e, i, s), s;
 };
-const Ii = "hd-panel-appearance";
-let O = class extends A {
+const qi = "hd-panel-appearance";
+let z = class extends H {
   constructor() {
     super(...arguments), this.narrow = !1, this._viewId = "", this._appearance = "auto", this._detailOpen = !1, this._detailEntityId = "", this._onPop = () => this._syncViewFromLocation(), this._onMqlChange = () => this._applyTheme(), this._onWindowError = (t) => {
       const e = t.error;
@@ -8798,7 +9289,7 @@ let O = class extends A {
   }
   // ---- Lifecycle ---------------------------------------------------------
   connectedCallback() {
-    super.connectedCallback(), this._appearance = localStorage.getItem(Ii) || "auto", this._mqlDark = window.matchMedia("(prefers-color-scheme: dark)"), this._mqlDark.addEventListener("change", this._onMqlChange), window.addEventListener("popstate", this._onPop), window.addEventListener("error", this._onWindowError), window.addEventListener("unhandledrejection", this._onRejection), this._syncViewFromLocation(), this._applyTheme(), this._applyKiosk();
+    super.connectedCallback(), this._appearance = localStorage.getItem(qi) || "auto", this._mqlDark = window.matchMedia("(prefers-color-scheme: dark)"), this._mqlDark.addEventListener("change", this._onMqlChange), window.addEventListener("popstate", this._onPop), window.addEventListener("error", this._onWindowError), window.addEventListener("unhandledrejection", this._onRejection), this._syncViewFromLocation(), this._applyTheme(), this._applyKiosk();
   }
   disconnectedCallback() {
     super.disconnectedCallback(), this._mqlDark?.removeEventListener("change", this._onMqlChange), window.removeEventListener("popstate", this._onPop), window.removeEventListener("error", this._onWindowError), window.removeEventListener("unhandledrejection", this._onRejection);
@@ -8809,7 +9300,7 @@ let O = class extends A {
   // ---- Config ------------------------------------------------------------
   get _cfg() {
     if (!this._validated) {
-      const t = ua(sa);
+      const t = x1(m1);
       this._validated = { config: t.sanitized, issues: t.issues };
       const e = t.issues.filter((i) => i.level === "error");
       e.length && console.error("[home-dashboard-panel] Invalid dashboard config:", e);
@@ -8830,11 +9321,11 @@ let O = class extends A {
   }
   // ---- Routing -----------------------------------------------------------
   _syncViewFromLocation() {
-    const e = pa(this.route, this._base) || this._cfg.config.defaultView, i = this._views.some((a) => a.id === e);
+    const e = A1(this.route, this._base) || this._cfg.config.defaultView, i = this._views.some((a) => a.id === e);
     this._viewId = i ? e : this._cfg.config.defaultView;
   }
   _onNavigate(t) {
-    t !== this._viewId && (this._viewId = t, va(fa(this._base, t, this._cfg.config.defaultView)), this.renderRoot.querySelector(".content")?.scrollTo?.({ top: 0 }));
+    t !== this._viewId && (this._viewId = t, V1(M1(this._base, t, this._cfg.config.defaultView)), this.renderRoot.querySelector(".content")?.scrollTo?.({ top: 0 }));
   }
   // ---- Theme -------------------------------------------------------------
   _resolveDark() {
@@ -8844,7 +9335,7 @@ let O = class extends A {
     this.setAttribute("data-theme", this._resolveDark() ? "dark" : "light");
   }
   _cycleAppearance() {
-    this._appearance = this._appearance === "auto" ? "light" : this._appearance === "light" ? "dark" : "auto", localStorage.setItem(Ii, this._appearance), this._applyTheme();
+    this._appearance = this._appearance === "auto" ? "light" : this._appearance === "light" ? "dark" : "auto", localStorage.setItem(qi, this._appearance), this._applyTheme();
   }
   _applyKiosk() {
     this._cfg.config.kiosk?.enabled && this._cfg.config.kiosk.preventScreenSelection && this.setAttribute("data-kiosk", "");
@@ -8899,10 +9390,10 @@ let O = class extends A {
     `;
   }
 };
-O.styles = [
-  ia,
-  aa,
-  x`
+z.styles = [
+  u1,
+  p1,
+  y`
       :host {
         display: block;
         height: 100%;
@@ -8943,48 +9434,48 @@ O.styles = [
       }
     `
 ];
-R([
-  m({ attribute: !1 })
-], O.prototype, "hass", 2);
-R([
-  m({ type: Boolean })
-], O.prototype, "narrow", 2);
-R([
-  m({ attribute: !1 })
-], O.prototype, "panel", 2);
-R([
-  m({ attribute: !1 })
-], O.prototype, "route", 2);
-R([
-  C()
-], O.prototype, "_viewId", 2);
-R([
-  C()
-], O.prototype, "_appearance", 2);
-R([
-  C()
-], O.prototype, "_detailOpen", 2);
-R([
-  C()
-], O.prototype, "_detailEntityId", 2);
-R([
-  C()
-], O.prototype, "_detailConfig", 2);
-R([
-  Je("hd-confirm")
-], O.prototype, "_confirm", 2);
-R([
-  Je("hd-toasts")
-], O.prototype, "_toasts", 2);
-O = R([
+Q([
+  p({ attribute: !1 })
+], z.prototype, "hass", 2);
+Q([
+  p({ type: Boolean })
+], z.prototype, "narrow", 2);
+Q([
+  p({ attribute: !1 })
+], z.prototype, "panel", 2);
+Q([
+  p({ attribute: !1 })
+], z.prototype, "route", 2);
+Q([
+  x()
+], z.prototype, "_viewId", 2);
+Q([
+  x()
+], z.prototype, "_appearance", 2);
+Q([
+  x()
+], z.prototype, "_detailOpen", 2);
+Q([
+  x()
+], z.prototype, "_detailEntityId", 2);
+Q([
+  x()
+], z.prototype, "_detailConfig", 2);
+Q([
+  Le("hd-confirm")
+], z.prototype, "_confirm", 2);
+Q([
+  Le("hd-toasts")
+], z.prototype, "_toasts", 2);
+z = Q([
   b("home-dashboard-panel")
-], O);
-var fr = Object.defineProperty, vr = Object.getOwnPropertyDescriptor, Me = (t, e, i, a) => {
-  for (var s = a > 1 ? void 0 : a ? vr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
+], z);
+var Or = Object.defineProperty, zr = Object.getOwnPropertyDescriptor, Re = (t, e, i, a) => {
+  for (var s = a > 1 ? void 0 : a ? zr(e, i) : e, n = t.length - 1, r; n >= 0; n--)
     (r = t[n]) && (s = (a ? r(e, i, s) : r(s)) || s);
-  return a && s && fr(e, i, s), s;
+  return a && s && Or(e, i, s), s;
 };
-let ct = class extends A {
+let ct = class extends H {
   constructor() {
     super(...arguments), this.hue = 0, this.sat = 100, this.disabled = !1, this._onDown = (t) => {
       if (this.disabled) return;
@@ -9020,7 +9511,7 @@ let ct = class extends A {
     </div>`;
   }
 };
-ct.styles = x`
+ct.styles = y`
     :host {
       display: block;
     }
@@ -9062,24 +9553,24 @@ ct.styles = x`
       pointer-events: none;
     }
   `;
-Me([
-  m({ type: Number })
+Re([
+  p({ type: Number })
 ], ct.prototype, "hue", 2);
-Me([
-  m({ type: Number })
+Re([
+  p({ type: Number })
 ], ct.prototype, "sat", 2);
-Me([
-  m({ type: Boolean, reflect: !0 })
+Re([
+  p({ type: Boolean, reflect: !0 })
 ], ct.prototype, "disabled", 2);
-ct = Me([
+ct = Re([
   b("hd-color-wheel")
 ], ct);
-const br = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const Rr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   get HdColorWheel() {
     return ct;
   }
 }, Symbol.toStringTag, { value: "Module" }));
 export {
-  O as HomeDashboardPanel
+  z as HomeDashboardPanel
 };
