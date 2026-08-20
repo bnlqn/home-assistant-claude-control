@@ -85,16 +85,21 @@ export class MediaWidget extends EntityWidget {
       background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 25%, var(--np-scrim-strong) 100%);
     }
 
-    /* Bar layout: crisp thumbnail · meta · transport, thin progress at foot. */
+    /* Bar layout (compact): artwork spans two rows on the left; the title gets
+       the full remaining width on top, transport sits on its own row beneath —
+       so the title is no longer choked into a marquee-only slit. */
     .np[data-variant="bar"] .np-body {
       position: relative;
       z-index: 2;
       height: 100%;
       box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      gap: 13px;
-      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      align-content: center;
+      column-gap: 14px;
+      row-gap: 9px;
+      padding: 12px 16px;
     }
     .np-art {
       flex: none;
@@ -109,12 +114,23 @@ export class MediaWidget extends EntityWidget {
       place-items: center;
       color: rgba(255, 255, 255, 0.85);
     }
+    .np[data-variant="bar"] .np-art {
+      grid-row: 1 / span 2;
+      align-self: center;
+      width: 66px;
+      height: 66px;
+      border-radius: 14px;
+    }
     .np-meta {
-      flex: 1;
       min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 2px;
+    }
+    .np[data-variant="bar"] .np-meta {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: end;
     }
     .np-app {
       font: var(--text-meta);
@@ -144,6 +160,13 @@ export class MediaWidget extends EntityWidget {
       text-overflow: clip;
       animation: marquee var(--marq-dur, 8s) linear infinite alternate;
     }
+    /* A soft trailing-edge fade so a scrolling title dissolves out instead of
+       hard-clipping against the meta column. Bar variant only; the leading
+       edge stays crisp so the first glyph never looks dimmed at rest. */
+    .np[data-variant="bar"] .np-title[data-marquee="on"] {
+      -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent 100%);
+      mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent 100%);
+    }
     @keyframes marquee {
       0%,
       12% {
@@ -161,6 +184,14 @@ export class MediaWidget extends EntityWidget {
       align-items: center;
       gap: 4px;
       --icon-fg: #fff;
+    }
+    .np[data-variant="bar"] .np-transport {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: start;
+      justify-content: flex-start;
+      gap: 6px;
+      margin-left: -6px;
     }
     .np-transport hd-icon-button {
       color: #fff;
@@ -204,12 +235,13 @@ export class MediaWidget extends EntityWidget {
 
     .np-progress {
       position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      left: 16px;
+      right: 16px;
+      bottom: 4px;
       z-index: 3;
       height: 3px;
-      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.22);
     }
     .np[data-variant="hero"] .np-progress {
       left: 18px;
