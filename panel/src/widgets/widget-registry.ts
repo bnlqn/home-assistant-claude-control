@@ -1,6 +1,7 @@
 import type { WidgetType } from "../config/schema.js";
 
 // Side-effect imports register every widget custom element.
+import "./group.js";
 import "./light.js";
 import "./basic.js";
 import "./sensor.js";
@@ -17,6 +18,7 @@ import "./extra.js";
 
 /** Maps a configured widget `type` to its custom-element tag. */
 export const WIDGET_TAGS: Record<WidgetType, string> = {
+  group: "hd-group",
   light: "hd-widget-light",
   switch: "hd-widget-switch",
   fan: "hd-widget-fan",

@@ -1,4 +1,12 @@
-import type { Breakpoint, WidgetConfig, WidgetSize } from "../config/schema.js";
+import type {
+  Breakpoint,
+  GroupOptions,
+  SectionKind,
+  WidgetConfig,
+  WidgetSize,
+  WidgetType,
+} from "../config/schema.js";
+import { SECTION_KINDS } from "../config/schema.js";
 
 /** Grid metrics derived purely from the panel's measured width. */
 export interface GridMetrics {
@@ -26,6 +34,22 @@ export function resolveWidgetSize(widget: WidgetConfig, bucket: Breakpoint): Wid
   return widget.size?.[bucket] ?? widget.size?.medium ?? "1x1";
 }
 
+/**
+ * Whether a child in a uniform tile section should BREAK OUT to its declared
+ * footprint instead of the section's 1×1 square. A widget opts in by bringing
+ * its own full-bleed surface — flagged via `options.hero` or any `options.brand`
+ * (e.g. the Roborock branded hero). Returns the footprint to use, or null to
+ * stay a normal square tile. Only sizes larger than 1×1 break out; at narrow
+ * breakpoints the widget collapses back to a plain tile.
+ */
+export function breakoutSizeFor(widget: WidgetConfig, bucket: Breakpoint): WidgetSize | null {
+  const o = widget.options ?? {};
+  const optsIn = o.hero === true || typeof o.brand === "string";
+  if (!optsIn) return null;
+  const size = resolveWidgetSize(widget, bucket);
+  return size === "1x1" ? null : size;
+}
+
 /** Parse "WxH" into column/row spans, clamped so width never exceeds the grid. */
 export function spanForSize(size: WidgetSize, columns: number): { colSpan: number; rowSpan: number } {
   const [w, h] = size.split("x").map((n) => parseInt(n, 10));
@@ -36,4 +60,114 @@ export function spanForSize(size: WidgetSize, columns: number): { colSpan: numbe
 export function squareUnit(width: number, m: GridMetrics): number {
   const usable = (width || 1024) - m.pad * 2 - m.gap * (m.columns - 1);
   return Math.max(96, Math.floor(usable / m.columns));
+}
+
+// ---------------------------------------------------------------------------
+// Sections: a view's flat widget list is organised into domain "sections",
+// each rendered by a self-contained `group` container (see `widgets/group.ts`).
+// These functions are pure so the grouping is fully unit-testable.
+// ---------------------------------------------------------------------------
+
+/** Fixed render order of auto-collected sections. */
+export const SECTION_ORDER: readonly SectionKind[] = SECTION_KINDS;
+
+/** Human labels for each section heading (HA-native wording; edit freely). */
+export const SECTION_LABELS: Record<SectionKind, string> = {
+  media: "Media",
+  devices: "Devices",
+  sensors: "Sensors",
+  energy: "Energy",
+};
+
+/** The section a widget type auto-collects into. */
+export function sectionForWidgetType(type: WidgetType): SectionKind {
+  switch (type) {
+    case "media":
+      return "media";
+    case "energy":
+    case "powerflow":
+    case "solarcharging":
+    case "energychart":
+      return "energy";
+    case "sensor":
+    case "binary_sensor":
+    case "person":
+    case "weather":
+      return "sensors";
+    default:
+      // light, switch, fan, climate, cover, lock, vacuum, camera, scene,
+      // script, button, action, alarm — everything actionable.
+      return "devices";
+  }
+}
+
+/** The tile layout the frame should use for a container of the given variant. */
+export function layoutForVariant(variant: SectionKind): "row" | "tile" | "value" {
+  if (variant === "devices") return "tile";
+  if (variant === "sensors") return "value";
+  return "row"; // media / energy own their own bodies
+}
+
+/**
+ * A container's internal column count, keyed to the container's OWN measured
+ * width (so it reflows independently of the outer grid — identical tiles, more
+ * columns as it gets wider).
+ */
+export function sectionColumns(variant: SectionKind, width: number): number {
+  const w = width || 1024;
+  switch (variant) {
+    case "media":
+      return w < 900 ? 1 : 2;
+    case "devices":
+      return w < 600 ? 3 : w < 900 ? 4 : w < 1200 ? 6 : 8;
+    case "sensors":
+      return w < 600 ? 2 : w < 900 ? 3 : w < 1200 ? 4 : 6;
+    case "energy":
+      // Energy widgets are wide (2×1 bars, 2×2 diagrams). Keep ≥2 columns so a
+      // 2-wide widget fills the row without becoming a full-width square.
+      return w < 900 ? 2 : 4;
+  }
+}
+
+const GROUP_SIZE: WidgetConfig["size"] = { compact: "4x2", medium: "4x2", wide: "4x2" };
+
+function syntheticGroup(kind: SectionKind, children: WidgetConfig[]): WidgetConfig {
+  const options: GroupOptions = { label: SECTION_LABELS[kind], variant: kind, children };
+  return {
+    id: `__section_${kind}`,
+    type: "group",
+    size: GROUP_SIZE,
+    options: options as unknown as Record<string, unknown>,
+  };
+}
+
+/**
+ * Transform a view's flat widget list into the list of top-level renderables.
+ *
+ * Default (no explicit `group` in the view): widgets are auto-partitioned by
+ * domain into synthetic `group` containers, emitted in `SECTION_ORDER`, with
+ * configured order preserved WITHIN each section and empty sections omitted.
+ *
+ * Override: if the view already contains any explicit `group` widget, the list
+ * is returned unchanged — the author is hand-composing sections, so we don't
+ * re-collect. (Auto XOR manual, per view.)
+ */
+export function sectioniseView(widgets: WidgetConfig[]): WidgetConfig[] {
+  const list = widgets ?? [];
+  if (list.some((w) => w.type === "group")) return list;
+
+  const buckets = new Map<SectionKind, WidgetConfig[]>();
+  for (const w of list) {
+    const kind = sectionForWidgetType(w.type);
+    const bucket = buckets.get(kind) ?? [];
+    bucket.push(w);
+    buckets.set(kind, bucket);
+  }
+
+  const out: WidgetConfig[] = [];
+  for (const kind of SECTION_ORDER) {
+    const members = buckets.get(kind);
+    if (members && members.length) out.push(syntheticGroup(kind, members));
+  }
+  return out;
 }

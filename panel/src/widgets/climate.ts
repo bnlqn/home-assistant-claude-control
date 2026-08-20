@@ -146,6 +146,7 @@ export class ClimateWidget extends EntityWidget {
     return html`
       <hd-widget-frame
         .icon=${vm.icon}
+        .layout=${this.layout}
         .name=${vm.name}
         .stateText=${titleCase(vm.rawState)}
         .secondary=${vm.secondary ?? ""}

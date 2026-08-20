@@ -37,6 +37,14 @@ export class HdWidgetFrame extends LitElement {
   @property({ type: String }) quickLabel = "";
   @property({ type: String }) actionState: ActionState = "idle";
   @property({ type: Boolean }) bleed = false;
+  /**
+   * Tile anatomy:
+   *  - "row"   → header card (icon + titles at the top). The default.
+   *  - "tile"  → Homey device square: icon top-left, status accessory
+   *              top-right (the `badge` slot, else an active dot), name bottom.
+   *  - "value" → read-only value tile: label, big value, right-hand icon circle.
+   */
+  @property({ type: String }) layout: "row" | "tile" | "value" = "row";
 
   static styles = css`
     :host {
@@ -209,6 +217,120 @@ export class HdWidgetFrame extends LitElement {
     ::slotted(*) {
       min-width: 0;
     }
+
+    /* ---- Homey device tile: icon TL · accessory TR · name at the bottom ---- */
+    .card.tile {
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .tile-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .accessory {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 24px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-ring, var(--idle-fg));
+    }
+    .tile-foot {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+      appearance: none;
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+      color: inherit;
+      border-radius: 8px;
+      min-width: 0;
+    }
+    button.tile-foot {
+      cursor: pointer;
+    }
+    button.tile-foot:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+    .card.tile .name {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    /* ---- Read-only value tile: label · big value · right-hand icon circle ---- */
+    .card.value {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .val-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      flex: 1;
+      text-align: left;
+      appearance: none;
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+      color: inherit;
+      border-radius: 8px;
+    }
+    button.val-main {
+      cursor: pointer;
+    }
+    button.val-main:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+    .val-label {
+      font: var(--text-secondary-state);
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .val-value {
+      font: var(--text-value);
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .val-value > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .val-icon {
+      flex: none;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-pill);
+      display: grid;
+      place-items: center;
+      background: var(--icon-bg, var(--idle-bg));
+      color: var(--icon-fg, var(--idle-fg));
+    }
   `;
 
   connectedCallback(): void {
@@ -279,31 +401,45 @@ export class HdWidgetFrame extends LitElement {
       </div>`;
     }
 
+    if (this.layout === "tile") return this._renderTile(cardVars, bodyAction, iconInteractive, iconLabel, titleLabel);
+    if (this.layout === "value") return this._renderValue(cardVars, bodyAction, titleLabel);
+    return this._renderRow(cardVars, bodyAction, iconInteractive, iconLabel, titleLabel);
+  }
+
+  /** The reusable quick-action icon button, shared by every layout. */
+  private _iconButton(iconInteractive: boolean, iconLabel: string) {
+    return html`<button
+      class="icon-btn ${this.actionState}"
+      data-interactive=${iconInteractive ? "true" : "false"}
+      aria-label=${iconLabel}
+      ?disabled=${this.unavailable && this.quickKind !== "none"}
+      @click=${this._quick}
+    >
+      <hd-icon .icon=${this.icon} .size=${24}></hd-icon>
+    </button>`;
+  }
+
+  private _titleBlock(bodyAction: "detail" | "quick" | null, titleLabel: string) {
+    const inner = html`<span class="name">${this.name}</span>
+      ${this.stateText ? html`<span class="state">${this.stateText}</span>` : nothing}
+      ${this.secondary ? html`<span class="secondary">${this.secondary}</span>` : nothing}`;
+    return bodyAction
+      ? html`<button class="titles" aria-label=${titleLabel} @click=${this._body}>${inner}</button>`
+      : html`<div class="titles">${inner}</div>`;
+  }
+
+  /** The default header card. */
+  private _renderRow(
+    cardVars: string,
+    bodyAction: "detail" | "quick" | null,
+    iconInteractive: boolean,
+    iconLabel: string,
+    titleLabel: string,
+  ) {
     return html`
       <div class="card" data-clickable=${bodyAction ? "true" : "false"} style=${cardVars} @click=${this._body}>
         <div class="header">
-          <button
-            class="icon-btn ${this.actionState}"
-            data-interactive=${iconInteractive ? "true" : "false"}
-            aria-label=${iconLabel}
-            ?disabled=${this.unavailable && this.quickKind !== "none"}
-            @click=${this._quick}
-          >
-            <hd-icon .icon=${this.icon} .size=${24}></hd-icon>
-          </button>
-
-          ${bodyAction
-            ? html`<button class="titles" aria-label=${titleLabel} @click=${this._body}>
-                <span class="name">${this.name}</span>
-                ${this.stateText ? html`<span class="state">${this.stateText}</span>` : nothing}
-                ${this.secondary ? html`<span class="secondary">${this.secondary}</span>` : nothing}
-              </button>`
-            : html`<div class="titles">
-                <span class="name">${this.name}</span>
-                ${this.stateText ? html`<span class="state">${this.stateText}</span>` : nothing}
-                ${this.secondary ? html`<span class="secondary">${this.secondary}</span>` : nothing}
-              </div>`}
-
+          ${this._iconButton(iconInteractive, iconLabel)} ${this._titleBlock(bodyAction, titleLabel)}
           <div class="badge">
             <slot name="badge"></slot>
             ${this.hasDetail && this.quickKind === "none"
@@ -311,8 +447,49 @@ export class HdWidgetFrame extends LitElement {
               : nothing}
           </div>
         </div>
-
         <div class="body" @click=${this._stop}><slot></slot></div>
+      </div>
+    `;
+  }
+
+  /** Homey device square: icon TL · accessory TR · name pinned to the bottom. */
+  private _renderTile(
+    cardVars: string,
+    bodyAction: "detail" | "quick" | null,
+    iconInteractive: boolean,
+    iconLabel: string,
+    titleLabel: string,
+  ) {
+    const foot = html`<span class="name">${this.name}</span>
+      ${this.stateText ? html`<span class="state">${this.stateText}</span>` : nothing}`;
+    return html`
+      <div class="card tile" data-clickable=${bodyAction ? "true" : "false"} style=${cardVars} @click=${this._body}>
+        <div class="tile-top">
+          ${this._iconButton(iconInteractive, iconLabel)}
+          <span class="accessory">
+            <slot name="badge">${this.active ? html`<span class="dot"></span>` : nothing}</slot>
+          </span>
+        </div>
+        ${bodyAction
+          ? html`<button class="tile-foot" aria-label=${titleLabel} @click=${this._body}>${foot}</button>`
+          : html`<div class="tile-foot">${foot}</div>`}
+      </div>
+    `;
+  }
+
+  /** Read-only value tile: label · big value · right-hand icon circle. */
+  private _renderValue(cardVars: string, bodyAction: "detail" | "quick" | null, titleLabel: string) {
+    const main = html`<span class="val-label">${this.name}</span>
+      <span class="val-value">
+        ${this.stateText ? html`<span>${this.stateText}</span>` : nothing}
+        <slot></slot>
+      </span>`;
+    return html`
+      <div class="card value" data-clickable=${bodyAction ? "true" : "false"} style=${cardVars} @click=${this._body}>
+        ${bodyAction
+          ? html`<button class="val-main" aria-label=${titleLabel} @click=${this._body}>${main}</button>`
+          : html`<div class="val-main">${main}</div>`}
+        <span class="val-icon"><hd-icon .icon=${this.icon} .size=${22}></hd-icon></span>
       </div>
     `;
   }

@@ -93,6 +93,7 @@ export class SensorWidget extends EntityWidget {
     return html`
       <hd-widget-frame
         .icon=${vm.icon}
+        .layout=${this.layout}
         .name=${vm.name}
         .stateText=${""}
         .size=${this.currentSize}

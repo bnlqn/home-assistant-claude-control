@@ -42,3 +42,58 @@ export function appIcon(name: string): string | undefined {
 export function isAppLauncher(sources: readonly string[]): boolean {
   return sources.some((s) => appIcon(s) !== undefined);
 }
+
+function normalizeApp(name: string): string {
+  return name.replace(/ /g, " ").trim().toLowerCase();
+}
+
+/**
+ * The streaming apps promoted to big primary launcher tiles in the media detail
+ * (bigger, branded, moved out of the generic apps chip list). Matched against
+ * the player's `source_list` by normalised name; order here is the display
+ * order. `key` is the source name to match; `label` overrides the display text.
+ */
+export interface FeaturedApp {
+  key: string;
+  label: string;
+  icon: string;
+}
+
+export const FEATURED_APPS: readonly FeaturedApp[] = [
+  { key: "tv", label: "Apple TV+", icon: "mdi:apple" },
+  { key: "infuse", label: "Infuse", icon: "mdi:play-box-multiple" },
+  { key: "netflix", label: "Netflix", icon: "mdi:netflix" },
+] as const;
+
+/** A featured app resolved against a real source name present in the list. */
+export interface ResolvedFeaturedApp extends FeaturedApp {
+  /** The exact source_list entry to pass to select_source. */
+  source: string;
+}
+
+/**
+ * Split a source list into the featured launcher apps (in FEATURED_APPS order)
+ * and the remaining sources, so the detail can render featured apps as primary
+ * tiles and everything else in the secondary chip list without duplication.
+ */
+export function splitFeaturedApps(sources: readonly string[]): {
+  featured: ResolvedFeaturedApp[];
+  rest: string[];
+} {
+  const byNorm = new Map<string, string>();
+  for (const src of sources) {
+    const n = normalizeApp(src);
+    if (!byNorm.has(n)) byNorm.set(n, src);
+  }
+  const featured: ResolvedFeaturedApp[] = [];
+  const claimed = new Set<string>();
+  for (const app of FEATURED_APPS) {
+    const source = byNorm.get(app.key);
+    if (source) {
+      featured.push({ ...app, source });
+      claimed.add(source);
+    }
+  }
+  const rest = sources.filter((s) => !claimed.has(s));
+  return { featured, rest };
+}

@@ -1,21 +1,22 @@
 import { LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
-import { html as staticHtml, unsafeStatic } from "lit/static-html.js";
 import { repeat } from "lit/directives/repeat.js";
 import { define } from "../primitives/registry.js";
 import type { HomeAssistant } from "../types/hass.js";
-import type { Breakpoint, ViewConfig, WidgetConfig, WidgetSize } from "../config/schema.js";
-import { widgetTag } from "../widgets/widget-registry.js";
-import { gridMetricsForWidth, resolveWidgetSize, spanForSize, squareUnit } from "./layout.js";
+import type { ViewConfig } from "../config/schema.js";
+import { gridMetricsForWidth, resolveWidgetSize, sectioniseView } from "./layout.js";
+import { renderWidgetCell } from "./widget-cell.js";
 import "../primitives/entity-icon.js";
 import "../widgets/widget-frame.js";
+import "../widgets/group.js";
 
 /**
- * The deterministic square-unit widget grid. Column count, gap, padding and the
- * responsive size bucket are all derived from the PANEL's own measured width
- * (via ResizeObserver), not the screen — so the layout adapts correctly inside
- * a sidebar-narrowed panel or a wall display. Configured widget order is always
- * preserved (no dense packing).
+ * The view canvas. A view's flat widget list is organised by `sectioniseView`
+ * into domain sections, each rendered by a self-contained `hd-group` container
+ * that owns its own internal responsive grid. The canvas itself is just a
+ * vertical stack of those full-width section blocks (plus, in hand-composed
+ * views, any standalone widget). Configured widget order is preserved within
+ * each section.
  */
 @define("hd-view-grid")
 export class HdViewGrid extends LitElement {
@@ -29,12 +30,10 @@ export class HdViewGrid extends LitElement {
     :host {
       display: block;
     }
-    .grid {
-      display: grid;
-      grid-auto-flow: row;
-      grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
-      grid-auto-rows: var(--unit, 150px);
-      gap: var(--gap, 14px);
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
       padding: var(--pad, 20px);
       box-sizing: border-box;
       max-width: 1760px;
@@ -81,62 +80,10 @@ export class HdViewGrid extends LitElement {
     this._ro?.disconnect();
   }
 
-  private _sizeFor(widget: WidgetConfig, bucket: Breakpoint): WidgetSize {
-    return resolveWidgetSize(widget, bucket);
-  }
-
-  private _renderWidget(widget: WidgetConfig, size: WidgetSize, columns: number) {
-    // Grid-level error net: a throw here — an unknown widget type, a bad config,
-    // a span computation gone wrong — degrades this one cell to an error tile
-    // instead of throwing out of render() and blanking the entire view. A
-    // widget's *own* render throw is caught one layer down by EntityWidget.
-    try {
-      const { colSpan, rowSpan } = spanForSize(size, columns);
-      const tag = unsafeStatic(widgetTag(widget.type));
-      const cellStyle = `grid-column: span ${colSpan}; grid-row: span ${rowSpan};`;
-      // Dynamic-tag element with live property bindings.
-      return staticHtml`<${tag}
-        class="cell"
-        style=${cellStyle}
-        .hass=${this.hass}
-        .config=${widget}
-        .currentSize=${size}
-      ></${tag}>`;
-    } catch (err) {
-      console.error(`[hd-view-grid] widget "${widget?.id ?? widget?.type}" failed to render:`, err);
-      return this._errorCell(widget, size, columns);
-    }
-  }
-
-  /** Card-styled fallback for a widget the grid couldn't even construct. */
-  private _errorCell(widget: WidgetConfig, size: WidgetSize, columns: number) {
-    // `spanForSize` may itself have thrown above — fall back to a 1×1 footprint.
-    let colSpan = 1;
-    let rowSpan = 1;
-    try {
-      ({ colSpan, rowSpan } = spanForSize(size, columns));
-    } catch {
-      /* keep the 1×1 fallback */
-    }
-    const cellStyle = `grid-column: span ${colSpan}; grid-row: span ${rowSpan};`;
-    const name = widget?.name || widget?.entity || "Widget";
-    return html`<hd-widget-frame
-      class="cell"
-      style=${cellStyle}
-      icon="mdi:alert-circle-outline"
-      .name=${name}
-      stateText="Unavailable"
-      secondary="Widget error"
-      accent="alert"
-      .size=${size}
-      ?unavailable=${true}
-    ></hd-widget-frame>`;
-  }
-
   render() {
     const view = this.view;
     const m = gridMetricsForWidth(this._width);
-    const gridStyle = `--cols:${m.columns}; --gap:${m.gap}px; --pad:${m.pad}px; --unit:var(--auto-unit)`;
+    const stackStyle = `--pad:${m.pad}px`;
 
     if (!view || view.widgets.length === 0) {
       return html`<div class="empty">
@@ -146,16 +93,16 @@ export class HdViewGrid extends LitElement {
       </div>`;
     }
 
-    // Compute a square unit from the measured width so 1×1 ≈ square.
-    const unit = squareUnit(this._width, m);
-    const styleWithUnit = `${gridStyle.replace("var(--auto-unit)", `${unit}px`)}`;
+    // Organise the flat widget list into section containers (+ any standalone
+    // widget in a hand-composed view). Each item renders itself full-width.
+    const items = sectioniseView(view.widgets);
 
     return html`
-      <div class="grid" style=${styleWithUnit}>
+      <div class="stack" style=${stackStyle}>
         ${repeat(
-          view.widgets,
+          items,
           (w) => w.id,
-          (w) => this._renderWidget(w, this._sizeFor(w, m.bucket), m.columns),
+          (w) => renderWidgetCell(w, resolveWidgetSize(w, m.bucket), 1, this.hass, "row"),
         )}
       </div>
       ${nothing}

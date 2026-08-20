@@ -78,6 +78,94 @@ describe("hd-widget-frame interaction targets", () => {
   });
 });
 
+describe("hd-widget-frame layout variants", () => {
+  it("tile layout renders a Homey square: icon, bottom name, active dot", async () => {
+    const el = await mount<HTMLElement>("hd-widget-frame", {
+      // @ts-expect-error assigning element props
+      name: "Hue Go",
+      icon: "mdi:lightbulb",
+      layout: "tile",
+      active: true,
+      hasDetail: true,
+      quickKind: "toggle",
+    });
+    const root = el.shadowRoot!;
+    expect(root.querySelector(".card.tile")).toBeTruthy();
+    expect(root.querySelector(".icon-btn")).toBeTruthy();
+    expect(root.querySelector(".tile-foot .name")!.textContent).toContain("Hue Go");
+    // Active with no slotted badge → the fallback status dot shows.
+    expect(root.querySelector(".accessory .dot")).toBeTruthy();
+    el.remove();
+  });
+
+  it("tile layout keeps icon quick-action separate from opening detail", async () => {
+    const el = await mount<HTMLElement>("hd-widget-frame", {
+      // @ts-expect-error assigning element props
+      name: "Lock",
+      layout: "tile",
+      quickKind: "toggle",
+      hasDetail: true,
+    });
+    let quick = 0;
+    let activate = 0;
+    el.addEventListener("hd-quick", () => quick++);
+    el.addEventListener("hd-activate", () => activate++);
+    (el.shadowRoot!.querySelector(".icon-btn") as HTMLElement).click();
+    (el.shadowRoot!.querySelector("button.tile-foot") as HTMLElement).click();
+    expect(quick).toBe(1);
+    expect(activate).toBe(1);
+    el.remove();
+  });
+
+  it("value layout renders label + big value + icon circle and opens detail", async () => {
+    const el = await mount<HTMLElement>("hd-widget-frame", {
+      // @ts-expect-error assigning element props
+      name: "Motion Detector",
+      icon: "mdi:motion-sensor",
+      layout: "value",
+      stateText: "318",
+      hasDetail: true,
+      quickKind: "none",
+    });
+    const root = el.shadowRoot!;
+    expect(root.querySelector(".card.value")).toBeTruthy();
+    expect(root.querySelector(".val-label")!.textContent).toContain("Motion Detector");
+    expect(root.querySelector(".val-value")!.textContent).toContain("318");
+    expect(root.querySelector(".val-icon")).toBeTruthy();
+    let activate = 0;
+    el.addEventListener("hd-activate", () => activate++);
+    (root.querySelector("button.val-main") as HTMLElement).click();
+    expect(activate).toBe(1);
+    el.remove();
+  });
+});
+
+describe("hd-group container", () => {
+  it("renders a heading and one cell per child", async () => {
+    await import("../widgets/group.js");
+    const el = await mount<HTMLElement>("hd-group", {
+      // @ts-expect-error assigning element props
+      config: {
+        id: "g",
+        type: "group",
+        size: { compact: "4x2", medium: "4x2", wide: "4x2" },
+        options: {
+          label: "Devices",
+          variant: "devices",
+          children: [
+            { id: "a", type: "light", entity: "light.a", size: { compact: "1x1", medium: "1x1", wide: "1x1" } },
+            { id: "b", type: "switch", entity: "switch.b", size: { compact: "1x1", medium: "1x1", wide: "1x1" } },
+          ],
+        },
+      },
+    });
+    const root = el.shadowRoot!;
+    expect(root.querySelector(".head")!.textContent).toContain("Devices");
+    expect(root.querySelectorAll(".grid > .cell")).toHaveLength(2);
+    el.remove();
+  });
+});
+
 describe("confirmation bus", () => {
   it("resolves via a handling ancestor (sensitive-action gate)", async () => {
     const host = document.createElement("div");

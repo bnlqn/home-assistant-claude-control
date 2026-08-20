@@ -190,6 +190,9 @@ export class MockHassController {
       case "vacuum.set_fan_speed":
         this.mutate(id, (s) => (s.attributes.fan_speed = data.fan_speed));
         break;
+      case "vacuum.locate":
+        // fire-and-forget beep — no state change.
+        break;
       default:
         // scene/script/button/alarm etc. — no local state change needed.
         break;

@@ -4,6 +4,7 @@ import {
   BREAKPOINTS,
   DashboardConfig,
   ENTITYLESS_TYPES,
+  GroupOptions,
   SUPPORTED_SIZES,
   ViewConfig,
   WidgetConfig,
@@ -175,6 +176,20 @@ function validateWidget(
           `Widget type "${type}" does not support size "${size}" at ${bp}. Supported: ${SUPPORTED_SIZES[type].join(", ")}.`,
         );
       }
+    }
+  }
+
+  // An explicit `group` container validates its children with the same rules,
+  // sharing the id-uniqueness set. (Synthetic groups from `sectioniseView` are
+  // built after validation from already-validated widgets.)
+  if (type === "group") {
+    const children = (widget.options as GroupOptions | undefined)?.children;
+    if (!Array.isArray(children) || children.length === 0) {
+      err(`${wpath}.options.children`, `Group "${widget.id}" must have a non-empty \`children\` array.`);
+    } else {
+      children.forEach((child, ci) =>
+        validateWidget(child, `${wpath}.options.children[${ci}]`, seenWidgetIds, err),
+      );
     }
   }
 

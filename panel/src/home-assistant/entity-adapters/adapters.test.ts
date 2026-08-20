@@ -90,6 +90,34 @@ describe("normalizeEntity", () => {
     expect(vm.available).toBe(false);
     expect(vm.accent).toBe("unavailable");
   });
+
+  it("reads vacuum battery + status from companion sensors, not the vacuum entity", () => {
+    const hass = hassWith({
+      "vacuum.robo": { state: "docked", attributes: { supported_features: 30524 } },
+      "sensor.robo_battery": { state: "80", attributes: { device_class: "battery", unit_of_measurement: "%" } },
+      "sensor.robo_status": { state: "charging", attributes: {} },
+    });
+    const vm = normalizeEntity(hass, "vacuum.robo");
+    expect(vm.displayState).toBe("Charging"); // companion status beats bare "docked"
+    expect(vm.secondary).toBe("80% battery");
+    expect(vm.quickAction.label).toBe("Start");
+  });
+
+  it("shows live progress + room while a vacuum is cleaning", () => {
+    const hass = hassWith({
+      "vacuum.robo": { state: "cleaning", attributes: { supported_features: 30524 } },
+      "sensor.robo_current_room": { state: "Kitchen", attributes: {} },
+      "sensor.robo_cleaning_progress": { state: "42", attributes: { unit_of_measurement: "%" } },
+      "sensor.robo_cleaning_area": { state: "12.5", attributes: { unit_of_measurement: "m²" } },
+    });
+    const vm = normalizeEntity(hass, "vacuum.robo");
+    expect(vm.active).toBe(true);
+    expect(vm.accent).toBe("accent");
+    expect(vm.displayState).toBe("Cleaning Kitchen");
+    expect(vm.secondary).toContain("42%");
+    expect(vm.secondary).toContain("12.5 m²");
+    expect(vm.level).toBe(42);
+  });
 });
 
 describe("accentVars", () => {

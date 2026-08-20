@@ -154,6 +154,9 @@ export function buildVacuumReturn(entityId: string): ServiceCall {
 export function buildVacuumFanSpeed(entityId: string, fanSpeed: string): ServiceCall {
   return { domain: "vacuum", service: "set_fan_speed", data: withEntity(entityId, { fan_speed: fanSpeed }) };
 }
+export function buildVacuumLocate(entityId: string): ServiceCall {
+  return { domain: "vacuum", service: "locate", data: withEntity(entityId) };
+}
 
 // ---- Lock ----------------------------------------------------------------
 export function buildLock(entityId: string): ServiceCall {

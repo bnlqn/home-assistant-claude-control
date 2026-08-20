@@ -22,6 +22,12 @@ export abstract class EntityWidget extends LitElement {
   @property({ attribute: false }) config!: WidgetConfig;
   /** Footprint resolved by the grid for the current breakpoint. */
   @property({ type: String }) currentSize: WidgetSize = "1x1";
+  /**
+   * Tile anatomy the widget's frame should adopt, set by the container section:
+   * "tile" (Homey device square), "value" (read-only value tile), or "row"
+   * (the default header card). Widgets forward this into `hd-widget-frame`.
+   */
+  @property({ type: String }) layout: "row" | "tile" | "value" = "row";
 
   @state() protected actionState: ActionState = "idle";
   private _resetTimer = 0;

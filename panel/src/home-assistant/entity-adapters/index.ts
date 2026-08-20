@@ -13,6 +13,7 @@ import {
   buildVacuumReturn,
   buildVacuumStart,
 } from "../service-calls.js";
+import { vacuumCompanions } from "../vacuum-companions.js";
 import { batteryIcon, defaultIcon, weatherIcon } from "./icons.js";
 import type { AccentToken, EntityViewModel } from "./model.js";
 
@@ -89,10 +90,15 @@ export function normalizeEntity(
     return base;
   }
 
-  return refineByDomain(base, stateObj, config);
+  return refineByDomain(base, stateObj, config, hass);
 }
 
-function refineByDomain(vm: EntityViewModel, s: HassEntity, config?: WidgetConfig): EntityViewModel {
+function refineByDomain(
+  vm: EntityViewModel,
+  s: HassEntity,
+  config?: WidgetConfig,
+  hass?: HomeAssistant,
+): EntityViewModel {
   const on = ON_STATES.has(s.state);
   switch (vm.domain) {
     case "light":
@@ -120,7 +126,7 @@ function refineByDomain(vm: EntityViewModel, s: HassEntity, config?: WidgetConfi
     case "lock":
       return refineLock(vm, s, config);
     case "vacuum":
-      return refineVacuum(vm, s);
+      return refineVacuum(vm, s, hass);
     case "binary_sensor":
       return refineBinarySensor(vm, s);
     case "person":
@@ -253,15 +259,30 @@ function refineLock(vm: EntityViewModel, s: HassEntity, config?: WidgetConfig): 
   return vm;
 }
 
-function refineVacuum(vm: EntityViewModel, s: HassEntity): EntityViewModel {
+function refineVacuum(vm: EntityViewModel, s: HassEntity, hass?: HomeAssistant): EntityViewModel {
   const st = s.state;
   const cleaning = st === "cleaning";
   const error = st === "error";
+  const co = vacuumCompanions(hass, vm.entityId);
   vm.active = cleaning;
   vm.accent = error ? "alert" : cleaning ? "accent" : "idle";
-  vm.displayState = titleCase(st);
-  const batt = s.attributes.battery_level as number | undefined;
-  vm.secondary = batt != null ? `${Math.round(batt)}% battery` : undefined;
+
+  // Prefer the richer companion status ("charging" / "drying") over the bare
+  // vacuum state ("docked"), and name the room while cleaning.
+  const statusText = titleCase((co.status ?? st).replace(/_/g, " "));
+  vm.displayState = cleaning && co.room ? `Cleaning ${co.room}` : statusText;
+  if (typeof co.progress === "number" && cleaning) vm.level = co.progress;
+
+  // Battery lives on a sibling sensor for most robots; fall back to the (rare)
+  // battery_level attribute if present.
+  const batt = co.battery ?? (s.attributes.battery_level as number | undefined);
+  if (cleaning && typeof co.progress === "number") {
+    const area = typeof co.area === "number" && co.area > 0 ? ` · ${formatNumber(co.area)} m²` : "";
+    vm.secondary = `${Math.round(co.progress)}%${area}`;
+  } else {
+    vm.secondary = batt != null ? `${Math.round(batt)}% battery` : undefined;
+  }
+
   vm.quickAction =
     st === "docked" || st === "idle"
       ? { kind: "toggle", label: "Start", call: buildVacuumStart(vm.entityId) }

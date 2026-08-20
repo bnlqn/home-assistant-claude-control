@@ -134,6 +134,7 @@ export class LightWidget extends EntityWidget {
     return html`
       <hd-widget-frame
         .icon=${vm.icon}
+        .layout=${this.layout}
         .name=${vm.name}
         .stateText=${vm.displayState}
         .size=${size}

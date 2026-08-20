@@ -53,8 +53,15 @@ export class HomeDashboardPanel extends LitElement {
   // render throws, but a throw inside a child element's own *async* update
   // (e.g. the inner flow diagram) surfaces here instead of being swallowed.
   // Log-only — tile attribution isn't possible at this level.
-  private _onWindowError = (ev: ErrorEvent) =>
-    console.error("[home-dashboard-panel] uncaught error:", ev.error ?? ev.message);
+  private _onWindowError = (ev: ErrorEvent) => {
+    // "ResizeObserver loop …" is a benign, self-correcting browser notice (fired
+    // when an observer callback changes layout); it is not an application fault.
+    // The text may arrive in `message` or `error` depending on the browser.
+    const err = ev.error;
+    const text = `${ev.message ?? ""} ${typeof err === "string" ? err : (err?.message ?? "")}`;
+    if (text.includes("ResizeObserver loop")) return;
+    console.error("[home-dashboard-panel] uncaught error:", err ?? ev.message);
+  };
   private _onRejection = (ev: PromiseRejectionEvent) =>
     console.error("[home-dashboard-panel] unhandled rejection:", ev.reason);
 

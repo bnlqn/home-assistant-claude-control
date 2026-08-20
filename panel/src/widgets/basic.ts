@@ -13,6 +13,7 @@ function frame(w: EntityWidget, opts: { quickKind: "toggle" | "activate" | "none
     .stateText=${vm.displayState}
     .secondary=${vm.secondary ?? ""}
     .size=${(w as unknown as { currentSize: string }).currentSize as never}
+    .layout=${w.layout}
     .accent=${vm.accent}
     .active=${vm.active}
     .unavailable=${!vm.available}
@@ -84,6 +85,7 @@ abstract class MomentaryWidget extends EntityWidget {
       .name=${vm.name}
       .stateText=${vm.displayState}
       .size=${this.currentSize}
+      .layout=${this.layout}
       .accent=${vm.accent}
       .active=${vm.active}
       .unavailable=${!vm.available}
@@ -156,6 +158,7 @@ export class ActionWidget extends EntityWidget {
       .name=${name}
       .stateText=${"Tap to run"}
       .size=${this.currentSize}
+      .layout=${this.layout}
       .accent=${"accent"}
       .active=${false}
       .hasDetail=${false}

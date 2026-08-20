@@ -30,10 +30,12 @@ import {
   buildTurnOn,
   buildUnlock,
   buildVacuumFanSpeed,
+  buildVacuumLocate,
   buildVacuumPause,
   buildVacuumReturn,
   buildVacuumStart,
 } from "../home-assistant/service-calls.js";
+import { vacuumCompanions, CONSUMABLE_LOW_HOURS } from "../home-assistant/vacuum-companions.js";
 import {
   climateCaps,
   coverCaps,
@@ -41,8 +43,9 @@ import {
   mediaCaps,
   vacuumCaps,
 } from "../home-assistant/capabilities.js";
-import { formatAttribute, formatState, formatNumber, formatDuration, relativeTime, titleCase } from "../home-assistant/state-formatting.js";
-import { appIcon, isAppLauncher } from "../home-assistant/media-apps.js";
+import { formatAttribute, formatState, formatNumber, relativeTime, titleCase } from "../home-assistant/state-formatting.js";
+import { appIcon, isAppLauncher, splitFeaturedApps } from "../home-assistant/media-apps.js";
+import { mediaProgress } from "../home-assistant/media-progress.js";
 import type { SegmentOption } from "../primitives/segmented.js";
 import { requestConfirm } from "../primitives/feedback.js";
 
@@ -269,27 +272,6 @@ function climateDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 }
 
 // ---- Media ---------------------------------------------------------------
-/**
- * Playback progress from media_position/duration, advancing the reported
- * position by the time elapsed since it was last updated (as HA's own media
- * card does). Returns null when the player exposes no usable duration.
- */
-function mediaProgress(s: HassEntity): { pct: number; elapsed: string; total: string } | null {
-  const duration = s.attributes.media_duration as number | undefined;
-  if (!duration || duration <= 0) return null;
-  let position = (s.attributes.media_position as number) ?? 0;
-  const updated = s.attributes.media_position_updated_at as string | undefined;
-  if (s.state === "playing" && updated) {
-    position += (Date.now() - new Date(updated).getTime()) / 1000;
-  }
-  position = Math.max(0, Math.min(position, duration));
-  return {
-    pct: (position / duration) * 100,
-    elapsed: formatDuration(position),
-    total: formatDuration(duration),
-  };
-}
-
 function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const caps = mediaCaps(s);
   const picture = s.attributes.entity_picture as string | undefined;
@@ -303,6 +285,14 @@ function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   // Treat the source list as an app launcher when any entry is a known app
   // (Apple TV & friends); then a tap powers the device on before launching.
   const isApps = caps.selectSource && isAppLauncher(sources);
+  // Promote the primary streaming apps to big branded launchers; the rest fall
+  // to the secondary chip list.
+  const { featured, rest } = isApps ? splitFeaturedApps(sources) : { featured: [], rest: sources };
+  const launch = async (src: string) => {
+    // Launching an app should wake a sleeping Apple TV, so power on first.
+    if (off) await ctx.call(buildTurnOn(ctx.entityId), "turn on");
+    await ctx.call(buildMediaSelectSource(ctx.entityId, src), isApps ? "launch" : "change source of");
+  };
   // Some apps (Infuse, Netflix, …) play without handing the Apple TV a title or
   // artwork. Fall back to the running app's icon + name so the surface still
   // says what's on, rather than showing a blank poster.
@@ -355,21 +345,31 @@ function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
           </div>
         </div>`
       : nothing}
-    ${caps.selectSource && sources.length
+    ${featured.length
       ? html`<div class="d-section">
-          <span class="d-label">${isApps ? "Apps" : "Source"}</span>
+          <span class="d-label">Apps</span>
+          <div class="media-apps big-buttons">
+            ${featured.map(
+              (a) => html`<button
+                class="bigbtn app ${s.attributes.source === a.source ? "active" : ""}"
+                @click=${() => launch(a.source)}
+              >
+                <hd-icon icon=${a.icon} .size=${26}></hd-icon><span>${a.label}</span>
+              </button>`,
+            )}
+          </div>
+        </div>`
+      : nothing}
+    ${caps.selectSource && rest.length
+      ? html`<div class="d-section">
+          <span class="d-label">${isApps ? (featured.length ? "More apps" : "Apps") : "Source"}</span>
           <div class="chips">
-            ${sources.slice(0, 24).map((src) => {
+            ${rest.slice(0, 24).map((src) => {
               const active = s.attributes.source === src;
               const icon = isApps ? (appIcon(src) ?? "mdi:apps") : undefined;
               return html`<button
                 class="chip ${icon ? "with-icon" : ""} ${active ? "active" : ""}"
-                @click=${async () => {
-                  // Launching an app should wake a sleeping Apple TV, so power
-                  // on first, then select the source.
-                  if (off) await ctx.call(buildTurnOn(ctx.entityId), "turn on");
-                  await ctx.call(buildMediaSelectSource(ctx.entityId, src), isApps ? "launch" : "change source of");
-                }}
+                @click=${() => launch(src)}
               >
                 ${icon ? html`<hd-icon icon=${icon} .size=${18}></hd-icon>` : nothing}<span>${src}</span>
               </button>`;
@@ -424,12 +424,21 @@ function lockDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 function vacuumDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   const caps = vacuumCaps(s);
   const speeds = ((s.attributes.fan_speed_list as string[]) ?? []).filter((x) => !["off", "custom"].includes(x));
-  const battery = s.attributes.battery_level as number | undefined;
+  const co = vacuumCompanions(ctx.hass, ctx.entityId);
+  const battery = co.battery ?? (s.attributes.battery_level as number | undefined);
+  const cleaning = s.state === "cleaning";
+
+  const runStats: Array<[string, string]> = [];
+  if (typeof co.progress === "number" && cleaning) runStats.push(["Progress", `${Math.round(co.progress)}%`]);
+  if (typeof co.area === "number" && co.area > 0) runStats.push(["Area", `${formatNumber(co.area)} m²`]);
+  if (typeof co.cleaningTime === "number" && co.cleaningTime > 0) runStats.push(["Time", `${Math.round(co.cleaningTime)} min`]);
+
   return html`
     <div class="d-section big-buttons">
       <button class="bigbtn" @click=${() => ctx.call(buildVacuumStart(ctx.entityId), "start")}><hd-icon icon="mdi:play" .size=${20}></hd-icon>Start</button>
       ${caps.pause ? html`<button class="bigbtn" @click=${() => ctx.call(buildVacuumPause(ctx.entityId), "pause")}><hd-icon icon="mdi:pause" .size=${20}></hd-icon>Pause</button>` : nothing}
       ${caps.returnHome ? html`<button class="bigbtn" @click=${() => ctx.call(buildVacuumReturn(ctx.entityId), "dock")}><hd-icon icon="mdi:home-import-outline" .size=${20}></hd-icon>Dock</button>` : nothing}
+      ${caps.locate ? html`<button class="bigbtn" @click=${() => ctx.call(buildVacuumLocate(ctx.entityId), "locate")}><hd-icon icon="mdi:map-marker-radius" .size=${20}></hd-icon>Locate</button>` : nothing}
     </div>
     ${speeds.length
       ? html`<div class="d-section">
@@ -438,7 +447,29 @@ function vacuumDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
             @hd-select=${(e: CustomEvent) => ctx.call(buildVacuumFanSpeed(ctx.entityId, e.detail.value), "set suction for")}></hd-segmented>
         </div>`
       : nothing}
-    ${battery != null ? html`<div class="d-meta">Battery ${Math.round(battery)}%</div>` : nothing}
+    ${runStats.length
+      ? html`<div class="d-section">
+          <span class="d-label">${cleaning ? (co.room ? `Cleaning ${co.room}` : "Current clean") : "Last clean"}</span>
+          <div class="d-grid">
+            ${runStats.map(([k, v]) => html`<div class="d-cell"><span class="k">${k}</span><span class="v">${v}</span></div>`)}
+          </div>
+        </div>`
+      : nothing}
+    ${co.consumables.length
+      ? html`<div class="d-section">
+          <span class="d-label">Consumables</span>
+          <div class="d-grid">
+            ${co.consumables.map((c) => {
+              const low = c.hoursLeft <= CONSUMABLE_LOW_HOURS;
+              return html`<div class="d-cell">
+                <span class="k">${c.label}</span>
+                <span class="v" style=${low ? "color:var(--state-warn)" : ""}>${Math.round(c.hoursLeft)} h${low ? " · replace" : ""}</span>
+              </div>`;
+            })}
+          </div>
+        </div>`
+      : nothing}
+    ${battery != null ? html`<div class="d-meta">Battery ${Math.round(battery)}%${co.status ? ` · ${titleCase(co.status.replace(/_/g, " "))}` : ""}</div>` : nothing}
   `;
 }
 

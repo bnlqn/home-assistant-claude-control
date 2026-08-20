@@ -776,7 +776,7 @@ export const DEMO_STATES: Record<string, HassEntity> = {
       "media_title": "Peaky Blinders - S4 ∙ E5 - The Duel",
       "app_id": "com.firecore.infuse",
       "app_name": "Infuse",
-      "entity_picture": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22320%22%20height%3D%22320%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2523c2410c%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%25231e293b%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22320%22%20height%3D%22320%22%20fill%3D%22url(%2523g)%22%2F%3E%3C%2Fsvg%3E",
+      "entity_picture": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22320%22%20height%3D%22320%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23c2410c%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231e293b%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22320%22%20height%3D%22320%22%20fill%3D%22url(%23g)%22%2F%3E%3C%2Fsvg%3E",
       "friendly_name": "TV",
       "supported_features": 450487
     },
@@ -822,6 +822,76 @@ export const DEMO_STATES: Record<string, HassEntity> = {
       "friendly_name": "Roborock S8 Pro Ultra",
       "supported_features": 30524
     },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_battery": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_battery",
+    "state": "100",
+    "attributes": { "device_class": "battery", "unit_of_measurement": "%", "friendly_name": "Roborock S8 Pro Ultra Battery" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_status": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_status",
+    "state": "charging",
+    "attributes": { "friendly_name": "Roborock S8 Pro Ultra Status" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_current_room": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_current_room",
+    "state": "unknown",
+    "attributes": { "friendly_name": "Roborock S8 Pro Ultra Current room" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_cleaning_progress": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_cleaning_progress",
+    "state": "0",
+    "attributes": { "unit_of_measurement": "%", "friendly_name": "Roborock S8 Pro Ultra Cleaning progress" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_cleaning_area": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_cleaning_area",
+    "state": "7.6",
+    "attributes": { "unit_of_measurement": "m²", "friendly_name": "Roborock S8 Pro Ultra Cleaning area" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_cleaning_time": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_cleaning_time",
+    "state": "13.97",
+    "attributes": { "unit_of_measurement": "min", "friendly_name": "Roborock S8 Pro Ultra Cleaning time" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_main_brush_time_left": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_main_brush_time_left",
+    "state": "293.12",
+    "attributes": { "unit_of_measurement": "h", "friendly_name": "Roborock S8 Pro Ultra Main brush time left" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_side_brush_time_left": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_side_brush_time_left",
+    "state": "15.81",
+    "attributes": { "unit_of_measurement": "h", "friendly_name": "Roborock S8 Pro Ultra Side brush time left" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_filter_time_left": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_filter_time_left",
+    "state": "7.01",
+    "attributes": { "unit_of_measurement": "h", "friendly_name": "Roborock S8 Pro Ultra Filter time left" },
+    "last_changed": "2026-08-18T07:37:09.480520+00:00",
+    "last_updated": "2026-08-18T07:37:09.480520+00:00"
+  },
+  "sensor.roborock_s8_pro_ultra_sensor_time_left": {
+    "entity_id": "sensor.roborock_s8_pro_ultra_sensor_time_left",
+    "state": "12.92",
+    "attributes": { "unit_of_measurement": "h", "friendly_name": "Roborock S8 Pro Ultra Sensor time left" },
     "last_changed": "2026-08-18T07:37:09.480520+00:00",
     "last_updated": "2026-08-18T07:37:09.480520+00:00"
   },

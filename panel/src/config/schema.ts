@@ -31,6 +31,7 @@ export interface WidgetSizeSet {
 
 /** Widget kinds backed by the widget registry. */
 export type WidgetType =
+  | "group"
   | "light"
   | "switch"
   | "fan"
@@ -55,6 +56,7 @@ export type WidgetType =
   | "action";
 
 export const ALL_WIDGET_TYPES: readonly WidgetType[] = [
+  "group",
   "light",
   "switch",
   "fan",
@@ -80,6 +82,30 @@ export const ALL_WIDGET_TYPES: readonly WidgetType[] = [
 ] as const;
 
 export type ViewType = "overview" | "room" | "system";
+
+/**
+ * Domain-oriented section a widget auto-collects into (see `layout.ts`). Also
+ * the `variant` a `group` container renders as: media hero band, small device
+ * tiles, read-only value tiles, or an energy/diagram band.
+ */
+export type SectionKind = "media" | "devices" | "sensors" | "energy";
+
+export const SECTION_KINDS: readonly SectionKind[] = ["media", "devices", "sensors", "energy"] as const;
+
+/**
+ * Options for a `group` container widget. A container owns a titled section and
+ * its own internal responsive grid. By default sections are produced
+ * automatically by domain (`sectioniseView`); an explicit `group` in config
+ * with `children` overrides that for hand-picked layouts.
+ */
+export interface GroupOptions {
+  /** Heading shown above the section. */
+  label?: string;
+  /** Which internal layout the container renders (defaults from its widgets). */
+  variant?: SectionKind;
+  /** Explicit children. When present, the container is NOT auto-collected. */
+  children?: WidgetConfig[];
+}
 
 export interface WidgetConfig {
   /** Stable, unique id (used for keying, focus restoration, deep links). */
@@ -133,6 +159,9 @@ export interface DashboardConfig {
  * cramped or empty-looking widget.
  */
 export const SUPPORTED_SIZES: Record<WidgetType, readonly WidgetSize[]> = {
+  // A container is full-width and self-sizing; the grid ignores its footprint,
+  // so every size is permitted (synthetic groups carry a nominal one).
+  group: ALL_SIZES,
   light: ["1x1", "2x1", "1x2", "2x2"],
   switch: ["1x1", "2x1"],
   fan: ["1x1", "2x1", "1x2"],
@@ -159,6 +188,7 @@ export const SUPPORTED_SIZES: Record<WidgetType, readonly WidgetSize[]> = {
 
 /** A widget type must supply an `entity` unless it is one of these. */
 export const ENTITYLESS_TYPES: readonly WidgetType[] = [
+  "group",
   "energy",
   "powerflow",
   "solarcharging",

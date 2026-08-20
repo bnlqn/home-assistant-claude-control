@@ -144,12 +144,18 @@ export class WeatherWidget extends EntityWidget {
     const a = vm.stateObj?.attributes ?? {};
     const size = this.currentSize;
     const big = size === "1x2" || size === "2x2";
+    const tempStr = a.temperature != null ? `${formatNumber(a.temperature as number)}°` : "—";
+
+    // In a value tile the temperature is the hero and the rich metrics/forecast
+    // move to the detail surface; otherwise the full current-conditions card.
+    const isValue = this.layout === "value";
 
     return html`
       <hd-widget-frame
         .icon=${weatherIcon(vm.rawState)}
+        .layout=${this.layout}
         .name=${vm.name}
-        .stateText=${titleCase(vm.rawState)}
+        .stateText=${isValue ? tempStr : titleCase(vm.rawState)}
         .size=${size}
         .accent=${"accent"}
         .active=${false}
@@ -158,8 +164,10 @@ export class WeatherWidget extends EntityWidget {
         .quickKind=${"none"}
         @hd-activate=${() => this.openDetail()}
       >
-        <div class="temp">${a.temperature != null ? `${formatNumber(a.temperature as number)}°` : "—"}</div>
-        ${this._metrics()} ${big ? this._forecastStrip() : nothing}
+        ${isValue
+          ? nothing
+          : html`<div class="temp">${tempStr}</div>
+              ${this._metrics()} ${big ? this._forecastStrip() : nothing}`}
       </hd-widget-frame>
     `;
   }

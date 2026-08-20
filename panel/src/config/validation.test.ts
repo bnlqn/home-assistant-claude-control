@@ -104,6 +104,56 @@ describe("validateConfig", () => {
     expect(r.issues.some((i) => i.message.includes("not a valid entity_id"))).toBe(true);
   });
 
+  it("validates children of an explicit group container", () => {
+    const cfg: DashboardConfig = {
+      defaultView: "overview",
+      views: [
+        {
+          id: "overview",
+          type: "overview",
+          label: "Home",
+          icon: "mdi:home",
+          widgets: [
+            {
+              id: "g",
+              type: "group",
+              size: { compact: "4x2", medium: "4x2", wide: "4x2" },
+              options: {
+                label: "Devices",
+                variant: "devices",
+                children: [
+                  // Missing entity → should surface a nested error.
+                  { id: "c1", type: "light", size: { compact: "1x1", medium: "1x1", wide: "1x1" } },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const r = validateConfig(cfg);
+    expect(r.issues.some((i) => i.path.includes("options.children[0]") && i.message.includes("requires an `entity`"))).toBe(true);
+  });
+
+  it("requires a group to have a non-empty children array", () => {
+    const cfg: DashboardConfig = {
+      defaultView: "overview",
+      views: [
+        {
+          id: "overview",
+          type: "overview",
+          label: "Home",
+          icon: "mdi:home",
+          widgets: [
+            { id: "g", type: "group", size: { compact: "4x2", medium: "4x2", wide: "4x2" }, options: { label: "Empty" } },
+          ],
+        },
+      ],
+    };
+    const r = validateConfig(cfg);
+    expect(r.issues.some((i) => i.message.includes("non-empty `children`"))).toBe(true);
+  });
+
   it("errors when defaultView matches no view", () => {
     const bad = structuredClone(okConfig);
     bad.views = [];

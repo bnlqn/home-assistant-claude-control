@@ -161,6 +161,24 @@ export class HdDetail extends LitElement {
       outline: none;
       box-shadow: var(--focus-ring);
     }
+    /* Featured streaming-app launchers — bigger, branded, primary. */
+    .media-apps {
+      display: flex;
+      gap: 10px;
+    }
+    .bigbtn.app {
+      min-height: 74px;
+      gap: 9px;
+      border-radius: var(--radius-widget);
+      font-weight: 700;
+    }
+    .bigbtn.app hd-icon {
+      opacity: 0.95;
+    }
+    .bigbtn.app.active {
+      background: var(--accent);
+      color: var(--text-on-accent);
+    }
     .climate-hero {
       flex-direction: row;
       align-items: center;
