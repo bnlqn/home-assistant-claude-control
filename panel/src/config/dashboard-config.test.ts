@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { dashboardConfig } from "./dashboard.config.js";
+import {
+  dashboardConfigToDocument,
+  dashboardDocumentToConfig,
+  validateDashboardDocument,
+} from "./dashboard-document.js";
+import { DISPLAY_PROFILES } from "./schema.js";
 import { validateConfig } from "./validation.js";
 
 describe("shipped dashboard.config", () => {
@@ -27,5 +33,20 @@ describe("shipped dashboard.config", () => {
   it("uses only unique widget ids across the whole dashboard", () => {
     const ids = dashboardConfig.views.flatMap((v) => v.widgets.map((w) => w.id));
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("adapts and resolves every display profile without errors", () => {
+    const document = dashboardConfigToDocument(dashboardConfig);
+    const documentResult = validateDashboardDocument(document);
+    expect(documentResult.issues.filter((issue) => issue.level === "error")).toEqual([]);
+
+    for (const profile of DISPLAY_PROFILES) {
+      const runtime = dashboardDocumentToConfig(document, profile);
+      const result = validateConfig(runtime);
+      expect(result.issues.filter((issue) => issue.level === "error"), profile).toEqual([]);
+      expect(runtime.views.map((view) => view.id)).toEqual(
+        dashboardConfig.views.map((view) => view.id),
+      );
+    }
   });
 });

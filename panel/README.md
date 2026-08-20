@@ -73,7 +73,7 @@ config/www/home-dashboard/home-dashboard-panel.js
 config/www/home-dashboard/assets/**/*.webp
 ```
 
-The optimized 2026-08-20 baseline is 376 kB JavaScript (98 kB gzip) and
+The 2026-08-21 baseline is 387 kB JavaScript (101 kB gzip) and
 approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
 flows are five packed animated WebPs plus reduced-motion stills. See
 [Build baseline and budgets](#build-baseline-and-budgets).
@@ -136,11 +136,14 @@ pre-populated with **this home's real entities**, grouped by room, so it works
 the moment it is deployed. To point the dashboard at a different Home Assistant,
 edit that file and nothing else.
 
-The config is **validated at startup**. Invalid widget types, unsupported sizes,
-duplicate ids, missing views, and malformed entity ids produce a clear
-developer-facing error banner (and a `console.error`), while the rest of the
-dashboard still renders. Missing entities render an intentional "unavailable"
-state — they never crash the panel or show fabricated values.
+The checked-in config is the legacy authoring source while customization is not
+yet implemented. At startup it is validated and migrated into a serializable
+version-1 dashboard document. That document stores widget data once and keeps
+phone, tablet, desktop, and wall placement separate. Invalid widget types,
+unsupported sizes, duplicate ids, missing views, and malformed entity ids
+produce a clear developer-facing error banner (and a `console.error`), while a
+known-good document remains renderable. Missing entities render an intentional
+"unavailable" state — they never crash the panel or show fabricated values.
 
 ### Add a room
 
@@ -266,7 +269,8 @@ Composite widgets (`energy`, `action`) take their entities/service via
 panel/src/
   panel/            home-dashboard-panel.ts (root) · app-shell · view-grid · router · layout · assets
   controllers/      HA dependency gating · keyed async lifecycle · responsive profiles
-  config/           schema · widget-options · validation · dashboard.config.ts  ← entity bindings live here
+  config/           schema · widget-options · validation · versioned dashboard document + migrations
+                    · dashboard.config.ts  ← current authoring source and entity bindings
   design-system/    tokens.ts (light/dark, type, motion) · mdi-paths.ts (tree-shaken icons)
   home-assistant/   capabilities · service-calls · state-formatting · history · entity-adapters/
   primitives/       icon · icon-button · toggle · slider · segmented · misc (progress/badge/skeleton/trend)
@@ -290,6 +294,12 @@ Key ideas:
   quick-action/detail metadata, and widget-specific option validation for every
   widget type. There are no parallel legacy size, entity, tag, section, or
   detail-routing tables.
+- **Versioned dashboard data.** `dashboard-document.ts` separates reusable
+  widget instances from pages and per-profile visibility, order, and footprint.
+  The current TypeScript config migrates through this boundary as implicit v0;
+  v1 JSON import/export is validated, and corrupt candidates fall back without
+  replacing the known-good dashboard. Household persistence will use a future
+  supported Home Assistant integration, never direct `.storage` writes.
 - **Detail domains stay independent.** Every detail body implements the small
   `DetailContext` contract in a focused domain module. Every registered widget
   detail selects its renderer through the typed definition registry,
@@ -314,10 +324,10 @@ Key ideas:
 These budgets prevent quiet regressions. The current values are warning
 ceilings, not performance targets to grow into.
 
-| Resource | 2026-08-20 baseline | Warning ceiling | Direction |
+| Resource | 2026-08-21 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 377 kB | 390 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 98 kB | 105 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 387 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 101 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
@@ -330,7 +340,8 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 160 Vitest cases covering config validation, widget-size
+`npm test` runs 168 Vitest cases covering config validation, versioned dashboard
+migration/import/export/fallback, all-profile document resolution, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive profiles, deterministic
 mixed-footprint packing, routing,

@@ -50,6 +50,27 @@ export type Breakpoint = "compact" | "medium" | "wide";
 
 export const BREAKPOINTS: readonly Breakpoint[] = ["compact", "medium", "wide"] as const;
 
+export const DISPLAY_PROFILES = [
+  "phonePortrait",
+  "phoneLandscape",
+  "tabletPortrait",
+  "tabletLandscape",
+  "desktop",
+  "wall",
+] as const;
+
+export type DisplayProfile = typeof DISPLAY_PROFILES[number];
+
+/** Widget-anatomy bucket used when adapting the legacy size set. */
+export const DISPLAY_PROFILE_BUCKETS: Readonly<Record<DisplayProfile, Breakpoint>> = {
+  phonePortrait: "compact",
+  phoneLandscape: "compact",
+  tabletPortrait: "medium",
+  tabletLandscape: "wide",
+  desktop: "wide",
+  wall: "wide",
+};
+
 /** A widget's footprint for each compact, medium, or wide anatomy bucket. */
 export interface WidgetSizeSet {
   compact: WidgetSize;

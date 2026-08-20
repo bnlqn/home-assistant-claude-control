@@ -1,12 +1,16 @@
 import type {
   Breakpoint,
+  DisplayProfile,
   SectionKind,
   WidgetConfig,
   WidgetSize,
   WidgetType,
 } from "../config/schema.js";
-import { SECTION_KINDS } from "../config/schema.js";
+import { DISPLAY_PROFILE_BUCKETS, SECTION_KINDS } from "../config/schema.js";
 import { widgetDefinition } from "../widgets/widget-definition.js";
+
+export { DISPLAY_PROFILES } from "../config/schema.js";
+export type { DisplayProfile } from "../config/schema.js";
 
 /** Complete grid rules selected by a shape-aware display profile. */
 export interface GridMetrics {
@@ -19,24 +23,13 @@ export interface GridMetrics {
   maxWidth: number;
 }
 
-export const DISPLAY_PROFILES = [
-  "phonePortrait",
-  "phoneLandscape",
-  "tabletPortrait",
-  "tabletLandscape",
-  "desktop",
-  "wall",
-] as const;
-
-export type DisplayProfile = typeof DISPLAY_PROFILES[number];
-
 const PROFILE_METRICS: Readonly<Record<DisplayProfile, GridMetrics>> = {
-  phonePortrait: { profile: "phonePortrait", columns: 2, gap: 10, pad: 12, bucket: "compact", minUnit: 96, maxWidth: 640 },
-  phoneLandscape: { profile: "phoneLandscape", columns: 4, gap: 10, pad: 12, bucket: "compact", minUnit: 96, maxWidth: 900 },
-  tabletPortrait: { profile: "tabletPortrait", columns: 4, gap: 14, pad: 20, bucket: "medium", minUnit: 104, maxWidth: 960 },
-  tabletLandscape: { profile: "tabletLandscape", columns: 6, gap: 16, pad: 24, bucket: "wide", minUnit: 112, maxWidth: 1280 },
-  desktop: { profile: "desktop", columns: 8, gap: 16, pad: 28, bucket: "wide", minUnit: 112, maxWidth: 1760 },
-  wall: { profile: "wall", columns: 10, gap: 16, pad: 32, bucket: "wide", minUnit: 120, maxWidth: 1760 },
+  phonePortrait: { profile: "phonePortrait", columns: 2, gap: 10, pad: 12, bucket: DISPLAY_PROFILE_BUCKETS.phonePortrait, minUnit: 96, maxWidth: 640 },
+  phoneLandscape: { profile: "phoneLandscape", columns: 4, gap: 10, pad: 12, bucket: DISPLAY_PROFILE_BUCKETS.phoneLandscape, minUnit: 96, maxWidth: 900 },
+  tabletPortrait: { profile: "tabletPortrait", columns: 4, gap: 14, pad: 20, bucket: DISPLAY_PROFILE_BUCKETS.tabletPortrait, minUnit: 104, maxWidth: 960 },
+  tabletLandscape: { profile: "tabletLandscape", columns: 6, gap: 16, pad: 24, bucket: DISPLAY_PROFILE_BUCKETS.tabletLandscape, minUnit: 112, maxWidth: 1280 },
+  desktop: { profile: "desktop", columns: 8, gap: 16, pad: 28, bucket: DISPLAY_PROFILE_BUCKETS.desktop, minUnit: 112, maxWidth: 1760 },
+  wall: { profile: "wall", columns: 10, gap: 16, pad: 32, bucket: DISPLAY_PROFILE_BUCKETS.wall, minUnit: 120, maxWidth: 1760 },
 };
 
 /** Resolve a named display profile from the panel's available shape. */

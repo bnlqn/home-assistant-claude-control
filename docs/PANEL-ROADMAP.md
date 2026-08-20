@@ -322,6 +322,29 @@ Exit criteria:
 - older fixtures migrate automatically to the current schema;
 - a corrupt document cannot blank the dashboard.
 
+Progress — completed 2026-08-21:
+
+- introduced serializable dashboard document v1 with stable widget instances
+  stored independently from pages and from phone portrait, phone landscape,
+  tablet portrait, tablet landscape, desktop, and wall placements;
+- made per-profile placement the owner of widget visibility, order, and
+  footprint, while preserving the Energy diagram as page-level hero data;
+- added structural, reference, widget-option, entity, supported-footprint,
+  kiosk, and Energy-hero validation, plus implicit-v0 migration from the current
+  TypeScript config and human-readable JSON import/export;
+- added a known-good fallback boundary so malformed JSON, unsupported versions,
+  invalid references, or unsupported sizes cannot replace the active dashboard;
+- wired the panel through v0 migration, v1 validation, active-profile
+  resolution, and a final runtime safety gate, with resolved configs cached per
+  display profile;
+- chose no dashboard persistence yet: local storage remains limited to the
+  device appearance preference; future synchronized household layouts require
+  a supported Home Assistant integration with versioned storage and WebSocket
+  commands, never direct panel writes to `.storage`;
+- passed 168 tests and the full production check, then visually verified Home
+  and Energy across phone, tablet, landscape, desktop, and wall viewports with
+  no horizontal overflow or application errors.
+
 ### Phase 4 — Dashboard customization
 
 Goal: let the user organize a collection of widgets safely.
@@ -394,15 +417,17 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Begin the versioned dashboard document now that the runtime widget/grid boundary
-is correct:
+Keep the Phase 4 editor deferred as requested. The next implementation slice
+should establish the Energy time-range context from Phase 5 without changing
+the hero/widget boundary:
 
-1. define a serializable v1 document that separates widget instances, pages,
-   per-profile placements, and visibility;
-2. adapt the current TypeScript configuration into that document without
-   changing rendered behavior;
-3. add validation, migrations, round-trip fixtures, and a last-valid fallback
-   before introducing persistence or editing.
+1. define one page-level selection contract for current day, past day, week,
+   and month;
+2. put recorder/statistics access behind the existing Home Assistant adapter,
+   with abort/stale-result handling and honest unavailable states;
+3. let the Energy hero and historical widgets consume the same selection while
+   keeping live power entities separate from period totals;
+4. add deterministic fixtures before adding any date-navigation UI.
 
-This keeps the architecture boundary testable while avoiding a simultaneous
-config, detail, and layout rewrite.
+This advances the other explicitly planned capability while preserving the now
+stable document and grid foundations and avoiding premature editor work.

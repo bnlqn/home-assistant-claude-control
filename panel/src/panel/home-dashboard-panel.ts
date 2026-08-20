@@ -3,8 +3,14 @@ import { property, query, state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import { designTokens, sharedA11y } from "../design-system/tokens.js";
 import type { HomeAssistant, PanelInfo, Route } from "../types/hass.js";
-import type { DashboardConfig, ViewConfig } from "../config/schema.js";
+import type { DashboardConfig, DisplayProfile, ViewConfig } from "../config/schema.js";
 import { dashboardConfig } from "../config/dashboard.config.js";
+import {
+  dashboardConfigToDocument,
+  dashboardDocumentToConfig,
+  loadDashboardDocument,
+  type DashboardDocumentV1,
+} from "../config/dashboard-document.js";
 import { validateConfig, type ValidationIssue } from "../config/validation.js";
 import { navigate, pathForView, viewIdFromRoute } from "./router.js";
 import type { HdAppShell, NavView } from "./app-shell.js";
@@ -28,7 +34,7 @@ const APPEARANCE_KEY = "hd-panel-appearance";
 /**
  * Root custom-panel element. Receives the Home Assistant panel contract
  * (`hass`, `narrow`, `panel`, `route`), owns theme resolution, sub-routing,
- * one-time config validation, and the single detail/confirm/toast instances.
+ * versioned document loading, and the single detail/confirm/toast instances.
  * It is intentionally thin — all real UI lives in the shell, grid and widgets.
  */
 @define("home-dashboard-panel")
@@ -48,7 +54,11 @@ export class HomeDashboardPanel extends LitElement {
   @query("hd-toasts") private _toasts?: HdToasts;
 
   private readonly _responsive = new ResponsiveProfileController(this, resolveDisplayProfile);
-  private _validated?: { config: DashboardConfig; issues: ValidationIssue[] };
+  private _document?: { value: DashboardDocumentV1; issues: ValidationIssue[] };
+  private readonly _resolvedConfigs = new Map<
+    DisplayProfile,
+    { config: DashboardConfig; issues: ValidationIssue[] }
+  >();
   private _onPop = () => this._syncViewFromLocation();
   private _mqlDark?: MediaQueryList;
   private _onMqlChange = () => this._applyTheme();
@@ -141,17 +151,38 @@ export class HomeDashboardPanel extends LitElement {
   }
 
   // ---- Config ------------------------------------------------------------
-  private get _cfg(): { config: DashboardConfig; issues: ValidationIssue[] } {
-    if (!this._validated) {
-      const result = validateConfig(dashboardConfig);
-      this._validated = { config: result.sanitized, issues: result.issues };
-      const errors = result.issues.filter((i) => i.level === "error");
+  private get _dashboardDocument(): { value: DashboardDocumentV1; issues: ValidationIssue[] } {
+    if (!this._document) {
+      // The checked-in TypeScript config is the legacy v0 source for now. It is
+      // sanitized first, then immediately adapted into the same serializable
+      // document contract future HA-backed persistence/imports will use.
+      const legacy = validateConfig(dashboardConfig);
+      const fallback = dashboardConfigToDocument(legacy.sanitized);
+      const loaded = loadDashboardDocument(dashboardConfig, fallback);
+      const issues = [...legacy.issues, ...loaded.issues];
+      this._document = { value: loaded.document, issues };
+      const errors = issues.filter((issue) => issue.level === "error");
       if (errors.length) {
         // Loud developer-facing signal; the UI also shows a banner.
-        console.error("[home-dashboard-panel] Invalid dashboard config:", errors);
+        console.error("[home-dashboard-panel] Invalid dashboard document:", errors);
       }
     }
-    return this._validated;
+    return this._document;
+  }
+
+  private get _cfg(): { config: DashboardConfig; issues: ValidationIssue[] } {
+    const profile = this._responsive.profile;
+    const cached = this._resolvedConfigs.get(profile);
+    if (cached) return cached;
+
+    const source = this._dashboardDocument;
+    const runtime = validateConfig(dashboardDocumentToConfig(source.value, profile));
+    const resolved = {
+      config: runtime.sanitized,
+      issues: [...source.issues, ...runtime.issues],
+    };
+    this._resolvedConfigs.set(profile, resolved);
+    return resolved;
   }
 
   private get _base(): string {
