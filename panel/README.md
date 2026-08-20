@@ -175,13 +175,14 @@ Add a `WidgetConfig` to a view's `widgets` array:
 }
 ```
 
-- **`size`** is required per breakpoint. Only sizes the widget type genuinely
+- **`size`** is required per anatomy bucket. Only sizes the widget type genuinely
   supports are allowed; an unsupported size is rejected at startup with a
   message telling you which sizes are valid.
-- Breakpoints resolve against the **panel's own width**, not the screen:
-  `compact ≈ phone`, `medium ≈ tablet`, `wide ≈ desktop / wall display`.
+- The panel resolves `phonePortrait`, `phoneLandscape`, `tabletPortrait`,
+  `tabletLandscape`, `desktop`, or `wall` from its available width and viewport
+  height. Each profile then selects compact, medium, or wide widget anatomy.
 - The same widget may use different approved footprints at different
-  breakpoints.
+  profiles, and sections do not silently flatten those footprints.
 - Widget-specific options are discriminated by `type`. Light, switch, media,
   sensor, weather, presence, camera, and entity-backed action widgets accept no
   option bag; climate, vacuum, entityless action, and the composite Energy
@@ -245,11 +246,10 @@ Composite widgets (`energy`, `action`) take their entities/service via
 - **Optimistic + reconciled.** Sliders update instantly, debounce service calls
   during a drag, send a precise final value on release, and reconcile against
   live state. Failures toast and revert.
-- **Responsive by container.** A deterministic square-unit CSS grid: 2 columns
-  on phones up to 10 on large displays, measured from the panel's own width so
-  it adapts inside a narrowed sidebar or on a wall tablet. Configured widget
-  order is always preserved (no dense packing that would desync keyboard/reader
-  order).
+- **Shape-aware placement.** Six explicit profiles define 2–10 columns, gaps,
+  padding, minimum units, content bounds, navigation mode, and widget anatomy.
+  The resolver uses panel width plus viewport height—not a device name—and
+  configured widget order is always preserved without dense packing.
 - **Light & dark**, defaulting to Home Assistant's `darkMode` (falling back to
   the OS preference), with an in-panel appearance toggle that overrides.
 - **Accessible**: 44 px minimum targets, visible focus, slider/switch/dialog
@@ -289,17 +289,17 @@ Key ideas:
   widget type. There are no parallel legacy size, entity, tag, section, or
   detail-routing tables.
 - **Detail domains stay independent.** Every detail body implements the small
-  `DetailContext` contract in a focused domain module. Registered light,
-  widget detail selects its renderer through the typed definition registry,
+  `DetailContext` contract in a focused domain module. Every registered widget
+  detail selects its renderer through the typed definition registry,
   including entityless Energy composites. History and forecast loading policy
   lives separately in `detail-data.ts`; there is no compatibility domain switch.
 - **Performance.** Each widget re-renders only when a **referenced** entity's
   state object changes by reference (or connectivity/size changes), resolved
   from its definition by the shared HA dependency controller. Keyed async
   loaders deduplicate history/statistics/forecast requests and ignore stale or
-  disconnected results. Responsive containers share one width/profile
-  controller, so the frequently-changing full `hass` object and observer timing
-  do not cause dashboard-wide repaint churn.
+  disconnected results. One dimension/profile controller resolves orientation
+  at the panel boundary and passes that profile through the placement contract,
+  so observer timing does not cause dashboard-wide repaint churn.
 - **Icons** are bundled from `@mdi/js`, tree-shaken to just the ~170 glyphs used
   — no icon font, no CDN. Unknown icons fall back to HA's `<ha-icon>` when
   present, else a neutral dot.
@@ -314,8 +314,8 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 376 kB | 390 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 98 kB | 105 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 379 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 99 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |

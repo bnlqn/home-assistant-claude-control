@@ -23,15 +23,15 @@ import type { DashboardConfig } from "./schema.js";
  *  2. Pick a `type` (see the union in schema.ts / the README catalogue).
  *  3. Point `entity` at a real entity_id (composite types like `energy` and
  *     `action` take their entities via `options` instead).
- *  4. Choose a `size` for each breakpoint. Only sizes the widget type supports
+ *  4. Choose a `size` for each anatomy bucket. Only supported sizes
  *     are allowed — an unsupported size is rejected at startup with a message.
  *
  *  CUSTOM LABEL / ICON:  add `name: "…"` and/or `icon: "mdi:…"` to any widget.
  *  CONFIRMATION:  add `requiresConfirmation: true` to guard a quick action.
  *
  *  Sizes are "1x1" | "2x1" | "1x2" | "2x2"  (WIDTHxHEIGHT in grid units).
- *  Breakpoints resolve against the PANEL's width, not the screen:
- *    compact ≈ phone · medium ≈ tablet · wide ≈ desktop / wall display.
+ *  The panel resolves a shape-aware display profile, then maps that profile to
+ *  compact / medium / wide widget anatomy. Orientation is therefore explicit.
  *
  *  ▶ PLACEHOLDER PATTERN — to hand this to a different home, replace ids with
  *    your own. Anything containing REPLACE_ME renders an explicit

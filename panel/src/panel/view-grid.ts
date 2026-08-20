@@ -4,9 +4,13 @@ import { repeat } from "lit/directives/repeat.js";
 import { define } from "../primitives/registry.js";
 import type { HomeAssistant } from "../types/hass.js";
 import type { ViewConfig } from "../config/schema.js";
-import { gridMetricsForWidth, resolveWidgetSize, sectioniseView } from "./layout.js";
+import {
+  gridMetricsForProfile,
+  resolveWidgetPlacement,
+  sectioniseView,
+  type DisplayProfile,
+} from "./layout.js";
 import { renderWidgetCell } from "./widget-cell.js";
-import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
 import "../primitives/entity-icon.js";
 import "../widgets/widget-frame.js";
 import "../widgets/group.js";
@@ -24,8 +28,7 @@ import "../energy/energy-hero.js";
 export class HdViewGrid extends LitElement {
   @property({ attribute: false }) hass?: HomeAssistant;
   @property({ attribute: false }) view?: ViewConfig;
-
-  private readonly _responsive = new ResponsiveProfileController(this, gridMetricsForWidth);
+  @property({ attribute: false }) displayProfile: DisplayProfile = "desktop";
 
   static styles = css`
     :host {
@@ -37,7 +40,7 @@ export class HdViewGrid extends LitElement {
       gap: 26px;
       padding: var(--pad, 20px);
       box-sizing: border-box;
-      max-width: 1760px;
+      max-width: var(--max-width, 1760px);
       margin: 0 auto;
     }
     .empty {
@@ -68,8 +71,8 @@ export class HdViewGrid extends LitElement {
 
   render() {
     const view = this.view;
-    const m = this._responsive.profile;
-    const stackStyle = `--pad:${m.pad}px`;
+    const m = gridMetricsForProfile(this.displayProfile);
+    const stackStyle = `--pad:${m.pad}px; --max-width:${m.maxWidth}px`;
 
     // A page-level hero (the Energy house) renders full-bleed above the grid.
     const hero = view?.hero
@@ -94,7 +97,7 @@ export class HdViewGrid extends LitElement {
         ${repeat(
           items,
           (w) => w.id,
-          (w) => renderWidgetCell(w, resolveWidgetSize(w, m.bucket), 1, this.hass, "row"),
+          (w) => renderWidgetCell(w, resolveWidgetPlacement(w, this.displayProfile, 1), this.hass),
         )}
       </div>
       ${nothing}

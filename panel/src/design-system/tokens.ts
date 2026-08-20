@@ -79,7 +79,7 @@ export const designTokens = css`
     --space-10: 40px;
     --space-12: 48px;
 
-    /* ---- Grid rhythm (overridden per breakpoint by the grid) ---- */
+    /* ---- Grid rhythm (overridden per display profile by the grid) ---- */
     --grid-gap: 14px;
     --grid-pad: 20px;
     --grid-unit: 104px;

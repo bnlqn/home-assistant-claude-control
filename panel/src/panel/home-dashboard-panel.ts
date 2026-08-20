@@ -19,6 +19,8 @@ import "../primitives/toast.js";
 import "../primitives/misc.js";
 import type { HdConfirm } from "../primitives/confirm-dialog.js";
 import type { HdToasts } from "../primitives/toast.js";
+import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
+import { resolveDisplayProfile } from "./layout.js";
 
 type Appearance = "auto" | "light" | "dark";
 const APPEARANCE_KEY = "hd-panel-appearance";
@@ -45,6 +47,7 @@ export class HomeDashboardPanel extends LitElement {
   @query("hd-confirm") private _confirm?: HdConfirm;
   @query("hd-toasts") private _toasts?: HdToasts;
 
+  private readonly _responsive = new ResponsiveProfileController(this, resolveDisplayProfile);
   private _validated?: { config: DashboardConfig; issues: ValidationIssue[] };
   private _onPop = () => this._syncViewFromLocation();
   private _mqlDark?: MediaQueryList;
@@ -235,6 +238,7 @@ export class HomeDashboardPanel extends LitElement {
 
     return html`
       <hd-app-shell
+        .displayProfile=${this._responsive.profile}
         .views=${this._navViews}
         .currentViewId=${view?.id ?? ""}
         .productTitle=${this._cfg.config.title ?? "Home"}
@@ -255,7 +259,11 @@ export class HomeDashboardPanel extends LitElement {
               </ul>
             </div>`
           : nothing}
-        <hd-view-grid .hass=${this.hass} .view=${view}></hd-view-grid>
+        <hd-view-grid
+          .hass=${this.hass}
+          .view=${view}
+          .displayProfile=${this._responsive.profile}
+        ></hd-view-grid>
       </hd-app-shell>
 
       <hd-detail

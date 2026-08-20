@@ -1,13 +1,10 @@
 import { html } from "lit";
 import { html as staticHtml, unsafeStatic } from "lit/static-html.js";
 import type { HomeAssistant } from "../types/hass.js";
-import type { WidgetConfig, WidgetSize } from "../config/schema.js";
+import type { WidgetConfig } from "../config/schema.js";
 import { widgetTag } from "../widgets/widget-registry.js";
-import { spanForSize } from "./layout.js";
+import type { WidgetPlacement } from "./layout.js";
 import "../widgets/widget-frame.js";
-
-/** How a widget's tiles should render inside its container (see widget-frame). */
-export type TileLayout = "row" | "tile" | "value";
 
 /**
  * Render one widget as a grid cell: a dynamically-tagged widget element with
@@ -21,13 +18,11 @@ export type TileLayout = "row" | "tile" | "value";
  */
 export function renderWidgetCell(
   widget: WidgetConfig,
-  size: WidgetSize,
-  columns: number,
+  placement: WidgetPlacement,
   hass: HomeAssistant | undefined,
-  layout: TileLayout = "row",
 ) {
   try {
-    const { colSpan, rowSpan } = spanForSize(size, columns);
+    const { colSpan, rowSpan, size, layout, profile } = placement;
     const tag = unsafeStatic(widgetTag(widget.type));
     const cellStyle = `grid-column: span ${colSpan}; grid-row: span ${rowSpan};`;
     return staticHtml`<${tag}
@@ -37,22 +32,17 @@ export function renderWidgetCell(
       .config=${widget}
       .currentSize=${size}
       .layout=${layout}
+      .displayProfile=${profile}
     ></${tag}>`;
   } catch (err) {
     console.error(`[widget-cell] widget "${widget?.id ?? widget?.type}" failed to render:`, err);
-    return errorCell(widget, size, columns);
+    return errorCell(widget, placement);
   }
 }
 
 /** Card-styled fallback for a widget the cell couldn't even construct. */
-export function errorCell(widget: WidgetConfig, size: WidgetSize, columns: number) {
-  let colSpan = 1;
-  let rowSpan = 1;
-  try {
-    ({ colSpan, rowSpan } = spanForSize(size, columns));
-  } catch {
-    /* keep the 1×1 fallback */
-  }
+export function errorCell(widget: WidgetConfig, placement: WidgetPlacement) {
+  const { colSpan, rowSpan, size } = placement;
   const cellStyle = `grid-column: span ${colSpan}; grid-row: span ${rowSpan};`;
   const name = widget?.name || widget?.entity || "Widget";
   return html`<hd-widget-frame

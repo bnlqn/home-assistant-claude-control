@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
-  breakoutSizeFor,
-  gridMetricsForWidth,
+  gridMetricsForProfile,
   layoutForVariant,
+  resolveDisplayProfile,
   resolveWidgetSize,
+  resolveWidgetPlacement,
   sectionColumns,
   sectionForWidgetType,
   sectioniseView,
@@ -28,13 +29,24 @@ const w = (id: string, type: WidgetConfig["type"], entity?: string): WidgetConfi
 }) as WidgetConfig;
 const opts = (group: WidgetConfig): GroupOptions => group.type === "group" ? group.options : {};
 
-describe("responsive grid metrics", () => {
-  it("chooses the right column count / bucket per width", () => {
-    expect(gridMetricsForWidth(375)).toMatchObject({ columns: 2, bucket: "compact" });
-    expect(gridMetricsForWidth(768)).toMatchObject({ columns: 4, bucket: "medium" });
-    expect(gridMetricsForWidth(1000)).toMatchObject({ columns: 6, bucket: "wide" });
-    expect(gridMetricsForWidth(1440)).toMatchObject({ columns: 8, bucket: "wide" });
-    expect(gridMetricsForWidth(1920)).toMatchObject({ columns: 10, bucket: "wide" });
+describe("display profiles", () => {
+  it("resolves the full supported viewport matrix from shape", () => {
+    expect(resolveDisplayProfile(320, 568)).toBe("phonePortrait");
+    expect(resolveDisplayProfile(390, 844)).toBe("phonePortrait");
+    expect(resolveDisplayProfile(844, 390)).toBe("phoneLandscape");
+    expect(resolveDisplayProfile(768, 1024)).toBe("tabletPortrait");
+    expect(resolveDisplayProfile(1024, 768)).toBe("tabletLandscape");
+    expect(resolveDisplayProfile(1440, 900)).toBe("desktop");
+    expect(resolveDisplayProfile(1920, 1080)).toBe("wall");
+  });
+
+  it("defines intentional grid density per profile", () => {
+    expect(gridMetricsForProfile("phonePortrait")).toMatchObject({ columns: 2, bucket: "compact" });
+    expect(gridMetricsForProfile("phoneLandscape")).toMatchObject({ columns: 4, bucket: "compact" });
+    expect(gridMetricsForProfile("tabletPortrait")).toMatchObject({ columns: 4, bucket: "medium" });
+    expect(gridMetricsForProfile("tabletLandscape")).toMatchObject({ columns: 6, bucket: "wide" });
+    expect(gridMetricsForProfile("desktop")).toMatchObject({ columns: 8, bucket: "wide" });
+    expect(gridMetricsForProfile("wall")).toMatchObject({ columns: 10, bucket: "wide" });
   });
 });
 
@@ -46,35 +58,21 @@ describe("responsive size selection", () => {
   });
 });
 
-describe("hero break-out from uniform tile grids", () => {
-  const branded: WidgetConfig = {
-    id: "v",
-    type: "vacuum",
-    entity: "vacuum.x",
-    size: { compact: "1x1", medium: "2x2", wide: "2x2" },
-    options: { brand: "roborock" },
-  };
-  it("breaks a branded widget out to its footprint above 1×1", () => {
-    expect(breakoutSizeFor(branded, "medium")).toBe("2x2");
-    expect(breakoutSizeFor(branded, "wide")).toBe("2x2");
+describe("shared widget placement", () => {
+  it("keeps configured footprints authoritative across section variants", () => {
+    const placement = resolveWidgetPlacement(widget, "tabletLandscape", 6, "devices");
+    expect(placement).toMatchObject({
+      profile: "tabletLandscape",
+      size: "2x2",
+      colSpan: 2,
+      rowSpan: 2,
+      layout: "tile",
+    });
   });
-  it("stays a plain tile at 1×1 (narrow) and when not opted in", () => {
-    expect(breakoutSizeFor(branded, "compact")).toBeNull();
-    expect(breakoutSizeFor(widget, "wide")).toBeNull(); // no brand/hero flag
-  });
-  it("also honors an explicit options.hero flag", () => {
-    const hero: WidgetConfig = { ...branded, options: { hero: true } };
-    expect(breakoutSizeFor(hero, "wide")).toBe("2x2");
-  });
-  it("preserves typed solar-charging brand breakouts", () => {
-    const tesla: WidgetConfig = {
-      id: "solar-charge",
-      type: "solarcharging",
-      size: { compact: "1x1", medium: "2x2", wide: "2x2" },
-      options: { brand: "tesla", master: "input_boolean.solar_charging" },
-    };
-    expect(breakoutSizeFor(tesla, "compact")).toBeNull();
-    expect(breakoutSizeFor(tesla, "medium")).toBe("2x2");
+
+  it("clamps a declared footprint only when the active grid is narrower", () => {
+    const placement = resolveWidgetPlacement(widget, "desktop", 1);
+    expect(placement).toMatchObject({ size: "2x2", colSpan: 1, rowSpan: 2, layout: "row" });
   });
 });
 
@@ -91,7 +89,7 @@ describe("span parsing", () => {
 
 describe("square unit", () => {
   it("keeps a 1×1 cell reasonably square and never below the floor", () => {
-    const m = gridMetricsForWidth(390);
+    const m = gridMetricsForProfile("phonePortrait");
     const unit = squareUnit(390, m);
     expect(unit).toBeGreaterThanOrEqual(96);
     expect(unit).toBeLessThan(390);
@@ -119,25 +117,25 @@ describe("section classification", () => {
   });
 });
 
-describe("section columns reflow to the container's own width", () => {
-  it("devices go 2 → 3 → 4 → 6 → 8 without cramped narrow-phone cells", () => {
-    expect(sectionColumns("devices", 320)).toBe(2);
-    expect(sectionColumns("devices", 353)).toBe(2);
-    expect(sectionColumns("devices", 354)).toBe(3);
-    expect(sectionColumns("devices", 375)).toBe(3);
-    expect(sectionColumns("devices", 768)).toBe(4);
-    expect(sectionColumns("devices", 1100)).toBe(6);
-    expect(sectionColumns("devices", 1600)).toBe(8);
+describe("section columns follow the shared display profile", () => {
+  it("devices gain density intentionally across profiles", () => {
+    expect(sectionColumns("devices", "phonePortrait")).toBe(2);
+    expect(sectionColumns("devices", "phoneLandscape")).toBe(4);
+    expect(sectionColumns("devices", "tabletPortrait")).toBe(4);
+    expect(sectionColumns("devices", "tabletLandscape")).toBe(6);
+    expect(sectionColumns("devices", "desktop")).toBe(8);
+    expect(sectionColumns("devices", "wall")).toBe(10);
   });
-  it("sensors go 2 → 3 → 4 → 6", () => {
-    expect(sectionColumns("sensors", 375)).toBe(2);
-    expect(sectionColumns("sensors", 768)).toBe(3);
-    expect(sectionColumns("sensors", 1100)).toBe(4);
-    expect(sectionColumns("sensors", 1600)).toBe(6);
+  it("distinguishes phone landscape from tablet portrait", () => {
+    expect(sectionColumns("sensors", "phonePortrait")).toBe(2);
+    expect(sectionColumns("sensors", "phoneLandscape")).toBe(4);
+    expect(sectionColumns("sensors", "tabletPortrait")).toBe(3);
+    expect(sectionColumns("sensors", "tabletLandscape")).toBe(4);
   });
-  it("media is a single hero column on a phone, two when wide", () => {
-    expect(sectionColumns("media", 375)).toBe(1);
-    expect(sectionColumns("media", 1200)).toBe(2);
+  it("media uses one phone-portrait column and two elsewhere", () => {
+    expect(sectionColumns("media", "phonePortrait")).toBe(1);
+    expect(sectionColumns("media", "phoneLandscape")).toBe(2);
+    expect(sectionColumns("media", "desktop")).toBe(2);
   });
 });
 

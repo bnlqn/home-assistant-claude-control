@@ -276,6 +276,21 @@ Exit criteria:
 - the Energy hero remains outside the grid and its lower widgets use exactly the
   same placement engine as other pages.
 
+Progress — 2026-08-20:
+
+- introduced explicit phone portrait, phone landscape, tablet portrait, tablet
+  landscape, desktop, and wall profiles resolved from panel width and viewport
+  height, with per-profile columns, gap, padding, minimum unit, content bound,
+  navigation mode, and widget-anatomy bucket;
+- added one placement resolver that preserves configured footprints across
+  section variants and passes the active profile, resolved footprint, spans,
+  and internal layout to every widget; removed hero/brand-only breakout rules;
+- verified the complete 320×568, 390×844, 844×390, 768×1024, 1024×768,
+  1440×900, and 1920×1080 matrix without horizontal overflow, plus the Energy
+  hero boundary at phone and tablet-landscape sizes;
+- still to do in Phase 2: replace nested section grids with structural headings
+  in the shared page grid and add deterministic packing coverage.
+
 ### Phase 3 — Versioned dashboard document
 
 Goal: create the data foundation needed by customization without building the
@@ -371,13 +386,13 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Begin the shared placement engine now that the Phase 1 contract is complete:
+Continue the shared grid now that profile and footprint resolution are unified:
 
-1. introduce one placement resolver for phone, tablet portrait, tablet
-   landscape, desktop, and wall-display profiles;
-2. make section grouping structural within that shared grid while keeping the
+1. make section grouping structural within the page grid while keeping the
    Energy hero outside it;
-3. verify the full viewport matrix before removing the current section grids.
+2. add deterministic row-order packing tests for mixed footprints;
+3. rerun the full viewport matrix, then delete the temporary nested section
+   column rules and `hd-group` layout responsibility.
 
 This keeps the architecture boundary testable while avoiding a simultaneous
 config, detail, and layout rewrite.

@@ -8,7 +8,7 @@ afterEach(() => {
 });
 
 describe("ResponsiveProfileController", () => {
-  it("defers width changes and resolves the corresponding profile", () => {
+  it("defers dimension changes and resolves the corresponding profile", () => {
     let observerCallback: ResizeObserverCallback | undefined;
     let frameCallback: FrameRequestCallback | undefined;
     let registeredController: ReactiveController | undefined;
@@ -35,18 +35,23 @@ describe("ResponsiveProfileController", () => {
       frameCallback = callback;
       return 1;
     });
+    vi.stubGlobal("innerHeight", 568);
 
-    const controller = new ResponsiveProfileController(host, (width) => width < 600 ? "compact" : "expanded");
+    const controller = new ResponsiveProfileController(
+      host,
+      (width, height) => width < height ? "portrait" : "landscape",
+    );
     expect(registeredController).toBe(controller);
     controller.hostConnected();
-    expect(controller.profile).toBe("compact");
+    expect(controller.profile).toBe("portrait");
     observerCallback?.([{ contentRect: { width: 768 } } as ResizeObserverEntry], {} as ResizeObserver);
 
     expect(controller.width).toBe(320);
     expect(requestUpdate).not.toHaveBeenCalled();
     frameCallback?.(0);
     expect(controller.width).toBe(768);
-    expect(controller.profile).toBe("expanded");
+    expect(controller.height).toBe(568);
+    expect(controller.profile).toBe("landscape");
     expect(requestUpdate).toHaveBeenCalledOnce();
   });
 });

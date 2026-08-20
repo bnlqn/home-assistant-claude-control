@@ -2,7 +2,7 @@ import { LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import type { ViewConfig } from "../config/schema.js";
-import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
+import type { DisplayProfile } from "./layout.js";
 import "../primitives/entity-icon.js";
 import "../primitives/icon-button.js";
 import "../primitives/surface.js";
@@ -16,8 +16,12 @@ export interface NavView {
 
 type ShellMode = "sidebar" | "rail" | "compact";
 
-const shellModeForWidth = (width: number): ShellMode =>
-  width >= 1000 ? "sidebar" : width >= 720 ? "rail" : "compact";
+const shellModeForProfile = (profile: DisplayProfile): ShellMode =>
+  profile === "phonePortrait" || profile === "phoneLandscape"
+    ? "compact"
+    : profile === "tabletPortrait" || profile === "tabletLandscape"
+      ? "rail"
+      : "sidebar";
 
 /**
  * The application shell: navigation, the current view title, connectivity, and
@@ -36,9 +40,9 @@ export class HdAppShell extends LitElement {
   @property({ type: String }) subtitle = "";
   @property({ type: Boolean }) connected = true;
   @property({ type: String }) appearance: "auto" | "light" | "dark" = "auto";
+  @property({ attribute: false }) displayProfile: DisplayProfile = "desktop";
 
   @state() private _switcherOpen = false;
-  private readonly _responsive = new ResponsiveProfileController(this, shellModeForWidth);
 
   static styles = css`
     :host {
@@ -299,7 +303,7 @@ export class HdAppShell extends LitElement {
   `;
 
   private get _mode(): ShellMode {
-    return this._responsive.profile;
+    return shellModeForProfile(this.displayProfile);
   }
 
   private _navigate(id: string) {

@@ -9,49 +9,56 @@ import type {
 import { SECTION_KINDS } from "../config/schema.js";
 import { widgetDefinition } from "../widgets/widget-definition.js";
 
-/** Grid metrics derived purely from the panel's measured width. */
+/** Complete grid rules selected by a shape-aware display profile. */
 export interface GridMetrics {
+  profile: DisplayProfile;
   columns: number;
   gap: number;
   pad: number;
   bucket: Breakpoint;
+  minUnit: number;
+  maxWidth: number;
 }
 
-/**
- * Responsive grid metrics. Breakpoints respond to the PANEL width (container),
- * not the screen — so a sidebar-narrowed panel still lays out correctly.
- */
-export function gridMetricsForWidth(width: number): GridMetrics {
+export const DISPLAY_PROFILES = [
+  "phonePortrait",
+  "phoneLandscape",
+  "tabletPortrait",
+  "tabletLandscape",
+  "desktop",
+  "wall",
+] as const;
+
+export type DisplayProfile = typeof DISPLAY_PROFILES[number];
+
+const PROFILE_METRICS: Readonly<Record<DisplayProfile, GridMetrics>> = {
+  phonePortrait: { profile: "phonePortrait", columns: 2, gap: 10, pad: 12, bucket: "compact", minUnit: 96, maxWidth: 640 },
+  phoneLandscape: { profile: "phoneLandscape", columns: 4, gap: 10, pad: 12, bucket: "compact", minUnit: 96, maxWidth: 900 },
+  tabletPortrait: { profile: "tabletPortrait", columns: 4, gap: 14, pad: 20, bucket: "medium", minUnit: 104, maxWidth: 960 },
+  tabletLandscape: { profile: "tabletLandscape", columns: 6, gap: 16, pad: 24, bucket: "wide", minUnit: 112, maxWidth: 1280 },
+  desktop: { profile: "desktop", columns: 8, gap: 16, pad: 28, bucket: "wide", minUnit: 112, maxWidth: 1760 },
+  wall: { profile: "wall", columns: 10, gap: 16, pad: 32, bucket: "wide", minUnit: 120, maxWidth: 1760 },
+};
+
+/** Resolve a named display profile from the panel's available shape. */
+export function resolveDisplayProfile(width: number, height: number): DisplayProfile {
   const w = width || 1024;
-  if (w < 600) return { columns: 2, gap: 10, pad: 12, bucket: "compact" };
-  if (w < 900) return { columns: 4, gap: 14, pad: 20, bucket: "medium" };
-  if (w < 1200) return { columns: 6, gap: 16, pad: 24, bucket: "wide" };
-  if (w < 1600) return { columns: 8, gap: 16, pad: 28, bucket: "wide" };
-  return { columns: 10, gap: 16, pad: 32, bucket: "wide" };
+  const h = height || 768;
+  if (w >= 1800) return "wall";
+  if (w >= 1200) return "desktop";
+  if (w < 600) return w > h ? "phoneLandscape" : "phonePortrait";
+  if (w < 900) return w > h ? "phoneLandscape" : "tabletPortrait";
+  return w > h ? "tabletLandscape" : "tabletPortrait";
+}
+
+/** Grid rules for an already resolved display profile. */
+export function gridMetricsForProfile(profile: DisplayProfile): GridMetrics {
+  return PROFILE_METRICS[profile];
 }
 
 /** The widget footprint for the given breakpoint, with safe fallbacks. */
 export function resolveWidgetSize(widget: WidgetConfig, bucket: Breakpoint): WidgetSize {
   return widget.size?.[bucket] ?? widget.size?.medium ?? "1x1";
-}
-
-/**
- * Whether a child in a uniform tile section should BREAK OUT to its declared
- * footprint instead of the section's 1×1 square. A widget opts in by bringing
- * its own full-bleed surface — flagged via `options.hero` or any `options.brand`
- * (e.g. the Roborock branded hero). Returns the footprint to use, or null to
- * stay a normal square tile. Only sizes larger than 1×1 break out; at narrow
- * breakpoints the widget collapses back to a plain tile.
- */
-export function breakoutSizeFor(widget: WidgetConfig, bucket: Breakpoint): WidgetSize | null {
-  const options: unknown = widget.options;
-  const optsIn = !!options && typeof options === "object" && !Array.isArray(options) && (
-    ("hero" in options && options.hero === true) ||
-    ("brand" in options && typeof options.brand === "string")
-  );
-  if (!optsIn) return null;
-  const size = resolveWidgetSize(widget, bucket);
-  return size === "1x1" ? null : size;
 }
 
 /** Parse "WxH" into column/row spans, clamped so width never exceeds the grid. */
@@ -63,7 +70,7 @@ export function spanForSize(size: WidgetSize, columns: number): { colSpan: numbe
 /** Square unit size (px) so a 1×1 cell is ≈ square at the current width. */
 export function squareUnit(width: number, m: GridMetrics): number {
   const usable = (width || 1024) - m.pad * 2 - m.gap * (m.columns - 1);
-  return Math.max(96, Math.floor(usable / m.columns));
+  return Math.max(m.minUnit, Math.floor(usable / m.columns));
 }
 
 // ---------------------------------------------------------------------------
@@ -97,32 +104,52 @@ export function layoutForVariant(variant: SectionKind): "row" | "tile" | "value"
   return "row"; // media / energy / tiles own their own bodies
 }
 
+export interface WidgetPlacement {
+  profile: DisplayProfile;
+  size: WidgetSize;
+  columns: number;
+  colSpan: number;
+  rowSpan: number;
+  layout: "row" | "tile" | "value";
+}
+
 /**
- * A container's internal column count, keyed to the container's OWN measured
- * width (so it reflows independently of the outer grid — identical tiles, more
- * columns as it gets wider).
+ * Resolve the complete placement contract passed to a widget. Configured
+ * footprints remain authoritative in every section; only the active profile
+ * chooses which declared footprint is used.
  */
-export function sectionColumns(variant: SectionKind, width: number): number {
-  const w = width || 1024;
-  switch (variant) {
-    case "media":
-      return w < 900 ? 1 : 2;
-    case "devices":
-      // The section is measured after the page's compact padding is applied.
-      // Below 354px, three columns would leave each device tile too narrow for
-      // its icon, accessory and two-line title, so narrow phones fall back to
-      // two columns. A 390px viewport still has room for the intended three.
-      return w < 354 ? 2 : w < 600 ? 3 : w < 900 ? 4 : w < 1200 ? 6 : 8;
-    case "sensors":
-      return w < 600 ? 2 : w < 900 ? 3 : w < 1200 ? 4 : 6;
-    case "energy":
-      // Energy widgets are wide (2×1 bars, 2×2 diagrams). Keep ≥2 columns so a
-      // 2-wide widget fills the row without becoming a full-width square.
-      return w < 900 ? 2 : 4;
-    case "tiles":
-      // Homey status tiles: two-up on a phone, one row across on a tablet.
-      return w < 640 ? 2 : 3;
-  }
+export function resolveWidgetPlacement(
+  widget: WidgetConfig,
+  profile: DisplayProfile,
+  columns: number,
+  section?: SectionKind,
+): WidgetPlacement {
+  const size = resolveWidgetSize(widget, gridMetricsForProfile(profile).bucket);
+  const { colSpan, rowSpan } = spanForSize(size, columns);
+  return {
+    profile,
+    size,
+    columns,
+    colSpan,
+    rowSpan,
+    layout: section ? layoutForVariant(section) : "row",
+  };
+}
+
+/**
+ * Temporary section-grid column rules keyed to the shared display profile.
+ * Phase 2's structural-section slice will fold these into the page grid.
+ */
+const SECTION_COLUMNS: Readonly<Record<SectionKind, Readonly<Record<DisplayProfile, number>>>> = {
+  media: { phonePortrait: 1, phoneLandscape: 2, tabletPortrait: 2, tabletLandscape: 2, desktop: 2, wall: 2 },
+  devices: { phonePortrait: 2, phoneLandscape: 4, tabletPortrait: 4, tabletLandscape: 6, desktop: 8, wall: 10 },
+  sensors: { phonePortrait: 2, phoneLandscape: 4, tabletPortrait: 3, tabletLandscape: 4, desktop: 6, wall: 8 },
+  energy: { phonePortrait: 2, phoneLandscape: 4, tabletPortrait: 4, tabletLandscape: 4, desktop: 4, wall: 6 },
+  tiles: { phonePortrait: 2, phoneLandscape: 3, tabletPortrait: 3, tabletLandscape: 3, desktop: 3, wall: 3 },
+};
+
+export function sectionColumns(variant: SectionKind, profile: DisplayProfile): number {
+  return SECTION_COLUMNS[variant][profile];
 }
 
 const GROUP_SIZE: WidgetConfig["size"] = { compact: "4x2", medium: "4x2", wide: "4x2" };

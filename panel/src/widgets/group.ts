@@ -5,23 +5,21 @@ import { define } from "../primitives/registry.js";
 import type { HomeAssistant } from "../types/hass.js";
 import type { GroupOptions, SectionKind, WidgetConfig } from "../config/schema.js";
 import {
-  breakoutSizeFor,
-  gridMetricsForWidth,
-  layoutForVariant,
-  resolveWidgetSize,
+  gridMetricsForProfile,
+  resolveWidgetPlacement,
   sectionColumns,
   sectionForWidgetType,
   squareUnit,
+  type DisplayProfile,
 } from "../panel/layout.js";
 import { renderWidgetCell } from "../panel/widget-cell.js";
 import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
 
 /**
  * A section container. Renders a heading plus its own internal responsive grid
- * of child widgets. Crucially, the grid reflows against the CONTAINER's own
- * measured width (through the shared element-width controller), so a section
- * renders with identical tiles everywhere and simply gains columns as it gets
- * wider — the density logic lives here, not in the outer grid.
+ * of child widgets. The panel's shared display profile determines its columns
+ * and widget footprints; local width is used only to calculate square row
+ * units while sections remain nested during the Phase 2 migration.
  *
  * It is not a card: the section sits transparently on the canvas and each child
  * tile is the card, matching the Homey layout. Child widgets keep their own
@@ -34,8 +32,9 @@ export class HdGroup extends LitElement {
   /** Present for interface parity with widgets; a container ignores it. */
   @property({ type: String }) currentSize = "4x2";
   @property({ type: String }) layout: "row" | "tile" | "value" = "row";
+  @property({ attribute: false }) displayProfile: DisplayProfile = "desktop";
 
-  private readonly _responsive = new ResponsiveProfileController(this, gridMetricsForWidth);
+  private readonly _responsive = new ResponsiveProfileController(this, (width) => width);
 
   static styles = css`
     :host {
@@ -83,16 +82,10 @@ export class HdGroup extends LitElement {
 
     const width = this._responsive.width;
     const variant = this._variant;
-    const cols = sectionColumns(variant, width);
-    const gap = 12;
-    const bucket = this._responsive.profile.bucket;
-    const cellLayout = layoutForVariant(variant);
+    const metrics = gridMetricsForProfile(this.displayProfile);
+    const cols = sectionColumns(variant, this.displayProfile);
+    const gap = metrics.gap;
     const label = this._opts.label;
-
-    // Tile/value sections are uniform glanceable grids (like the mock) — every
-    // child is 1×1 and its controls live in the detail surface. Media and energy
-    // keep their configured footprints (hero art tile, wide diagrams).
-    const uniform = cellLayout !== "row";
 
     // Row height per variant: value tiles are short wide rows, the media hero a
     // fixed-height bar, and device/energy cells square (1×1 reads as a square).
@@ -103,7 +96,7 @@ export class HdGroup extends LitElement {
           ? 116
           : variant === "tiles"
             ? 100 // wide status cards (icon + name + "value • status"); name may wrap
-            : squareUnit(width || 1024, { columns: cols, gap, pad: 0, bucket });
+            : squareUnit(width || 1024, { ...metrics, columns: cols, pad: 0 });
 
     const gridStyle = `--cols:${cols}; --gap:${gap}px; --unit:${unit}px`;
 
@@ -114,19 +107,11 @@ export class HdGroup extends LitElement {
           ${repeat(
             children,
             (c) => c.id,
-            (c) => {
-              // A uniform tile section renders every child as a 1×1 square —
-              // unless the child brings its own full-bleed hero surface, which
-              // breaks out to its declared footprint with a body-owning layout.
-              const breakout = uniform ? breakoutSizeFor(c, bucket) : null;
-              return renderWidgetCell(
-                c,
-                breakout ?? (uniform ? "1x1" : resolveWidgetSize(c, bucket)),
-                cols,
-                this.hass,
-                breakout ? "row" : cellLayout,
-              );
-            },
+            (c) => renderWidgetCell(
+              c,
+              resolveWidgetPlacement(c, this.displayProfile, cols, variant),
+              this.hass,
+            ),
           )}
         </div>
       </section>

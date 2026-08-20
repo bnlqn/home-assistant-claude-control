@@ -45,12 +45,12 @@ export type WidgetSize = "1x1" | "2x1" | "1x2" | "2x2" | "3x3" | "4x2";
 
 export const ALL_SIZES: readonly WidgetSize[] = ["1x1", "2x1", "1x2", "2x2", "3x3", "4x2"] as const;
 
-/** Responsive breakpoint buckets, resolved against the panel's own width. */
+/** Widget-anatomy buckets selected by the active shape-aware display profile. */
 export type Breakpoint = "compact" | "medium" | "wide";
 
 export const BREAKPOINTS: readonly Breakpoint[] = ["compact", "medium", "wide"] as const;
 
-/** A widget's footprint at each breakpoint. */
+/** A widget's footprint for each compact, medium, or wide anatomy bucket. */
 export interface WidgetSizeSet {
   compact: WidgetSize;
   medium: WidgetSize;

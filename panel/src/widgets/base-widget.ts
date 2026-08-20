@@ -9,6 +9,7 @@ import { requestConfirm, toast } from "../primitives/feedback.js";
 import "./widget-frame.js";
 import { HassDependencyController } from "../controllers/hass-dependency-controller.js";
 import { widgetDependencies } from "./widget-definition.js";
+import type { DisplayProfile } from "../panel/layout.js";
 
 /**
  * Base class for every widget. Provides:
@@ -30,6 +31,8 @@ export abstract class EntityWidget extends LitElement {
    * (the default header card). Widgets forward this into `hd-widget-frame`.
    */
   @property({ type: String }) layout: "row" | "tile" | "value" = "row";
+  /** Shape-aware profile resolved once by the panel and shared with all widgets. */
+  @property({ attribute: false }) displayProfile: DisplayProfile = "desktop";
 
   @state() protected actionState: ActionState = "idle";
   private _resetTimer = 0;
