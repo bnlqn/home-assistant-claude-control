@@ -1,6 +1,5 @@
 import type {
   Breakpoint,
-  GroupOptions,
   SectionKind,
   WidgetConfig,
   WidgetSize,
@@ -74,9 +73,9 @@ export function squareUnit(width: number, m: GridMetrics): number {
 }
 
 // ---------------------------------------------------------------------------
-// Sections: a view's flat widget list is organised into domain "sections",
-// each rendered by a self-contained `group` container (see `widgets/group.ts`).
-// These functions are pure so the grouping is fully unit-testable.
+// Sections and packing: a flat widget list becomes structural headings plus
+// explicitly positioned cells in one page grid. These functions stay pure so
+// placement is deterministic and fully unit-testable.
 // ---------------------------------------------------------------------------
 
 /** Fixed render order of auto-collected sections. */
@@ -88,8 +87,6 @@ export const SECTION_LABELS: Record<SectionKind, string> = {
   devices: "Devices",
   sensors: "Sensors",
   energy: "Energy",
-  // Hand-composed only (never auto-collected); heading comes from GroupOptions.
-  tiles: "",
 };
 
 /** The section a widget type auto-collects into. */
@@ -136,61 +133,162 @@ export function resolveWidgetPlacement(
   };
 }
 
-/**
- * Temporary section-grid column rules keyed to the shared display profile.
- * Phase 2's structural-section slice will fold these into the page grid.
- */
-const SECTION_COLUMNS: Readonly<Record<SectionKind, Readonly<Record<DisplayProfile, number>>>> = {
-  media: { phonePortrait: 1, phoneLandscape: 2, tabletPortrait: 2, tabletLandscape: 2, desktop: 2, wall: 2 },
-  devices: { phonePortrait: 2, phoneLandscape: 4, tabletPortrait: 4, tabletLandscape: 6, desktop: 8, wall: 10 },
-  sensors: { phonePortrait: 2, phoneLandscape: 4, tabletPortrait: 3, tabletLandscape: 4, desktop: 6, wall: 8 },
-  energy: { phonePortrait: 2, phoneLandscape: 4, tabletPortrait: 4, tabletLandscape: 4, desktop: 4, wall: 6 },
-  tiles: { phonePortrait: 2, phoneLandscape: 3, tabletPortrait: 3, tabletLandscape: 3, desktop: 3, wall: 3 },
-};
-
-export function sectionColumns(variant: SectionKind, profile: DisplayProfile): number {
-  return SECTION_COLUMNS[variant][profile];
+export interface ViewSection {
+  id: string;
+  kind: SectionKind;
+  label: string;
+  widgets: WidgetConfig[];
 }
 
-const GROUP_SIZE: WidgetConfig["size"] = { compact: "4x2", medium: "4x2", wide: "4x2" };
-
-function syntheticGroup(kind: SectionKind, children: WidgetConfig[]): WidgetConfig {
-  const options: GroupOptions = { label: SECTION_LABELS[kind], variant: kind, children };
-  return {
-    id: `__section_${kind}`,
-    type: "group",
-    size: GROUP_SIZE,
-    options,
-  };
-}
-
-/**
- * Transform a view's flat widget list into the list of top-level renderables.
- *
- * Default (no explicit `group` in the view): widgets are auto-partitioned by
- * domain into synthetic `group` containers, emitted in `SECTION_ORDER`, with
- * configured order preserved WITHIN each section and empty sections omitted.
- *
- * Override: if the view already contains any explicit `group` widget, the list
- * is returned unchanged — the author is hand-composing sections, so we don't
- * re-collect. (Auto XOR manual, per view.)
- */
-export function sectioniseView(widgets: WidgetConfig[]): WidgetConfig[] {
-  const list = widgets ?? [];
-  if (list.some((w) => w.type === "group")) return list;
-
+/** Partition a flat widget collection into ordered structural page sections. */
+export function structureView(widgets: WidgetConfig[]): ViewSection[] {
   const buckets = new Map<SectionKind, WidgetConfig[]>();
-  for (const w of list) {
+  for (const w of widgets ?? []) {
     const kind = sectionForWidgetType(w.type);
     const bucket = buckets.get(kind) ?? [];
     bucket.push(w);
     buckets.set(kind, bucket);
   }
 
-  const out: WidgetConfig[] = [];
-  for (const kind of SECTION_ORDER) {
+  return SECTION_ORDER.flatMap((kind) => {
     const members = buckets.get(kind);
-    if (members && members.length) out.push(syntheticGroup(kind, members));
+    return members?.length
+      ? [{ id: `section-${kind}`, kind, label: SECTION_LABELS[kind], widgets: members }]
+      : [];
+  });
+}
+
+export interface PackedHeading {
+  kind: "heading";
+  id: string;
+  label: string;
+  section: SectionKind;
+  rowStart: number;
+}
+
+export interface PackedWidget {
+  kind: "widget";
+  id: string;
+  widget: WidgetConfig;
+  section: SectionKind;
+  placement: WidgetPlacement;
+  columnStart: number;
+  rowStart: number;
+}
+
+export type PackedGridItem = PackedHeading | PackedWidget;
+
+export interface PackedGrid {
+  columns: number;
+  rows: readonly string[];
+  items: readonly PackedGridItem[];
+}
+
+/**
+ * Deterministically pack structural sections into one page grid. Placement is
+ * row-ordered and never backfills an earlier hole, keeping DOM, reading, and
+ * keyboard order aligned while still respecting multi-row footprints.
+ */
+export function packViewGrid(
+  widgets: WidgetConfig[],
+  profile: DisplayProfile,
+  hiddenHeadings: readonly SectionKind[] = [],
+): PackedGrid {
+  const columns = gridMetricsForProfile(profile).columns;
+  const rows: string[] = [];
+  const items: PackedGridItem[] = [];
+
+  for (const section of structureView(widgets)) {
+    if (section.label && !hiddenHeadings.includes(section.kind)) {
+      rows.push("auto");
+      items.push({
+        kind: "heading",
+        id: `${section.id}-heading`,
+        label: section.label,
+        section: section.kind,
+        rowStart: rows.length,
+      });
+    }
+
+    const baseRow = rows.length + 1;
+    const occupied = new Set<string>();
+    let cursorRow = 0;
+    let cursorColumn = 0;
+    let sectionRows = 0;
+
+    for (const widget of section.widgets) {
+      const placement = resolveWidgetPlacement(widget, profile, columns, section.kind);
+      let placed = false;
+      while (!placed) {
+        if (cursorColumn + placement.colSpan > columns) {
+          cursorRow += 1;
+          cursorColumn = 0;
+        }
+        placed = rectangleAvailable(
+          occupied,
+          cursorRow,
+          cursorColumn,
+          placement.rowSpan,
+          placement.colSpan,
+        );
+        if (!placed) cursorColumn += 1;
+      }
+
+      occupyRectangle(
+        occupied,
+        cursorRow,
+        cursorColumn,
+        placement.rowSpan,
+        placement.colSpan,
+      );
+      items.push({
+        kind: "widget",
+        id: widget.id,
+        widget,
+        section: section.kind,
+        placement,
+        columnStart: cursorColumn + 1,
+        rowStart: baseRow + cursorRow,
+      });
+      sectionRows = Math.max(sectionRows, cursorRow + placement.rowSpan);
+      cursorColumn += placement.colSpan;
+      if (cursorColumn >= columns) {
+        cursorRow += 1;
+        cursorColumn = 0;
+      }
+    }
+
+    rows.push(...Array.from({ length: sectionRows }, () => "var(--unit)"));
   }
-  return out;
+
+  return { columns, rows, items };
+}
+
+function rectangleAvailable(
+  occupied: ReadonlySet<string>,
+  row: number,
+  column: number,
+  rowSpan: number,
+  colSpan: number,
+): boolean {
+  for (let y = row; y < row + rowSpan; y += 1) {
+    for (let x = column; x < column + colSpan; x += 1) {
+      if (occupied.has(`${y}:${x}`)) return false;
+    }
+  }
+  return true;
+}
+
+function occupyRectangle(
+  occupied: Set<string>,
+  row: number,
+  column: number,
+  rowSpan: number,
+  colSpan: number,
+): void {
+  for (let y = row; y < row + rowSpan; y += 1) {
+    for (let x = column; x < column + colSpan; x += 1) {
+      occupied.add(`${y}:${x}`);
+    }
+  }
 }

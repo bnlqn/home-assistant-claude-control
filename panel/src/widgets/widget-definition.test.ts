@@ -27,7 +27,6 @@ import {
   SWITCH_WIDGET_DEFINITION,
   VACUUM_WIDGET_DEFINITION,
   WEATHER_WIDGET_DEFINITION,
-  GROUP_WIDGET_DEFINITION,
   WIDGET_DEFINITIONS,
   widgetDefinition,
 } from "./widget-definition.js";
@@ -182,13 +181,6 @@ const metricTileConfig: WidgetConfig = {
   options: { accent: "accent", format: "power", status: "gridDirection" },
 };
 
-const groupConfig: WidgetConfig = {
-  id: "group-test",
-  type: "group",
-  size: sizes("4x2", "4x2", "4x2"),
-  options: { label: "Metrics", variant: "tiles", children: [metricTileConfig] },
-};
-
 const energyConfig: WidgetConfig = {
   id: "energy-test",
   type: "energy",
@@ -243,7 +235,6 @@ const definitionConfigs = [
   [BUTTON_WIDGET_DEFINITION, buttonConfig],
   [ALARM_WIDGET_DEFINITION, alarmConfig],
   [ACTION_WIDGET_DEFINITION, actionConfig],
-  [GROUP_WIDGET_DEFINITION, groupConfig],
   [ENERGY_WIDGET_DEFINITION, energyConfig],
   [POWERFLOW_WIDGET_DEFINITION, powerflowConfig],
   [SOLAR_CHARGING_WIDGET_DEFINITION, solarChargingConfig],
@@ -354,7 +345,6 @@ describe("widget definitions", () => {
       "button",
       "alarm",
       "action",
-      "group",
       "energy",
       "powerflow",
       "solarcharging",
@@ -372,7 +362,6 @@ describe("widget definitions", () => {
     expect(widgetDefinition("camera")).toBe(CAMERA_WIDGET_DEFINITION);
     expect(widgetDefinition("scene")).toBe(SCENE_WIDGET_DEFINITION);
     expect(widgetDefinition("action")).toBe(ACTION_WIDGET_DEFINITION);
-    expect(widgetDefinition("group")).toBe(GROUP_WIDGET_DEFINITION);
     expect(widgetDefinition("metrictile")).toBe(METRIC_TILE_WIDGET_DEFINITION);
     expect(widgetDefinition("electricitytotal")).toBe(ELECTRICITY_TOTAL_WIDGET_DEFINITION);
 
@@ -389,7 +378,6 @@ describe("widget definitions", () => {
       SCRIPT_WIDGET_DEFINITION,
       BUTTON_WIDGET_DEFINITION,
       ALARM_WIDGET_DEFINITION,
-      GROUP_WIDGET_DEFINITION,
     ]) {
       expect(definition.section).toBe("devices");
     }
@@ -440,7 +428,6 @@ describe("widget definitions", () => {
       button: undefined,
       alarm: "generic",
       action: undefined,
-      group: undefined,
       energy: "energy",
       powerflow: "powerflow",
       solarcharging: "solarcharging",
@@ -458,7 +445,6 @@ describe("widget definitions", () => {
       SCRIPT_WIDGET_DEFINITION,
       BUTTON_WIDGET_DEFINITION,
       ACTION_WIDGET_DEFINITION,
-      GROUP_WIDGET_DEFINITION,
       ENERGY_CHART_WIDGET_DEFINITION,
       ELECTRICITY_TOTAL_WIDGET_DEFINITION,
     ]) {
@@ -503,7 +489,6 @@ describe("widget definitions", () => {
     expect(BUTTON_WIDGET_DEFINITION.dependencyIds(buttonConfig)).toEqual(["button.test"]);
     expect(ALARM_WIDGET_DEFINITION.dependencyIds(alarmConfig)).toEqual(["alarm_control_panel.test"]);
     expect(ACTION_WIDGET_DEFINITION.dependencyIds()).toEqual([]);
-    expect(GROUP_WIDGET_DEFINITION.dependencyIds(groupConfig)).toEqual(["sensor.grid_power"]);
     expect(ENERGY_WIDGET_DEFINITION.dependencyIds(energyConfig)).toEqual([
       "sensor.grid_power",
       "sensor.solar_power",
@@ -539,7 +524,6 @@ describe("widget definitions", () => {
     expect(customElements.get(BUTTON_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(ALARM_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(ACTION_WIDGET_DEFINITION.tag)).toBeUndefined();
-    expect(customElements.get(GROUP_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(ENERGY_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(POWERFLOW_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(SOLAR_CHARGING_WIDGET_DEFINITION.tag)).toBeUndefined();
@@ -585,12 +569,7 @@ describe("widget definitions", () => {
     ]);
   });
 
-  it("validates group and composite options at the definition boundary", () => {
-    expect(GROUP_WIDGET_DEFINITION.validateOptions?.(groupConfig.options)).toEqual([]);
-    expect(GROUP_WIDGET_DEFINITION.validateOptions?.({ variant: "unknown", children: [] })).toEqual([
-      { path: "variant", message: "Group `variant` must be one of: media, devices, sensors, energy, tiles." },
-      { path: "children", message: "Group `children` must be a non-empty array." },
-    ]);
+  it("validates composite options at the definition boundary", () => {
     expect(ENERGY_WIDGET_DEFINITION.validateOptions?.({ gridPower: "invalid" })).toEqual([
       { path: "gridPower", message: "Energy `gridPower` must be a valid entity_id." },
     ]);

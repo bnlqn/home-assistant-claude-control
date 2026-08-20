@@ -3,7 +3,6 @@ import {
   ALL_WIDGET_TYPES,
   BREAKPOINTS,
   DashboardConfig,
-  GroupOptions,
   ViewConfig,
   WidgetConfig,
   WidgetType,
@@ -198,32 +197,6 @@ function validateWidget(
   for (const issue of definition.validateOptions?.(widget.options) ?? []) {
     err(`${wpath}.options${issue.path ? `.${issue.path}` : ""}`, issue.message);
     valid = false;
-  }
-
-  // An explicit `group` container validates its children with the same rules,
-  // sharing the id-uniqueness set. (Synthetic groups from `sectioniseView` are
-  // built after validation from already-validated widgets.)
-  if (widget.type === "group") {
-    const children = (widget.options as GroupOptions | undefined)?.children;
-    if (!Array.isArray(children) || children.length === 0) {
-      err(`${wpath}.options.children`, `Group "${widget.id}" must have a non-empty \`children\` array.`);
-      valid = false;
-    } else {
-      const validChildren = children
-        .map((child, ci) =>
-          validateWidget(child, `${wpath}.options.children[${ci}]`, seenWidgetIds, err),
-        )
-        .filter((child): child is WidgetConfig => child !== null);
-      if (validChildren.length === 0) {
-        err(`${wpath}.options.children`, `Group "${widget.id}" has no valid children after validation.`);
-        valid = false;
-      } else if (valid) {
-        return {
-          ...widget,
-          options: { ...(widget.options ?? {}), children: validChildren },
-        };
-      }
-    }
   }
 
   return valid ? { ...widget } : null;

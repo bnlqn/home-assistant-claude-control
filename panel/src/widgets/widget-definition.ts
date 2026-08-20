@@ -1,5 +1,4 @@
 import type {
-  GroupOptions,
   SectionKind,
   WidgetConfig,
   WidgetConfigOf,
@@ -7,7 +6,6 @@ import type {
   WidgetSizeSet,
   WidgetType,
 } from "../config/schema.js";
-import { ALL_SIZES, SECTION_KINDS } from "../config/schema.js";
 import type {
   ActionWidgetOptions,
   ClimateSwitchOption,
@@ -178,22 +176,6 @@ function validateEntityOptions(
     if (entityId !== undefined && (typeof entityId !== "string" || !ENTITY_ID_RE.test(entityId))) {
       issues.push({ path: key, message: `${label} \`${key}\` must be a valid entity_id.` });
     }
-  }
-  return issues;
-}
-
-function validateGroupOptions(options: unknown): WidgetOptionIssue[] {
-  if (!isOptionRecord(options)) return [{ path: "", message: "Group options must be an object." }];
-  const value = options as Partial<GroupOptions>;
-  const issues: WidgetOptionIssue[] = [];
-  if (value.label !== undefined && typeof value.label !== "string") {
-    issues.push({ path: "label", message: "Group `label` must be a string." });
-  }
-  if (value.variant !== undefined && !SECTION_KINDS.includes(value.variant)) {
-    issues.push({ path: "variant", message: `Group \`variant\` must be one of: ${SECTION_KINDS.join(", ")}.` });
-  }
-  if (!Array.isArray(value.children) || value.children.length === 0) {
-    issues.push({ path: "children", message: "Group `children` must be a non-empty array." });
   }
   return issues;
 }
@@ -543,22 +525,6 @@ export const ACTION_WIDGET_DEFINITION = {
   validateOptions: validateActionOptions,
 } satisfies WidgetDefinition<"action">;
 
-export const GROUP_WIDGET_DEFINITION = {
-  type: "group",
-  tag: "hd-group",
-  label: "Group",
-  icon: "mdi:view-grid-outline",
-  load: () => import("./group.js"),
-  supportedSizes: ALL_SIZES,
-  defaultSize: { compact: "4x2", medium: "4x2", wide: "4x2" },
-  requiresEntity: false,
-  section: "devices",
-  quickAction: "none",
-  hasDetail: false,
-  dependencyIds: (config) => widgetDependencyIds(config),
-  validateOptions: validateGroupOptions,
-} satisfies WidgetDefinition<"group">;
-
 export const ENERGY_WIDGET_DEFINITION = {
   type: "energy",
   tag: "hd-widget-energy",
@@ -687,7 +653,6 @@ const DEFINITIONS = {
   button: BUTTON_WIDGET_DEFINITION,
   alarm: ALARM_WIDGET_DEFINITION,
   action: ACTION_WIDGET_DEFINITION,
-  group: GROUP_WIDGET_DEFINITION,
   energy: ENERGY_WIDGET_DEFINITION,
   powerflow: POWERFLOW_WIDGET_DEFINITION,
   solarcharging: SOLAR_CHARGING_WIDGET_DEFINITION,

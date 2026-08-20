@@ -147,32 +147,6 @@ describe("hd-widget-frame layout variants", () => {
   });
 });
 
-describe("hd-group container", () => {
-  it("renders a heading and one cell per child", async () => {
-    await import("../widgets/group.js");
-    const el = await mount<HTMLElement>("hd-group", {
-      // @ts-expect-error assigning element props
-      config: {
-        id: "g",
-        type: "group",
-        size: { compact: "4x2", medium: "4x2", wide: "4x2" },
-        options: {
-          label: "Devices",
-          variant: "devices",
-          children: [
-            { id: "a", type: "light", entity: "light.a", size: { compact: "1x1", medium: "1x1", wide: "1x1" } },
-            { id: "b", type: "switch", entity: "switch.b", size: { compact: "1x1", medium: "1x1", wide: "1x1" } },
-          ],
-        },
-      },
-    });
-    const root = el.shadowRoot!;
-    expect(root.querySelector(".head")!.textContent).toContain("Devices");
-    expect(root.querySelectorAll(".grid > .cell")).toHaveLength(2);
-    el.remove();
-  });
-});
-
 describe("confirmation bus", () => {
   it("resolves via a handling ancestor (sensitive-action gate)", async () => {
     const host = document.createElement("div");

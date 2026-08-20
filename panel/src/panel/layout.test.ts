@@ -1,17 +1,18 @@
 import { describe, it, expect } from "vitest";
 import {
+  DISPLAY_PROFILES,
   gridMetricsForProfile,
   layoutForVariant,
+  packViewGrid,
   resolveDisplayProfile,
   resolveWidgetSize,
   resolveWidgetPlacement,
-  sectionColumns,
   sectionForWidgetType,
-  sectioniseView,
+  structureView,
   spanForSize,
   squareUnit,
 } from "./layout.js";
-import type { GroupOptions, WidgetConfig } from "../config/schema.js";
+import type { WidgetConfig } from "../config/schema.js";
 
 const widget: WidgetConfig = {
   id: "w",
@@ -27,7 +28,6 @@ const w = (id: string, type: WidgetConfig["type"], entity?: string): WidgetConfi
   ...(entity ? { entity } : {}),
   size: sz,
 }) as WidgetConfig;
-const opts = (group: WidgetConfig): GroupOptions => group.type === "group" ? group.options : {};
 
 describe("display profiles", () => {
   it("resolves the full supported viewport matrix from shape", () => {
@@ -117,57 +117,115 @@ describe("section classification", () => {
   });
 });
 
-describe("section columns follow the shared display profile", () => {
-  it("devices gain density intentionally across profiles", () => {
-    expect(sectionColumns("devices", "phonePortrait")).toBe(2);
-    expect(sectionColumns("devices", "phoneLandscape")).toBe(4);
-    expect(sectionColumns("devices", "tabletPortrait")).toBe(4);
-    expect(sectionColumns("devices", "tabletLandscape")).toBe(6);
-    expect(sectionColumns("devices", "desktop")).toBe(8);
-    expect(sectionColumns("devices", "wall")).toBe(10);
-  });
-  it("distinguishes phone landscape from tablet portrait", () => {
-    expect(sectionColumns("sensors", "phonePortrait")).toBe(2);
-    expect(sectionColumns("sensors", "phoneLandscape")).toBe(4);
-    expect(sectionColumns("sensors", "tabletPortrait")).toBe(3);
-    expect(sectionColumns("sensors", "tabletLandscape")).toBe(4);
-  });
-  it("media uses one phone-portrait column and two elsewhere", () => {
-    expect(sectionColumns("media", "phonePortrait")).toBe(1);
-    expect(sectionColumns("media", "phoneLandscape")).toBe(2);
-    expect(sectionColumns("media", "desktop")).toBe(2);
-  });
-});
-
-describe("sectioniseView", () => {
-  it("auto-partitions a flat list into ordered, labelled sections", () => {
-    const out = sectioniseView([
+describe("structural sections", () => {
+  it("partitions a flat list into ordered, labelled structures", () => {
+    const out = structureView([
       w("s1", "sensor", "sensor.a"),
       w("l1", "light", "light.a"),
       w("m1", "media", "media_player.a"),
       w("l2", "switch", "switch.a"),
       w("p1", "powerflow"),
     ]);
-    // Emitted in SECTION_ORDER: media, devices, sensors, energy.
-    expect(out.map((g) => g.type)).toEqual(["group", "group", "group", "group"]);
-    expect(out.map((g) => opts(g).variant)).toEqual(["media", "devices", "sensors", "energy"]);
-    expect(out.map((g) => opts(g).label)).toEqual(["Media", "Devices", "Sensors", "Energy"]);
-    // Order preserved within the devices bucket.
-    expect(opts(out[1]).children!.map((c) => c.id)).toEqual(["l1", "l2"]);
+    expect(out.map((section) => section.kind)).toEqual(["media", "devices", "sensors", "energy"]);
+    expect(out.map((section) => section.label)).toEqual(["Media", "Devices", "Sensors", "Energy"]);
+    expect(out[1].widgets.map((child) => child.id)).toEqual(["l1", "l2"]);
   });
 
   it("omits empty sections", () => {
-    const out = sectioniseView([w("s1", "sensor", "sensor.a"), w("s2", "sensor", "sensor.b")]);
+    const out = structureView([w("s1", "sensor", "sensor.a"), w("s2", "sensor", "sensor.b")]);
     expect(out).toHaveLength(1);
-    expect(opts(out[0]).variant).toBe("sensors");
+    expect(out[0].kind).toBe("sensors");
+  });
+});
+
+describe("deterministic page-grid packing", () => {
+  it("packs mixed footprints without backfilling ahead of DOM order", () => {
+    const widgets: WidgetConfig[] = [
+      { ...w("large", "light", "light.large"), size: { compact: "2x2", medium: "2x2", wide: "2x2" } },
+      w("small-a", "switch", "switch.a"),
+      w("small-b", "switch", "switch.b"),
+      { ...w("wide", "light", "light.wide"), size: { compact: "2x1", medium: "2x1", wide: "2x1" } },
+    ];
+    const packed = packViewGrid(widgets, "phoneLandscape");
+    const cells = packed.items.filter((item) => item.kind === "widget");
+
+    expect(packed.columns).toBe(4);
+    expect(packed.rows).toEqual(["auto", "var(--unit)", "var(--unit)"]);
+    expect(packed.items.map((item) => item.id)).toEqual([
+      "section-devices-heading",
+      "large",
+      "small-a",
+      "small-b",
+      "wide",
+    ]);
+    expect(cells.map(({ id, columnStart, rowStart }) => ({ id, columnStart, rowStart }))).toEqual([
+      { id: "large", columnStart: 1, rowStart: 2 },
+      { id: "small-a", columnStart: 3, rowStart: 2 },
+      { id: "small-b", columnStart: 4, rowStart: 2 },
+      { id: "wide", columnStart: 3, rowStart: 3 },
+    ]);
   });
 
-  it("passes a hand-composed view through untouched when it already has a group", () => {
-    const manual: WidgetConfig[] = [
-      { id: "g", type: "group", size: sz, options: { label: "Mine", variant: "devices", children: [w("l1", "light", "light.a")] } },
-      w("s1", "sensor", "sensor.a"),
+  it("starts each structural section on new tracks and can suppress a page-redundant heading", () => {
+    const widgets = [
+      w("device", "light", "light.a"),
+      w("sensor", "sensor", "sensor.a"),
+      w("energy", "powerflow"),
     ];
-    const out = sectioniseView(manual);
-    expect(out).toBe(manual);
+    const packed = packViewGrid(widgets, "phonePortrait", ["energy"]);
+
+    expect(packed.items.filter((item) => item.kind === "heading").map((item) => item.section)).toEqual([
+      "devices",
+      "sensors",
+    ]);
+    expect(packed.items.map((item) => item.id)).toEqual([
+      "section-devices-heading",
+      "device",
+      "section-sensors-heading",
+      "sensor",
+      "energy",
+    ]);
+  });
+
+  it("keeps every mixed-footprint cell in bounds and collision-free across profiles", () => {
+    const widgets: WidgetConfig[] = [
+      { ...w("climate", "climate", "climate.a"), size: { compact: "2x2", medium: "2x2", wide: "2x2" } },
+      { ...w("light", "light", "light.a"), size: { compact: "2x1", medium: "2x1", wide: "2x1" } },
+      w("switch", "switch", "switch.a"),
+      { ...w("weather", "weather", "weather.a"), size: { compact: "2x1", medium: "1x2", wide: "2x2" } },
+    ];
+
+    for (const profile of DISPLAY_PROFILES) {
+      const packed = packViewGrid(widgets, profile);
+      const occupied = new Set<string>();
+      for (const item of packed.items) {
+        if (item.kind !== "widget") continue;
+        expect(item.columnStart).toBeGreaterThanOrEqual(1);
+        expect(item.columnStart + item.placement.colSpan - 1).toBeLessThanOrEqual(packed.columns);
+        for (let row = item.rowStart; row < item.rowStart + item.placement.rowSpan; row += 1) {
+          for (let column = item.columnStart; column < item.columnStart + item.placement.colSpan; column += 1) {
+            const cell = `${row}:${column}`;
+            expect(occupied.has(cell)).toBe(false);
+            occupied.add(cell);
+          }
+        }
+      }
+    }
+  });
+
+  it("preserves a climate widget's 2×2 footprint in the shared tablet grid", () => {
+    const climate: WidgetConfig = {
+      id: "climate",
+      type: "climate",
+      entity: "climate.office",
+      size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+    };
+    const packed = packViewGrid([climate], "tabletLandscape");
+    const cell = packed.items.find((item) => item.kind === "widget");
+
+    expect(cell?.kind).toBe("widget");
+    if (cell?.kind === "widget") {
+      expect(cell.placement).toMatchObject({ size: "2x2", colSpan: 2, rowSpan: 2 });
+    }
   });
 });

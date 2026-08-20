@@ -249,7 +249,9 @@ Composite widgets (`energy`, `action`) take their entities/service via
 - **Shape-aware placement.** Six explicit profiles define 2–10 columns, gaps,
   padding, minimum units, content bounds, navigation mode, and widget anatomy.
   The resolver uses panel width plus viewport height—not a device name—and
-  configured widget order is always preserved without dense packing.
+  configured widget order is always preserved without dense packing. Every
+  page uses one grid; section headings are structural rows, not nested grids or
+  synthetic widgets.
 - **Light & dark**, defaulting to Home Assistant's `darkMode` (falling back to
   the OS preference), with an in-panel appearance toggle that overrides.
 - **Accessible**: 44 px minimum targets, visible focus, slider/switch/dialog
@@ -314,8 +316,8 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 379 kB | 390 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 99 kB | 105 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 377 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 98 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
@@ -328,9 +330,10 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 164 Vitest cases covering config validation, widget-size
+`npm test` runs 160 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
-construction, missing/unavailable entities, responsive size selection, routing,
+construction, missing/unavailable entities, responsive profiles, deterministic
+mixed-footprint packing, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,
 Energy flow selection and asset paths, media update lifecycle, deferred
 responsive measurement, widget-definition dependencies and supported-footprint

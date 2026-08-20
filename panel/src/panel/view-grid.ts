@@ -6,23 +6,20 @@ import type { HomeAssistant } from "../types/hass.js";
 import type { ViewConfig } from "../config/schema.js";
 import {
   gridMetricsForProfile,
-  resolveWidgetPlacement,
-  sectioniseView,
+  packViewGrid,
+  squareUnit,
   type DisplayProfile,
 } from "./layout.js";
 import { renderWidgetCell } from "./widget-cell.js";
+import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
 import "../primitives/entity-icon.js";
 import "../widgets/widget-frame.js";
-import "../widgets/group.js";
 import "../energy/energy-hero.js";
 
 /**
- * The view canvas. A view's flat widget list is organised by `sectioniseView`
- * into domain sections, each rendered by a self-contained `hd-group` container
- * that owns its own internal responsive grid. The canvas itself is just a
- * vertical stack of those full-width section blocks (plus, in hand-composed
- * views, any standalone widget). Configured widget order is preserved within
- * each section.
+ * The view canvas. One page-wide grid owns every widget placement. Domain
+ * headings are full-width structural rows in that same grid, and configured
+ * order remains identical to DOM, reading, and keyboard order.
  */
 @define("hd-view-grid")
 export class HdViewGrid extends LitElement {
@@ -30,18 +27,33 @@ export class HdViewGrid extends LitElement {
   @property({ attribute: false }) view?: ViewConfig;
   @property({ attribute: false }) displayProfile: DisplayProfile = "desktop";
 
+  private readonly _dimensions = new ResponsiveProfileController(this, (width) => width);
+
   static styles = css`
     :host {
       display: block;
     }
-    .stack {
-      display: flex;
-      flex-direction: column;
-      gap: 26px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+      grid-template-rows: var(--rows, auto);
+      gap: var(--gap, 12px);
       padding: var(--pad, 20px);
       box-sizing: border-box;
       max-width: var(--max-width, 1760px);
       margin: 0 auto;
+    }
+    .heading {
+      grid-column: 1 / -1;
+      align-self: end;
+      margin: 12px 0 0 2px;
+      font: var(--text-widget-title);
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--text-primary);
+    }
+    .heading:first-child {
+      margin-top: 0;
     }
     .empty {
       display: flex;
@@ -72,7 +84,7 @@ export class HdViewGrid extends LitElement {
   render() {
     const view = this.view;
     const m = gridMetricsForProfile(this.displayProfile);
-    const stackStyle = `--pad:${m.pad}px; --max-width:${m.maxWidth}px`;
+    const unit = squareUnit(this._dimensions.width || 1024, m);
 
     // A page-level hero (the Energy house) renders full-bleed above the grid.
     const hero = view?.hero
@@ -87,17 +99,37 @@ export class HdViewGrid extends LitElement {
       </div>`;
     }
 
-    // Organise the flat widget list into section containers (+ any standalone
-    // widget in a hand-composed view). Each item renders itself full-width.
-    const items = sectioniseView(view.widgets);
+    const packed = packViewGrid(
+      view.widgets,
+      this.displayProfile,
+      view.hero ? ["energy"] : [],
+    );
+    const gridStyle = [
+      `--cols:${packed.columns}`,
+      `--rows:${packed.rows.join(" ") || "auto"}`,
+      `--unit:${unit}px`,
+      `--gap:${m.gap}px`,
+      `--pad:${m.pad}px`,
+      `--max-width:${m.maxWidth}px`,
+    ].join(";");
 
     return html`
       ${hero}
-      <div class="stack" style=${stackStyle}>
+      <div class="grid" style=${gridStyle}>
         ${repeat(
-          items,
-          (w) => w.id,
-          (w) => renderWidgetCell(w, resolveWidgetPlacement(w, this.displayProfile, 1), this.hass),
+          packed.items,
+          (item) => item.id,
+          (item) => item.kind === "heading"
+            ? html`<h2
+                class="heading"
+                style=${`grid-row:${item.rowStart};`}
+              >${item.label}</h2>`
+            : renderWidgetCell(
+                item.widget,
+                item.placement,
+                this.hass,
+                { columnStart: item.columnStart, rowStart: item.rowStart },
+              ),
         )}
       </div>
       ${nothing}

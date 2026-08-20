@@ -59,7 +59,6 @@ export interface WidgetSizeSet {
 
 /** Widget kinds backed by the widget registry. */
 export type WidgetType =
-  | "group"
   | "light"
   | "switch"
   | "fan"
@@ -86,7 +85,6 @@ export type WidgetType =
   | "action";
 
 export const ALL_WIDGET_TYPES: readonly WidgetType[] = [
-  "group",
   "light",
   "switch",
   "fan",
@@ -116,28 +114,12 @@ export const ALL_WIDGET_TYPES: readonly WidgetType[] = [
 export type ViewType = "overview" | "room" | "system";
 
 /**
- * Domain-oriented section a widget auto-collects into (see `layout.ts`). Also
- * the `variant` a `group` container renders as: media hero band, small device
- * tiles, read-only value tiles, or an energy/diagram band.
+ * Domain-oriented structural section a widget auto-collects into. Sections are
+ * headings and packing boundaries in the page grid, never widget containers.
  */
-export type SectionKind = "media" | "devices" | "sensors" | "energy" | "tiles";
+export type SectionKind = "media" | "devices" | "sensors" | "energy";
 
-export const SECTION_KINDS: readonly SectionKind[] = ["media", "devices", "sensors", "energy", "tiles"] as const;
-
-/**
- * Options for a `group` container widget. A container owns a titled section and
- * its own internal responsive grid. By default sections are produced
- * automatically by domain (`sectioniseView`); an explicit `group` in config
- * with `children` overrides that for hand-picked layouts.
- */
-export interface GroupOptions {
-  /** Heading shown above the section. */
-  label?: string;
-  /** Which internal layout the container renders (defaults from its widgets). */
-  variant?: SectionKind;
-  /** Explicit children. When present, the container is NOT auto-collected. */
-  children?: WidgetConfig[];
-}
+export const SECTION_KINDS: readonly SectionKind[] = ["media", "devices", "sensors", "energy"] as const;
 
 interface WidgetConfigBase<Type extends WidgetType> {
   /** Stable, unique id (used for keying, focus restoration, deep links). */
@@ -226,10 +208,6 @@ export interface ActionWidgetConfig extends WidgetConfigBase<"action"> {
   options: ActionWidgetOptions;
 }
 
-export interface GroupWidgetConfig extends WidgetConfigBase<"group"> {
-  options: GroupOptions;
-}
-
 export interface MetricTileWidgetConfig extends WidgetConfigBase<"metrictile"> {
   options?: MetricTileWidgetOptions;
 }
@@ -259,7 +237,6 @@ export interface ElectricityTotalWidgetConfig extends WidgetConfigBase<"electric
  * options belonging to another widget at compile time.
  */
 export type WidgetConfig =
-  | GroupWidgetConfig
   | LightWidgetConfig
   | ClimateWidgetConfig
   | SwitchWidgetConfig

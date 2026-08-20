@@ -509,49 +509,40 @@ export const dashboardConfig: DashboardConfig = {
         carPower: "sensor.tesla_wall_connector_total_power", // kW, auto-normalized
       },
       widgets: [
-        // The three Homey-style status tiles, in their own container. (No home
-        // battery in this install, so the fourth "Battery" tile is omitted.)
+        // Three Homey-style status tiles. They are regular widgets in the
+        // shared Energy grid; no synthetic container owns their placement.
+        // (No home battery in this install, so a fourth tile is omitted.)
         {
-          id: "en-tiles",
-          type: "group",
-          size: { compact: "4x2", medium: "4x2", wide: "4x2" },
+          id: "en-t-electricity",
+          type: "metrictile",
+          entity: "sensor.p1_meter_power",
+          name: "Electricity",
+          icon: "mdi:flash",
+          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+          options: { accent: "accent", format: "power", status: "gridDirection" },
+        },
+        {
+          id: "en-t-solar",
+          type: "metrictile",
+          entity: "sensor.goodwe_pv_power",
+          name: "Solar",
+          icon: "mdi:weather-sunny",
+          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+          options: { accent: "light", format: "power", status: "none" },
+        },
+        {
+          id: "en-t-ev",
+          type: "metrictile",
+          entity: "sensor.other_tesla_model_3_battery_level",
+          name: "Electric Vehicle",
+          icon: "mdi:car-electric",
+          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
           options: {
-            variant: "tiles",
-            children: [
-              {
-                id: "en-t-electricity",
-                type: "metrictile",
-                entity: "sensor.p1_meter_power",
-                name: "Electricity",
-                icon: "mdi:flash",
-                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-                options: { accent: "accent", format: "power", status: "gridDirection" },
-              },
-              {
-                id: "en-t-solar",
-                type: "metrictile",
-                entity: "sensor.goodwe_pv_power",
-                name: "Solar",
-                icon: "mdi:weather-sunny",
-                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-                options: { accent: "light", format: "power", status: "none" },
-              },
-              {
-                id: "en-t-ev",
-                type: "metrictile",
-                entity: "sensor.other_tesla_model_3_battery_level",
-                name: "Electric Vehicle",
-                icon: "mdi:car-electric",
-                size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-                options: {
-                  accent: "alert",
-                  format: "percent",
-                  status: "carCharge",
-                  chargeStatus: "sensor.tesla_wall_connector_status",
-                  connected: "binary_sensor.tesla_wall_connector_vehicle_connected",
-                },
-              },
-            ],
+            accent: "alert",
+            format: "percent",
+            status: "carCharge",
+            chargeStatus: "sensor.tesla_wall_connector_status",
+            connected: "binary_sensor.tesla_wall_connector_vehicle_connected",
           },
         },
         // Bespoke: the solar-only EV-charging control system, as a branded Tesla

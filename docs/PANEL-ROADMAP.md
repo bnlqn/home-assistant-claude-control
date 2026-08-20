@@ -288,8 +288,16 @@ Progress — 2026-08-20:
 - verified the complete 320×568, 390×844, 844×390, 768×1024, 1024×768,
   1440×900, and 1920×1080 matrix without horizontal overflow, plus the Energy
   hero boundary at phone and tablet-landscape sizes;
-- still to do in Phase 2: replace nested section grids with structural headings
-  in the shared page grid and add deterministic packing coverage.
+- replaced nested section grids with one page-wide grid whose headings are
+  full-width structural tracks; added deterministic, non-dense packing with
+  explicit row/column starts and collision/bounds coverage across every profile;
+- removed `group` from the widget schema, registry, validation, implementation,
+  and tests because composition is not a reusable widget; flattened the Energy
+  metric tiles into its ordinary widget collection while retaining exactly one
+  page-level hero;
+- reran the complete viewport matrix without overflow or browser errors and
+  completed Phase 2 with 160 focused tests after retiring obsolete group-widget
+  tests.
 
 ### Phase 3 — Versioned dashboard document
 
@@ -386,13 +394,15 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Continue the shared grid now that profile and footprint resolution are unified:
+Begin the versioned dashboard document now that the runtime widget/grid boundary
+is correct:
 
-1. make section grouping structural within the page grid while keeping the
-   Energy hero outside it;
-2. add deterministic row-order packing tests for mixed footprints;
-3. rerun the full viewport matrix, then delete the temporary nested section
-   column rules and `hd-group` layout responsibility.
+1. define a serializable v1 document that separates widget instances, pages,
+   per-profile placements, and visibility;
+2. adapt the current TypeScript configuration into that document without
+   changing rendered behavior;
+3. add validation, migrations, round-trip fixtures, and a last-valid fallback
+   before introducing persistence or editing.
 
 This keeps the architecture boundary testable while avoiding a simultaneous
 config, detail, and layout rewrite.

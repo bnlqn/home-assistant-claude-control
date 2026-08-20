@@ -154,20 +154,6 @@ const validTypedWidgetFixtures: WidgetConfig[] = [
     size: { compact: "1x1", medium: "1x1", wide: "2x1" },
     options: { accent: "accent", format: "power", status: "gridDirection" },
   },
-  {
-    id: "typed-group",
-    type: "group",
-    size: { compact: "4x2", medium: "4x2", wide: "4x2" },
-    options: {
-      variant: "tiles",
-      children: [{
-        id: "typed-group-light",
-        type: "light",
-        entity: "light.test",
-        size: { compact: "1x1", medium: "1x1", wide: "1x1" },
-      }],
-    },
-  },
 ];
 
 const invalidTypedWidgetFixtures: WidgetConfig[] = [
