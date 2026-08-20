@@ -216,9 +216,11 @@ Progress — 2026-08-20:
   independent light/climate detail modules; registered widget details no longer
   live in the legacy controller switch, with focused renderer/service-call
   coverage bringing the runtime suite to 144 tests;
+- moved the remaining media, device, sensor/weather, and Energy detail bodies
+  into focused domain modules, reducing `controllers.ts` from 506 lines to a
+  66-line compatibility router and extending regression coverage to 148 tests;
 - still to do in Phase 1: migrate the remaining catalogue and its loose option
-  records, split the remaining media/device/Energy detail bodies, and introduce
-  the reusable HA/async/profile controllers.
+  records and introduce the reusable HA/async/profile controllers.
 
 ### Phase 2 — Shared responsive grid engine
 

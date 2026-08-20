@@ -1,13 +1,23 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render } from "lit";
 import type { WidgetConfig } from "../config/schema.js";
+import { COVER_FEATURE, MEDIA_FEATURE, VACUUM_FEATURE } from "../home-assistant/capabilities.js";
 import type { ServiceCall } from "../home-assistant/service-calls.js";
 import type { HassEntity, HomeAssistant } from "../types/hass.js";
 import { renderClimateDetail } from "./climate-detail.js";
 import type { DetailContext } from "./detail-context.js";
 import { renderDetailBody } from "./controllers.js";
 import { renderDefinedDetail } from "./detail-registry.js";
+import {
+  renderCoverDetail,
+  renderVacuumDetail,
+} from "./device-detail.js";
+import {
+  renderPowerflowDetail,
+  renderSolarChargingDetail,
+} from "./energy-detail.js";
 import { renderLightDetail, rgbToHs } from "./light-detail.js";
+import { renderSensorDetail, renderWeatherDetail } from "./sensor-detail.js";
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
 
@@ -161,5 +171,173 @@ describe("climate detail renderer", () => {
 
     expect(container.textContent).toContain("Mode");
     expect(container.textContent).toContain("—");
+  });
+});
+
+describe("legacy domain detail modules", () => {
+  it("keeps media rendering and transport service routing independent", () => {
+    const state = entity("media_player.test", "playing", {
+      media_title: "Night Drive",
+      volume_level: 0.35,
+      supported_features: MEDIA_FEATURE.PAUSE |
+        MEDIA_FEATURE.PLAY |
+        MEDIA_FEATURE.VOLUME_SET,
+    });
+    const config: WidgetConfig = {
+      id: "media-detail",
+      type: "media",
+      entity: state.entity_id,
+      size,
+    };
+    const { ctx, call } = context(state, config);
+    const container = document.createElement("div");
+
+    render(renderDetailBody(ctx), container);
+
+    expect(container.textContent).toContain("Night Drive");
+    expect(container.querySelector("hd-slider")).not.toBeNull();
+    container.querySelector<HTMLElement>('[label="Play or pause"]')!
+      .dispatchEvent(new Event("click", { bubbles: true }));
+    expect(call).toHaveBeenCalledWith({
+      domain: "media_player",
+      service: "media_play_pause",
+      data: { entity_id: state.entity_id },
+    }, "control");
+  });
+
+  it("preserves cover and vacuum capability-driven actions", () => {
+    const cover = entity("cover.test", "open", {
+      current_position: 64,
+      supported_features: COVER_FEATURE.OPEN |
+        COVER_FEATURE.CLOSE |
+        COVER_FEATURE.STOP |
+        COVER_FEATURE.SET_POSITION,
+    });
+    const coverConfig: WidgetConfig = {
+      id: "cover-detail",
+      type: "cover",
+      entity: cover.entity_id,
+      size,
+    };
+    const coverContext = context(cover, coverConfig);
+    const coverContainer = document.createElement("div");
+    render(renderCoverDetail(coverContext.ctx, cover), coverContainer);
+
+    coverContainer.querySelector("hd-slider")!.dispatchEvent(new CustomEvent("hd-change", {
+      detail: { value: 42 },
+    }));
+    expect(coverContext.call).toHaveBeenCalledWith({
+      domain: "cover",
+      service: "set_cover_position",
+      data: { entity_id: cover.entity_id, position: 42 },
+    }, "move");
+
+    const vacuum = entity("vacuum.test", "docked", {
+      battery_level: 82,
+      fan_speed: "balanced",
+      fan_speed_list: ["quiet", "balanced"],
+      supported_features: VACUUM_FEATURE.START |
+        VACUUM_FEATURE.PAUSE |
+        VACUUM_FEATURE.RETURN_HOME,
+    });
+    const vacuumConfig: WidgetConfig = {
+      id: "vacuum-detail",
+      type: "vacuum",
+      entity: vacuum.entity_id,
+      size,
+    };
+    const vacuumContext = context(vacuum, vacuumConfig);
+    const vacuumContainer = document.createElement("div");
+    render(renderVacuumDetail(vacuumContext.ctx, vacuum), vacuumContainer);
+
+    vacuumContainer.querySelector<HTMLButtonElement>("button.bigbtn")!.click();
+    expect(vacuumContext.call).toHaveBeenCalledWith({
+      domain: "vacuum",
+      service: "start",
+      data: { entity_id: vacuum.entity_id },
+    }, "start");
+  });
+
+  it("keeps sensor history and weather forecast rendering in a read-only module", () => {
+    const sensor = entity("sensor.temperature", "21.4", {
+      friendly_name: "Temperature",
+      unit_of_measurement: "°C",
+    });
+    const sensorConfig: WidgetConfig = {
+      id: "sensor-detail",
+      type: "sensor",
+      entity: sensor.entity_id,
+      size,
+    };
+    const sensorContext = context(sensor, sensorConfig);
+    sensorContext.ctx.trend = [19.5, 20.2, 21.4];
+    const sensorContainer = document.createElement("div");
+    render(renderSensorDetail(sensorContext.ctx, sensor), sensorContainer);
+    expect(sensorContainer.textContent).toContain("Last 24 hours");
+    expect(sensorContainer.querySelector("hd-trend")).not.toBeNull();
+
+    const weather = entity("weather.test", "partlycloudy", {
+      temperature: 20,
+      humidity: 58,
+    });
+    const weatherConfig: WidgetConfig = {
+      id: "weather-detail",
+      type: "weather",
+      entity: weather.entity_id,
+      size,
+    };
+    const weatherContext = context(weather, weatherConfig);
+    weatherContext.ctx.forecast = [{
+      datetime: "2026-08-21T12:00:00Z",
+      condition: "sunny",
+      temperature: 24,
+      templow: 15,
+    }];
+    const weatherContainer = document.createElement("div");
+    render(renderWeatherDetail(weatherContext.ctx, weather), weatherContainer);
+    expect(weatherContainer.textContent).toContain("Forecast");
+    expect(weatherContainer.textContent).toContain("24° / 15°");
+  });
+
+  it("keeps Energy renderers separate while preserving helper actions", () => {
+    const grid = entity("sensor.grid_power", "-900", { unit_of_measurement: "W" });
+    const energyConfig: WidgetConfig = {
+      id: "energy-detail",
+      type: "energy",
+      size,
+      options: { gridPower: grid.entity_id },
+    };
+    const energyContext = context(grid, energyConfig);
+    const energyContainer = document.createElement("div");
+    render(renderDetailBody(energyContext.ctx), energyContainer);
+    expect(energyContainer.textContent).toContain("GridPower");
+
+    const flowConfig: WidgetConfig = {
+      id: "flow-detail",
+      type: "powerflow",
+      size: { compact: "2x2", medium: "2x2", wide: "3x3" },
+      options: { gridPower: grid.entity_id },
+    };
+    const flowContext = context(grid, flowConfig);
+    const flowContainer = document.createElement("div");
+    render(renderPowerflowDetail(flowContext.ctx), flowContainer);
+    expect(flowContainer.querySelector("hd-flow-diagram")).not.toBeNull();
+
+    const master = entity("input_boolean.solar_charging", "on", {});
+    const solarConfig: WidgetConfig = {
+      id: "solar-detail",
+      type: "solarcharging",
+      size,
+      options: { master: master.entity_id },
+    };
+    const solarContext = context(master, solarConfig);
+    const solarContainer = document.createElement("div");
+    render(renderSolarChargingDetail(solarContext.ctx), solarContainer);
+    solarContainer.querySelector("hd-toggle")!.dispatchEvent(new CustomEvent("hd-toggle"));
+    expect(solarContext.call).toHaveBeenCalledWith({
+      domain: "input_boolean",
+      service: "toggle",
+      data: { entity_id: master.entity_id },
+    }, "toggle solar charging");
   });
 });
