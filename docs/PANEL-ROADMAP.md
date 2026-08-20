@@ -161,8 +161,10 @@ Progress — 2026-08-20:
 - moved media artwork derivation before rendering and deferred marquee
   measurement outside Lit's completed-update lifecycle, eliminating the
   browser's extra-update warning with a component regression test;
-- still to do in Phase 0: automate browser screenshots/accessibility checks,
-  investigate the remaining development ResizeObserver loop notification, and
+- introduced a reusable element-width reactive controller for the shell, page
+  grid, and section grids; frame-deferred delivery eliminates the development
+  ResizeObserver loop while preserving 320/390 px reflow without overflow;
+- still to do in Phase 0: automate browser screenshots/accessibility checks and
   profile wall-tablet decoded image memory.
 
 ### Phase 1 — Unified widget contract

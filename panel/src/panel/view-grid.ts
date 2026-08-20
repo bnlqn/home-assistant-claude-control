@@ -1,11 +1,12 @@
 import { LitElement, css, html, nothing } from "lit";
-import { property, state } from "lit/decorators.js";
+import { property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import { define } from "../primitives/registry.js";
 import type { HomeAssistant } from "../types/hass.js";
 import type { ViewConfig } from "../config/schema.js";
 import { gridMetricsForWidth, resolveWidgetSize, sectioniseView } from "./layout.js";
 import { renderWidgetCell } from "./widget-cell.js";
+import { ElementWidthController } from "./element-width-controller.js";
 import "../primitives/entity-icon.js";
 import "../widgets/widget-frame.js";
 import "../widgets/group.js";
@@ -24,8 +25,7 @@ export class HdViewGrid extends LitElement {
   @property({ attribute: false }) hass?: HomeAssistant;
   @property({ attribute: false }) view?: ViewConfig;
 
-  @state() private _width = 0;
-  private _ro?: ResizeObserver;
+  private readonly _elementWidth = new ElementWidthController(this);
 
   static styles = css`
     :host {
@@ -66,24 +66,9 @@ export class HdViewGrid extends LitElement {
     }
   `;
 
-  connectedCallback(): void {
-    super.connectedCallback();
-    this._ro = new ResizeObserver((entries) => {
-      const w = Math.round(entries[0].contentRect.width);
-      if (w && Math.abs(w - this._width) > 1) this._width = w;
-    });
-    this._ro.observe(this);
-    this._width = this.getBoundingClientRect().width || window.innerWidth;
-  }
-
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._ro?.disconnect();
-  }
-
   render() {
     const view = this.view;
-    const m = gridMetricsForWidth(this._width);
+    const m = gridMetricsForWidth(this._elementWidth.width);
     const stackStyle = `--pad:${m.pad}px`;
 
     // A page-level hero (the Energy house) renders full-bleed above the grid.

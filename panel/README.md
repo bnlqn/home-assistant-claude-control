@@ -310,12 +310,13 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 131 Vitest cases covering config validation, widget-size
+`npm test` runs 132 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,
-Energy flow selection and asset paths, media update lifecycle, the quick-action
-vs. open-detail split, the confirmation bus, and reduced-motion tokens.
+Energy flow selection and asset paths, media update lifecycle, deferred
+responsive measurement, the quick-action vs. open-detail split, the
+confirmation bus, and reduced-motion tokens.
 
 `npm run check` is the local pre-commit equivalent of Panel CI. CI installs the
 lockfile, runs the complete check, and verifies that the tracked deploy mirror

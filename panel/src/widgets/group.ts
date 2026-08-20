@@ -1,5 +1,5 @@
 import { LitElement, css, html, nothing } from "lit";
-import { property, state } from "lit/decorators.js";
+import { property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import { define } from "../primitives/registry.js";
 import type { HomeAssistant } from "../types/hass.js";
@@ -14,13 +14,14 @@ import {
   squareUnit,
 } from "../panel/layout.js";
 import { renderWidgetCell } from "../panel/widget-cell.js";
+import { ElementWidthController } from "../panel/element-width-controller.js";
 
 /**
  * A section container. Renders a heading plus its own internal responsive grid
  * of child widgets. Crucially, the grid reflows against the CONTAINER's own
- * measured width (its own ResizeObserver), so a section renders with identical
- * tiles everywhere and simply gains columns as it gets wider — the density
- * logic lives here, not in the outer grid.
+ * measured width (through the shared element-width controller), so a section
+ * renders with identical tiles everywhere and simply gains columns as it gets
+ * wider — the density logic lives here, not in the outer grid.
  *
  * It is not a card: the section sits transparently on the canvas and each child
  * tile is the card, matching the Homey layout. Child widgets keep their own
@@ -34,8 +35,7 @@ export class HdGroup extends LitElement {
   @property({ type: String }) currentSize = "4x2";
   @property({ type: String }) layout: "row" | "tile" | "value" = "row";
 
-  @state() private _width = 0;
-  private _ro?: ResizeObserver;
+  private readonly _elementWidth = new ElementWidthController(this);
 
   static styles = css`
     :host {
@@ -65,20 +65,6 @@ export class HdGroup extends LitElement {
     }
   `;
 
-  connectedCallback(): void {
-    super.connectedCallback();
-    this._ro = new ResizeObserver((entries) => {
-      const w = Math.round(entries[0].contentRect.width);
-      if (w && Math.abs(w - this._width) > 1) this._width = w;
-    });
-    this._ro.observe(this);
-    this._width = this.getBoundingClientRect().width || window.innerWidth;
-  }
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._ro?.disconnect();
-  }
-
   private get _opts(): GroupOptions {
     return (this.config?.options ?? {}) as GroupOptions;
   }
@@ -95,10 +81,11 @@ export class HdGroup extends LitElement {
     const children = this._children;
     if (!children.length) return nothing;
 
+    const width = this._elementWidth.width;
     const variant = this._variant;
-    const cols = sectionColumns(variant, this._width);
+    const cols = sectionColumns(variant, width);
     const gap = 12;
-    const bucket = gridMetricsForWidth(this._width).bucket;
+    const bucket = gridMetricsForWidth(width).bucket;
     const cellLayout = layoutForVariant(variant);
     const label = this._opts.label;
 
@@ -116,7 +103,7 @@ export class HdGroup extends LitElement {
           ? 116
           : variant === "tiles"
             ? 100 // wide status cards (icon + name + "value • status"); name may wrap
-            : squareUnit(this._width || 1024, { columns: cols, gap, pad: 0, bucket });
+            : squareUnit(width || 1024, { columns: cols, gap, pad: 0, bucket });
 
     const gridStyle = `--cols:${cols}; --gap:${gap}px; --unit:${unit}px`;
 

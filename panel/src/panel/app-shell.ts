@@ -2,6 +2,7 @@ import { LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import type { ViewConfig } from "../config/schema.js";
+import { ElementWidthController } from "./element-width-controller.js";
 import "../primitives/entity-icon.js";
 import "../primitives/icon-button.js";
 import "../primitives/surface.js";
@@ -33,9 +34,8 @@ export class HdAppShell extends LitElement {
   @property({ type: Boolean }) connected = true;
   @property({ type: String }) appearance: "auto" | "light" | "dark" = "auto";
 
-  @state() private _mode: ShellMode = "sidebar";
   @state() private _switcherOpen = false;
-  private _ro?: ResizeObserver;
+  private readonly _elementWidth = new ElementWidthController(this);
 
   static styles = css`
     :host {
@@ -295,18 +295,9 @@ export class HdAppShell extends LitElement {
     }
   `;
 
-  connectedCallback(): void {
-    super.connectedCallback();
-    this._ro = new ResizeObserver((entries) => {
-      const w = entries[0].contentRect.width;
-      const mode: ShellMode = w >= 1000 ? "sidebar" : w >= 720 ? "rail" : "compact";
-      if (mode !== this._mode) this._mode = mode;
-    });
-    this._ro.observe(this);
-  }
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._ro?.disconnect();
+  private get _mode(): ShellMode {
+    const width = this._elementWidth.width;
+    return width >= 1000 ? "sidebar" : width >= 720 ? "rail" : "compact";
   }
 
   private _navigate(id: string) {
