@@ -73,7 +73,7 @@ config/www/home-dashboard/home-dashboard-panel.js
 config/www/home-dashboard/assets/**/*.webp
 ```
 
-The optimized 2026-08-20 baseline is 363 kB JavaScript (95 kB gzip) and
+The optimized 2026-08-20 baseline is 365 kB JavaScript (96 kB gzip) and
 approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
 flows are five packed animated WebPs plus reduced-motion stills. See
 [Build baseline and budgets](#build-baseline-and-budgets).
@@ -284,14 +284,15 @@ Key ideas:
 - **One widget contract, migrated incrementally.** `widget-definition.ts`
   centralizes tag/loading, footprints, entity dependencies, section placement,
   quick-action/detail metadata, and widget-specific option validation. Light,
-  climate, switch, fan, cover, lock, vacuum, and media now use the contract;
-  legacy widgets retain their existing tables until each is migrated with
-  coverage.
+  climate, switch, fan, cover, lock, vacuum, media, sensor, and weather now use
+  the contract; legacy widgets retain their existing tables until each is
+  migrated with coverage.
 - **Detail domains stay independent.** Every detail body implements the small
   `DetailContext` contract in a focused domain module. Registered light,
-  climate, device, and media widgets select their renderer through the typed
-  definition registry; a 66-line `controllers.ts` router preserves fallback
-  routing for widget domains that have not yet migrated their definitions.
+  climate, device, media, sensor, and weather widgets select their renderer
+  through the typed definition registry; a 66-line `controllers.ts` router
+  preserves fallback routing for widget domains that have not yet migrated
+  their definitions.
 - **Performance.** Each widget re-renders only when a **referenced** entity's
   state object changes by reference (or connectivity/size changes) — the
   frequently-changing full `hass` object doesn't re-render the whole grid.
@@ -311,8 +312,8 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 363 kB | 390 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 95 kB | 105 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 365 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 96 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
@@ -325,7 +326,7 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 154 Vitest cases covering config validation, widget-size
+`npm test` runs 155 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,

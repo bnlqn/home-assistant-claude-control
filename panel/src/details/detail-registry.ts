@@ -11,6 +11,7 @@ import {
 } from "./device-detail.js";
 import { renderLightDetail } from "./light-detail.js";
 import { renderMediaDetail } from "./media-detail.js";
+import { renderSensorDetail, renderWeatherDetail } from "./sensor-detail.js";
 
 type DetailRenderer = (context: DetailContext, state: HassEntity) => TemplateResult;
 
@@ -23,6 +24,8 @@ const DETAIL_RENDERERS = {
   lock: renderLockDetail,
   vacuum: renderVacuumDetail,
   media: renderMediaDetail,
+  sensor: renderSensorDetail,
+  weather: renderWeatherDetail,
 } satisfies Record<WidgetDetailRenderer, DetailRenderer>;
 
 export function renderDefinedDetail(

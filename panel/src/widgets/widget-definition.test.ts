@@ -9,8 +9,10 @@ import {
   LIGHT_WIDGET_DEFINITION,
   LOCK_WIDGET_DEFINITION,
   MEDIA_WIDGET_DEFINITION,
+  SENSOR_WIDGET_DEFINITION,
   SWITCH_WIDGET_DEFINITION,
   VACUUM_WIDGET_DEFINITION,
+  WEATHER_WIDGET_DEFINITION,
   WIDGET_DEFINITIONS,
   widgetDefinition,
 } from "./widget-definition.js";
@@ -85,6 +87,20 @@ const mediaConfig: WidgetConfig = {
   size: sizes("2x1", "2x1", "2x2"),
 };
 
+const sensorConfig: WidgetConfig = {
+  id: "sensor-test",
+  type: "sensor",
+  entity: "sensor.test",
+  size: sizes("1x1", "2x1", "2x2"),
+};
+
+const weatherConfig: WidgetConfig = {
+  id: "weather-test",
+  type: "weather",
+  entity: "weather.test",
+  size: sizes("2x1", "1x2", "2x2"),
+};
+
 function entity(entityId: string, state: string, attributes: Record<string, unknown>): HassEntity {
   return {
     entity_id: entityId,
@@ -131,6 +147,16 @@ function hass(): HomeAssistant {
       app_name: "Music",
       supported_features: 1 | 16 | 32 | 16384,
     }),
+    entity("sensor.test", "21.4", {
+      friendly_name: "Test sensor",
+      unit_of_measurement: "°C",
+    }),
+    entity("weather.test", "partlycloudy", {
+      friendly_name: "Test weather",
+      temperature: 20,
+      humidity: 58,
+      forecast: [],
+    }),
   ];
   return {
     states: Object.fromEntries(states.map((state) => [state.entity_id, state])),
@@ -151,11 +177,15 @@ describe("widget definitions", () => {
       "lock",
       "vacuum",
       "media",
+      "sensor",
+      "weather",
     ]);
     expect(widgetDefinition("light")).toBe(LIGHT_WIDGET_DEFINITION);
     expect(widgetDefinition("climate")).toBe(CLIMATE_WIDGET_DEFINITION);
     expect(widgetDefinition("vacuum")).toBe(VACUUM_WIDGET_DEFINITION);
-    expect(widgetDefinition("sensor")).toBeUndefined();
+    expect(widgetDefinition("sensor")).toBe(SENSOR_WIDGET_DEFINITION);
+    expect(widgetDefinition("weather")).toBe(WEATHER_WIDGET_DEFINITION);
+    expect(widgetDefinition("camera")).toBeUndefined();
 
     for (const definition of [
       LIGHT_WIDGET_DEFINITION,
@@ -178,6 +208,8 @@ describe("widget definitions", () => {
       LOCK_WIDGET_DEFINITION,
       VACUUM_WIDGET_DEFINITION,
       MEDIA_WIDGET_DEFINITION,
+      SENSOR_WIDGET_DEFINITION,
+      WEATHER_WIDGET_DEFINITION,
     ]) {
       expect(definition.icon).toMatch(/^mdi:/);
       expect(definition.requiresEntity).toBe(true);
@@ -198,8 +230,12 @@ describe("widget definitions", () => {
       lock: "lock",
       vacuum: "vacuum",
       media: "media",
+      sensor: "sensor",
+      weather: "weather",
     });
     expect(MEDIA_WIDGET_DEFINITION.section).toBe("media");
+    expect(SENSOR_WIDGET_DEFINITION.section).toBe("sensors");
+    expect(WEATHER_WIDGET_DEFINITION.section).toBe("sensors");
   });
 
   it("declares every entity dependency, including climate companion switches", () => {
@@ -215,6 +251,8 @@ describe("widget definitions", () => {
     expect(LOCK_WIDGET_DEFINITION.dependencyIds(lockConfig)).toEqual(["lock.test"]);
     expect(VACUUM_WIDGET_DEFINITION.dependencyIds(vacuumConfig)).toEqual(["vacuum.test"]);
     expect(MEDIA_WIDGET_DEFINITION.dependencyIds(mediaConfig)).toEqual(["media_player.test"]);
+    expect(SENSOR_WIDGET_DEFINITION.dependencyIds(sensorConfig)).toEqual(["sensor.test"]);
+    expect(WEATHER_WIDGET_DEFINITION.dependencyIds(weatherConfig)).toEqual(["weather.test"]);
   });
 
   it("keeps split device elements unloaded until their definition is requested", () => {
@@ -222,6 +260,8 @@ describe("widget definitions", () => {
     expect(customElements.get(FAN_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(LOCK_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(MEDIA_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(SENSOR_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(WEATHER_WIDGET_DEFINITION.tag)).toBeUndefined();
   });
 
   it("validates climate-specific options at the definition boundary", () => {
@@ -258,6 +298,8 @@ describe("widget definitions", () => {
       [LOCK_WIDGET_DEFINITION, lockConfig],
       [VACUUM_WIDGET_DEFINITION, vacuumConfig],
       [MEDIA_WIDGET_DEFINITION, mediaConfig],
+      [SENSOR_WIDGET_DEFINITION, sensorConfig],
+      [WEATHER_WIDGET_DEFINITION, weatherConfig],
     ] as const) {
       expect(widgetTag(definition.type)).toBe(definition.tag);
       await definition.load();

@@ -231,6 +231,9 @@ Progress — 2026-08-20:
   union, moved its size/tag/section/detail metadata out of the legacy tables,
   and verified registered detail routing and responsive footprints with the
   suite at 154 tests;
+- migrated sensor and weather into typed, independently loaded widget
+  definitions, moving their footprint/section/detail metadata out of the legacy
+  tables and adding responsive validation coverage with the suite at 155 tests;
 - still to do in Phase 1: migrate the remaining catalogue and its loose option
   records and introduce the reusable HA/async/profile controllers.
 
@@ -356,8 +359,8 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 Complete the Phase 1 contract before changing placement semantics:
 
-1. expand the discriminated option union and definitions through the remaining
-   sensor and action widget families;
+1. split and migrate the remaining presence, binary-sensor, camera, and action
+   widget families into the discriminated contract;
 2. introduce the reusable HA/async/profile controllers and finish contract
    coverage for the remaining catalogue;
 3. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix

@@ -95,6 +95,33 @@ describe("validateConfig", () => {
     expect(result.sanitized.views[0].widgets).toHaveLength(0);
   });
 
+  it("uses sensor-family definitions for responsive footprint validation", () => {
+    const bad = structuredClone(okConfig);
+    bad.views[0].widgets = [
+      {
+        id: "sensor",
+        type: "sensor",
+        entity: "sensor.test",
+        size: { compact: "3x3", medium: "3x3", wide: "3x3" },
+      },
+      {
+        id: "weather",
+        type: "weather",
+        entity: "weather.test",
+        size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+      },
+    ];
+
+    const result = validateConfig(bad);
+
+    expect(result.ok).toBe(false);
+    expect(result.issues.some((issue) =>
+      issue.message.includes('Widget type "sensor" does not support size "3x3"'))).toBe(true);
+    expect(result.issues.some((issue) =>
+      issue.message.includes('Widget type "weather" does not support size "1x1"'))).toBe(true);
+    expect(result.sanitized.views[0].widgets).toHaveLength(0);
+  });
+
   it("validates migrated vacuum hero options", () => {
     const bad = structuredClone(okConfig);
     bad.views[0].widgets[0] = {

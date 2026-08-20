@@ -13,7 +13,6 @@ import {
   renderSolarChargingDetail,
 } from "./energy-detail.js";
 import { renderLightDetail, rgbToHs } from "./light-detail.js";
-import { renderSensorDetail, renderWeatherDetail } from "./sensor-detail.js";
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
 
@@ -285,7 +284,7 @@ describe("domain detail modules", () => {
     const sensorContext = context(sensor, sensorConfig);
     sensorContext.ctx.trend = [19.5, 20.2, 21.4];
     const sensorContainer = document.createElement("div");
-    render(renderSensorDetail(sensorContext.ctx, sensor), sensorContainer);
+    render(renderDefinedDetail("sensor", sensorContext.ctx, sensor), sensorContainer);
     expect(sensorContainer.textContent).toContain("Last 24 hours");
     expect(sensorContainer.querySelector("hd-trend")).not.toBeNull();
 
@@ -307,7 +306,7 @@ describe("domain detail modules", () => {
       templow: 15,
     }];
     const weatherContainer = document.createElement("div");
-    render(renderWeatherDetail(weatherContext.ctx, weather), weatherContainer);
+    render(renderDefinedDetail("weather", weatherContext.ctx, weather), weatherContainer);
     expect(weatherContainer.textContent).toContain("Forecast");
     expect(weatherContainer.textContent).toContain("24° / 15°");
   });

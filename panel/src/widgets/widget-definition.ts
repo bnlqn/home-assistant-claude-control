@@ -24,7 +24,9 @@ export type WidgetDetailRenderer =
   | "cover"
   | "lock"
   | "vacuum"
-  | "media";
+  | "media"
+  | "sensor"
+  | "weather";
 
 /**
  * The single contract for a reusable dashboard widget.
@@ -254,6 +256,38 @@ export const MEDIA_WIDGET_DEFINITION = {
   detailRenderer: "media",
 } satisfies WidgetDefinition<"media">;
 
+export const SENSOR_WIDGET_DEFINITION = {
+  type: "sensor",
+  tag: "hd-widget-sensor",
+  label: "Sensor",
+  icon: "mdi:gauge",
+  load: () => import("./sensor.js"),
+  supportedSizes: ["1x1", "2x1", "1x2", "2x2"],
+  defaultSize: { compact: "1x1", medium: "2x1", wide: "2x2" },
+  requiresEntity: true,
+  section: "sensors",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "sensor",
+} satisfies WidgetDefinition<"sensor">;
+
+export const WEATHER_WIDGET_DEFINITION = {
+  type: "weather",
+  tag: "hd-widget-weather",
+  label: "Weather",
+  icon: "mdi:weather-partly-cloudy",
+  load: () => import("./weather.js"),
+  supportedSizes: ["2x1", "1x2", "2x2"],
+  defaultSize: { compact: "2x1", medium: "2x1", wide: "2x2" },
+  requiresEntity: true,
+  section: "sensors",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => config.entity ? [config.entity] : [],
+  detailRenderer: "weather",
+} satisfies WidgetDefinition<"weather">;
+
 type MigratedWidgetType =
   | "light"
   | "climate"
@@ -262,7 +296,9 @@ type MigratedWidgetType =
   | "cover"
   | "lock"
   | "vacuum"
-  | "media";
+  | "media"
+  | "sensor"
+  | "weather";
 type WidgetDefinitionMap = {
   [Type in MigratedWidgetType]: WidgetDefinition<Type>;
 };
@@ -275,6 +311,8 @@ const DEFINITIONS = {
   lock: LOCK_WIDGET_DEFINITION,
   vacuum: VACUUM_WIDGET_DEFINITION,
   media: MEDIA_WIDGET_DEFINITION,
+  sensor: SENSOR_WIDGET_DEFINITION,
+  weather: WEATHER_WIDGET_DEFINITION,
 } satisfies WidgetDefinitionMap;
 
 type AnyWidgetDefinitionMap = {

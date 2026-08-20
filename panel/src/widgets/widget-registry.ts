@@ -4,8 +4,6 @@ import { widgetDefinition } from "./widget-definition.js";
 // Side-effect imports register every widget custom element.
 import "./group.js";
 import "./basic.js";
-import "./sensor.js";
-import "./weather.js";
 import "./energy.js";
 import "./powerflow.js";
 import "./solarcharging.js";
@@ -16,14 +14,12 @@ import "./extra.js";
 
 const LEGACY_WIDGET_TAGS: Record<LegacyWidgetType, string> = {
   group: "hd-group",
-  sensor: "hd-widget-sensor",
   binary_sensor: "hd-widget-binary",
   person: "hd-widget-person",
   scene: "hd-widget-scene",
   script: "hd-widget-script",
   button: "hd-widget-button",
   camera: "hd-widget-camera",
-  weather: "hd-widget-weather",
   energy: "hd-widget-energy",
   powerflow: "hd-widget-powerflow",
   solarcharging: "hd-widget-solarcharging",

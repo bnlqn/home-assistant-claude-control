@@ -24,6 +24,12 @@ type SwitchRejectsAllOptions = Assert<
 type MediaRejectsAllOptions = Assert<
   WidgetConfigOf<"media">["options"] extends undefined ? true : false
 >;
+type SensorRejectsAllOptions = Assert<
+  WidgetConfigOf<"sensor">["options"] extends undefined ? true : false
+>;
+type WeatherRejectsAllOptions = Assert<
+  WidgetConfigOf<"weather">["options"] extends undefined ? true : false
+>;
 type VacuumRejectsEnergyOptions = Assert<DoesNotHave<VacuumWidgetOptions, "gridPower">>;
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
@@ -53,6 +59,18 @@ const validTypedWidgetFixtures: WidgetConfig[] = [
     id: "typed-media",
     type: "media",
     entity: "media_player.test",
+    size,
+  },
+  {
+    id: "typed-sensor",
+    type: "sensor",
+    entity: "sensor.test",
+    size,
+  },
+  {
+    id: "typed-weather",
+    type: "weather",
+    entity: "weather.test",
     size,
   },
 ];
@@ -102,6 +120,22 @@ const invalidTypedWidgetFixtures: WidgetConfig[] = [
     size,
     options: { source: "TV" },
   },
+  // @ts-expect-error Sensor widgets do not accept an options bag.
+  {
+    id: "invalid-sensor",
+    type: "sensor",
+    entity: "sensor.test",
+    size,
+    options: { hours: 48 },
+  },
+  // @ts-expect-error Weather widgets do not accept an options bag.
+  {
+    id: "invalid-weather",
+    type: "weather",
+    entity: "weather.test",
+    size,
+    options: { forecast: "hourly" },
+  },
 ];
 
 void validTypedWidgetFixtures;
@@ -113,4 +147,6 @@ export type WidgetOptionContractAssertions =
   | LightRejectsAllOptions
   | SwitchRejectsAllOptions
   | MediaRejectsAllOptions
+  | SensorRejectsAllOptions
+  | WeatherRejectsAllOptions
   | VacuumRejectsEnergyOptions;
