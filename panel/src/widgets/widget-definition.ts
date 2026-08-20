@@ -1,13 +1,17 @@
 import type {
+  GroupOptions,
   SectionKind,
+  WidgetConfig,
   WidgetConfigOf,
   WidgetSize,
   WidgetSizeSet,
   WidgetType,
 } from "../config/schema.js";
+import { ALL_SIZES, SECTION_KINDS } from "../config/schema.js";
 import type {
   ActionWidgetOptions,
   ClimateSwitchOption,
+  MetricTileWidgetOptions,
   VacuumWidgetOptions,
 } from "../config/widget-options.js";
 
@@ -27,7 +31,10 @@ export type WidgetDetailRenderer =
   | "vacuum"
   | "media"
   | "sensor"
-  | "weather";
+  | "weather"
+  | "energy"
+  | "powerflow"
+  | "solarcharging";
 
 /**
  * The single contract for a reusable dashboard widget.
@@ -138,6 +145,110 @@ function validateActionOptions(options: unknown): WidgetOptionIssue[] {
   }
   if (value.target !== undefined && !isOptionRecord(value.target)) {
     issues.push({ path: "target", message: "Action `target` must be an object." });
+  }
+  return issues;
+}
+
+function configuredEntityIds(value: unknown): string[] {
+  if (typeof value === "string") return ENTITY_ID_RE.test(value) ? [value] : [];
+  if (Array.isArray(value)) return value.flatMap(configuredEntityIds);
+  if (!value || typeof value !== "object") return [];
+  return Object.values(value as Record<string, unknown>).flatMap(configuredEntityIds);
+}
+
+function widgetDependencyIds(config: WidgetConfig): string[] {
+  const ids = config.entity ? [config.entity] : [];
+  if (config.type === "action") return ids;
+  ids.push(...configuredEntityIds(config.options));
+  return [...new Set(ids)];
+}
+
+function validateEntityOptions(
+  options: unknown,
+  label: string,
+  keys: readonly string[],
+): WidgetOptionIssue[] {
+  if (options === undefined) return [];
+  if (!isOptionRecord(options)) {
+    return [{ path: "", message: `${label} options must be an object.` }];
+  }
+  const issues: WidgetOptionIssue[] = [];
+  for (const key of keys) {
+    const entityId = options[key];
+    if (entityId !== undefined && (typeof entityId !== "string" || !ENTITY_ID_RE.test(entityId))) {
+      issues.push({ path: key, message: `${label} \`${key}\` must be a valid entity_id.` });
+    }
+  }
+  return issues;
+}
+
+function validateGroupOptions(options: unknown): WidgetOptionIssue[] {
+  if (!isOptionRecord(options)) return [{ path: "", message: "Group options must be an object." }];
+  const value = options as Partial<GroupOptions>;
+  const issues: WidgetOptionIssue[] = [];
+  if (value.label !== undefined && typeof value.label !== "string") {
+    issues.push({ path: "label", message: "Group `label` must be a string." });
+  }
+  if (value.variant !== undefined && !SECTION_KINDS.includes(value.variant)) {
+    issues.push({ path: "variant", message: `Group \`variant\` must be one of: ${SECTION_KINDS.join(", ")}.` });
+  }
+  if (!Array.isArray(value.children) || value.children.length === 0) {
+    issues.push({ path: "children", message: "Group `children` must be a non-empty array." });
+  }
+  return issues;
+}
+
+function validateMetricTileOptions(options: unknown): WidgetOptionIssue[] {
+  const issues = validateEntityOptions(options, "Metric tile", ["chargeStatus", "connected"]);
+  if (!isOptionRecord(options)) return issues;
+  const value = options as Partial<MetricTileWidgetOptions>;
+  const accents = ["idle", "unavailable", "accent", "light", "heat", "cool", "eco", "warn", "alert"];
+  if (value.accent !== undefined && !accents.includes(value.accent)) {
+    issues.push({ path: "accent", message: "Metric tile `accent` is not supported." });
+  }
+  if (value.format !== undefined && !["power", "percent", "state"].includes(value.format)) {
+    issues.push({ path: "format", message: "Metric tile `format` is not supported." });
+  }
+  if (value.status !== undefined && !["gridDirection", "carCharge", "none"].includes(value.status)) {
+    issues.push({ path: "status", message: "Metric tile `status` is not supported." });
+  }
+  return issues;
+}
+
+const SOLAR_CHARGING_ENTITY_KEYS = [
+  "master",
+  "vehicleConnected",
+  "chargingState",
+  "wallStatus",
+  "chargePower",
+  "battery",
+  "chargeLimit",
+  "sessionEnergy",
+  "chargeRate",
+  "chargeCurrent",
+  "startThreshold",
+  "stopThreshold",
+  "minCurrent",
+  "deadband",
+] as const;
+
+function validateSolarChargingOptions(options: unknown): WidgetOptionIssue[] {
+  const issues = validateEntityOptions(options, "Solar charging", SOLAR_CHARGING_ENTITY_KEYS);
+  if (!isOptionRecord(options)) return issues;
+  if (options.brand !== undefined && options.brand !== "tesla") {
+    issues.push({ path: "brand", message: "Solar charging `brand` must be `tesla`." });
+  }
+  if (options.branded !== undefined && typeof options.branded !== "boolean") {
+    issues.push({ path: "branded", message: "Solar charging `branded` must be a boolean." });
+  }
+  return issues;
+}
+
+function validateEnergyChartOptions(options: unknown): WidgetOptionIssue[] {
+  const issues = validateEntityOptions(options, "Energy chart", ["gridImport", "gridExport", "solar", "car"]);
+  if (!isOptionRecord(options)) return issues;
+  if (options.defaultPeriod !== undefined && !["day", "week", "month"].includes(options.defaultPeriod as string)) {
+    issues.push({ path: "defaultPeriod", message: "Energy chart `defaultPeriod` must be day, week, or month." });
   }
   return issues;
 }
@@ -432,27 +543,130 @@ export const ACTION_WIDGET_DEFINITION = {
   validateOptions: validateActionOptions,
 } satisfies WidgetDefinition<"action">;
 
-type MigratedWidgetType =
-  | "light"
-  | "climate"
-  | "switch"
-  | "fan"
-  | "cover"
-  | "lock"
-  | "vacuum"
-  | "media"
-  | "sensor"
-  | "weather"
-  | "binary_sensor"
-  | "person"
-  | "camera"
-  | "scene"
-  | "script"
-  | "button"
-  | "alarm"
-  | "action";
+export const GROUP_WIDGET_DEFINITION = {
+  type: "group",
+  tag: "hd-group",
+  label: "Group",
+  icon: "mdi:view-grid-outline",
+  load: () => import("./group.js"),
+  supportedSizes: ALL_SIZES,
+  defaultSize: { compact: "4x2", medium: "4x2", wide: "4x2" },
+  requiresEntity: false,
+  section: "devices",
+  quickAction: "none",
+  hasDetail: false,
+  dependencyIds: (config) => widgetDependencyIds(config),
+  validateOptions: validateGroupOptions,
+} satisfies WidgetDefinition<"group">;
+
+export const ENERGY_WIDGET_DEFINITION = {
+  type: "energy",
+  tag: "hd-widget-energy",
+  label: "Energy",
+  icon: "mdi:lightning-bolt-outline",
+  load: () => import("./energy.js"),
+  supportedSizes: ["2x1", "1x2", "2x2"],
+  defaultSize: { compact: "2x1", medium: "2x2", wide: "2x2" },
+  requiresEntity: false,
+  section: "energy",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => widgetDependencyIds(config),
+  validateOptions: (options) => validateEntityOptions(options, "Energy", [
+    "gridPower", "solarPower", "solarToday", "forecastEndOfDay", "solarForecastRemaining",
+  ]),
+  detailRenderer: "energy",
+} satisfies WidgetDefinition<"energy">;
+
+export const POWERFLOW_WIDGET_DEFINITION = {
+  type: "powerflow",
+  tag: "hd-widget-powerflow",
+  label: "Power flow",
+  icon: "mdi:transmission-tower",
+  load: () => import("./powerflow.js"),
+  supportedSizes: ["2x2", "3x3"],
+  defaultSize: { compact: "2x2", medium: "3x3", wide: "3x3" },
+  requiresEntity: false,
+  section: "energy",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => widgetDependencyIds(config),
+  validateOptions: (options) => validateEntityOptions(options, "Power flow", [
+    "gridPower", "solarPower", "houseConsumption", "carPower", "carPowerAlt", "carActive", "carActiveAlt",
+  ]),
+  detailRenderer: "powerflow",
+} satisfies WidgetDefinition<"powerflow">;
+
+export const SOLAR_CHARGING_WIDGET_DEFINITION = {
+  type: "solarcharging",
+  tag: "hd-widget-solarcharging",
+  label: "Solar charging",
+  icon: "mdi:car-electric",
+  load: () => import("./solarcharging.js"),
+  supportedSizes: ["2x1", "1x2", "2x2"],
+  defaultSize: { compact: "2x1", medium: "2x2", wide: "2x2" },
+  requiresEntity: false,
+  section: "energy",
+  quickAction: "toggle",
+  hasDetail: true,
+  dependencyIds: (config) => widgetDependencyIds(config),
+  validateOptions: validateSolarChargingOptions,
+  detailRenderer: "solarcharging",
+} satisfies WidgetDefinition<"solarcharging">;
+
+export const ENERGY_CHART_WIDGET_DEFINITION = {
+  type: "energychart",
+  tag: "hd-widget-energychart",
+  label: "Energy chart",
+  icon: "mdi:chart-bar",
+  load: () => import("./energychart.js"),
+  supportedSizes: ["2x2", "4x2"],
+  defaultSize: { compact: "2x2", medium: "4x2", wide: "4x2" },
+  requiresEntity: false,
+  section: "energy",
+  quickAction: "none",
+  hasDetail: false,
+  dependencyIds: (config) => widgetDependencyIds(config),
+  validateOptions: validateEnergyChartOptions,
+} satisfies WidgetDefinition<"energychart">;
+
+export const METRIC_TILE_WIDGET_DEFINITION = {
+  type: "metrictile",
+  tag: "hd-widget-metrictile",
+  label: "Metric tile",
+  icon: "mdi:gauge",
+  load: () => import("./metric-tile.js"),
+  supportedSizes: ["1x1", "2x1"],
+  defaultSize: { compact: "1x1", medium: "1x1", wide: "2x1" },
+  requiresEntity: true,
+  section: "energy",
+  quickAction: "none",
+  hasDetail: true,
+  dependencyIds: (config) => widgetDependencyIds(config),
+  validateOptions: validateMetricTileOptions,
+  detailRenderer: "generic",
+} satisfies WidgetDefinition<"metrictile">;
+
+export const ELECTRICITY_TOTAL_WIDGET_DEFINITION = {
+  type: "electricitytotal",
+  tag: "hd-widget-electricitytotal",
+  label: "Electricity total",
+  icon: "mdi:flash",
+  load: () => import("./electricity-total.js"),
+  supportedSizes: ["2x2", "4x2"],
+  defaultSize: { compact: "2x2", medium: "4x2", wide: "4x2" },
+  requiresEntity: false,
+  section: "energy",
+  quickAction: "none",
+  hasDetail: false,
+  dependencyIds: (config) => widgetDependencyIds(config),
+  validateOptions: (options) => validateEntityOptions(options, "Electricity total", [
+    "importEnergy", "exportEnergy",
+  ]),
+} satisfies WidgetDefinition<"electricitytotal">;
+
 type WidgetDefinitionMap = {
-  [Type in MigratedWidgetType]: WidgetDefinition<Type>;
+  [Type in WidgetType]: WidgetDefinition<Type>;
 };
 const DEFINITIONS = {
   light: LIGHT_WIDGET_DEFINITION,
@@ -473,14 +687,17 @@ const DEFINITIONS = {
   button: BUTTON_WIDGET_DEFINITION,
   alarm: ALARM_WIDGET_DEFINITION,
   action: ACTION_WIDGET_DEFINITION,
+  group: GROUP_WIDGET_DEFINITION,
+  energy: ENERGY_WIDGET_DEFINITION,
+  powerflow: POWERFLOW_WIDGET_DEFINITION,
+  solarcharging: SOLAR_CHARGING_WIDGET_DEFINITION,
+  energychart: ENERGY_CHART_WIDGET_DEFINITION,
+  metrictile: METRIC_TILE_WIDGET_DEFINITION,
+  electricitytotal: ELECTRICITY_TOTAL_WIDGET_DEFINITION,
 } satisfies WidgetDefinitionMap;
 
-type AnyWidgetDefinitionMap = {
-  [Type in WidgetType]: WidgetDefinition<Type>;
-};
+export const WIDGET_DEFINITIONS: Readonly<WidgetDefinitionMap> = DEFINITIONS;
 
-export const WIDGET_DEFINITIONS: Readonly<Partial<AnyWidgetDefinitionMap>> = DEFINITIONS;
-
-export function widgetDefinition<Type extends WidgetType>(type: Type): WidgetDefinition<Type> | undefined {
+export function widgetDefinition<Type extends WidgetType>(type: Type): WidgetDefinition<Type> {
   return WIDGET_DEFINITIONS[type];
 }

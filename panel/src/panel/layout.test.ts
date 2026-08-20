@@ -26,7 +26,7 @@ const w = (id: string, type: WidgetConfig["type"], entity?: string): WidgetConfi
   ...(entity ? { entity } : {}),
   size: sz,
 }) as WidgetConfig;
-const opts = (g: WidgetConfig): GroupOptions => g.options as unknown as GroupOptions;
+const opts = (group: WidgetConfig): GroupOptions => group.type === "group" ? group.options : {};
 
 describe("responsive grid metrics", () => {
   it("chooses the right column count / bucket per width", () => {
@@ -166,7 +166,7 @@ describe("sectioniseView", () => {
 
   it("passes a hand-composed view through untouched when it already has a group", () => {
     const manual: WidgetConfig[] = [
-      { id: "g", type: "group", size: sz, options: { label: "Mine", variant: "devices", children: [w("l1", "light", "light.a")] } as unknown as Record<string, unknown> },
+      { id: "g", type: "group", size: sz, options: { label: "Mine", variant: "devices", children: [w("l1", "light", "light.a")] } },
       w("s1", "sensor", "sensor.a"),
     ];
     const out = sectioniseView(manual);

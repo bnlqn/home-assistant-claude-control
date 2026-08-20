@@ -73,7 +73,7 @@ config/www/home-dashboard/home-dashboard-panel.js
 config/www/home-dashboard/assets/**/*.webp
 ```
 
-The optimized 2026-08-20 baseline is 369 kB JavaScript (97 kB gzip) and
+The optimized 2026-08-20 baseline is 376 kB JavaScript (98 kB gzip) and
 approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
 flows are five packed animated WebPs plus reduced-motion stills. See
 [Build baseline and budgets](#build-baseline-and-budgets).
@@ -269,7 +269,7 @@ panel/src/
   primitives/       icon · icon-button · toggle · slider · segmented · misc (progress/badge/skeleton/trend)
                     · surface (sheet/drawer/dialog) · confirm-dialog · toast · feedback bus · registry
   widgets/          widget-frame · base-widget · widget-definition · widget-registry · one module per domain
-  details/          detail-surface · detail-context · detail-registry · domain renderers · legacy controllers
+  details/          detail-surface · detail-context · detail-data · detail-registry · domain renderers
   dev/              mock-hass.ts · main.ts (dev harness — never shipped)
   testing/          fixtures + Vitest setup
 ```
@@ -282,19 +282,16 @@ Key ideas:
 - **Capability-driven.** Brightness, colour, fan mode, tilt, source, etc. are
   only offered when the entity's `supported_features` / attributes advertise
   them (`home-assistant/capabilities.ts`).
-- **One widget contract, migrated incrementally.** `widget-definition.ts`
+- **One widget contract.** `widget-definition.ts`
   centralizes tag/loading, footprints, entity dependencies, section placement,
-  quick-action/detail metadata, and widget-specific option validation. Light,
-  climate, switch, fan, cover, lock, vacuum, media, sensor, weather, person,
-  binary sensor, camera, scene, script, button, alarm, and entityless action now
-  use the contract; legacy widgets retain their existing tables until each is
-  migrated with coverage.
+  quick-action/detail metadata, and widget-specific option validation for every
+  widget type. There are no parallel legacy size, entity, tag, section, or
+  detail-routing tables.
 - **Detail domains stay independent.** Every detail body implements the small
   `DetailContext` contract in a focused domain module. Registered light,
-  climate, device, media, sensor, weather, presence, and camera widgets select
-  their renderer through the typed definition registry; a 66-line
-  `controllers.ts` router preserves fallback routing for widget domains that
-  have not yet migrated their definitions.
+  widget detail selects its renderer through the typed definition registry,
+  including entityless Energy composites. History and forecast loading policy
+  lives separately in `detail-data.ts`; there is no compatibility domain switch.
 - **Performance.** Each widget re-renders only when a **referenced** entity's
   state object changes by reference (or connectivity/size changes) — the
   frequently-changing full `hass` object doesn't re-render the whole grid.
@@ -314,8 +311,8 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 369 kB | 390 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 97 kB | 105 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 376 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 98 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
@@ -328,7 +325,7 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 159 Vitest cases covering config validation, widget-size
+`npm test` runs 161 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,

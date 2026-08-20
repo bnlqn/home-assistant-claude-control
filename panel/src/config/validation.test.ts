@@ -257,6 +257,33 @@ describe("validateConfig", () => {
     expect(result.sanitized.views[0].widgets).toHaveLength(0);
   });
 
+  it("validates composite widget entity maps through their definitions", () => {
+    const bad = structuredClone(okConfig);
+    bad.views[0].widgets = [
+      {
+        id: "energy",
+        type: "energy",
+        size: { compact: "2x1", medium: "2x2", wide: "2x2" },
+        options: { gridPower: "invalid" },
+      },
+      {
+        id: "metric",
+        type: "metrictile",
+        entity: "sensor.test",
+        size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+        options: { accent: "pink", connected: "invalid" },
+      } as unknown as WidgetConfig,
+    ];
+
+    const result = validateConfig(bad);
+
+    expect(result.ok).toBe(false);
+    expect(result.issues.some((issue) => issue.path.endsWith("options.gridPower"))).toBe(true);
+    expect(result.issues.some((issue) => issue.path.endsWith("options.connected"))).toBe(true);
+    expect(result.issues.some((issue) => issue.path.endsWith("options.accent"))).toBe(true);
+    expect(result.sanitized.views[0].widgets).toHaveLength(0);
+  });
+
   it("flags a malformed entity id", () => {
     const bad = structuredClone(okConfig);
     bad.views[0].widgets[0].entity = "not-an-entity";

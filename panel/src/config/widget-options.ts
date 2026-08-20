@@ -90,3 +90,22 @@ export interface ElectricityTotalWidgetOptions {
   /** `total_increasing` grid-export energy statistic id. */
   exportEnergy?: string;
 }
+
+export type MetricTileAccent =
+  | "idle"
+  | "unavailable"
+  | "accent"
+  | "light"
+  | "heat"
+  | "cool"
+  | "eco"
+  | "warn"
+  | "alert";
+
+export interface MetricTileWidgetOptions {
+  accent?: MetricTileAccent;
+  format?: "power" | "percent" | "state";
+  status?: "gridDirection" | "carCharge" | "none";
+  chargeStatus?: string;
+  connected?: string;
+}

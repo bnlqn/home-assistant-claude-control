@@ -4,9 +4,6 @@ import {
   BREAKPOINTS,
   DashboardConfig,
   GroupOptions,
-  LEGACY_ENTITYLESS_TYPES,
-  LEGACY_SUPPORTED_SIZES,
-  LegacyWidgetType,
   ViewConfig,
   WidgetConfig,
   WidgetType,
@@ -156,8 +153,7 @@ function validateWidget(
   let valid = true;
 
   // Entity presence + shape.
-  const needsEntity = definition?.requiresEntity ??
-    !LEGACY_ENTITYLESS_TYPES.includes(type as LegacyWidgetType);
+  const needsEntity = definition.requiresEntity;
   if (needsEntity && !widget.entity) {
     err(`${wpath}.entity`, `Widget "${widget.id}" (${type}) requires an \`entity\`.`);
     valid = false;
@@ -174,8 +170,7 @@ function validateWidget(
     err(`${wpath}.size`, `Widget "${widget.id}" is missing a size set.`);
     valid = false;
   } else {
-    const supportedSizes = definition?.supportedSizes ??
-      LEGACY_SUPPORTED_SIZES[type as LegacyWidgetType];
+    const supportedSizes = definition.supportedSizes;
     for (const bp of BREAKPOINTS) {
       const size = widget.size[bp];
       if (!size) {
@@ -200,7 +195,7 @@ function validateWidget(
 
   // Migrated widgets own their option contract. This keeps widget-specific
   // validation beside the definition instead of growing this central switch.
-  for (const issue of definition?.validateOptions?.(widget.options) ?? []) {
+  for (const issue of definition.validateOptions?.(widget.options) ?? []) {
     err(`${wpath}.options${issue.path ? `.${issue.path}` : ""}`, issue.message);
     valid = false;
   }

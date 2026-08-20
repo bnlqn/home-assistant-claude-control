@@ -6,6 +6,7 @@ import type {
   ActionWidgetOptions,
   ClimateWidgetOptions,
   EnergyWidgetOptions,
+  MetricTileWidgetOptions,
   VacuumWidgetOptions,
 } from "./widget-options.js";
 
@@ -53,6 +54,7 @@ type AlarmRejectsAllOptions = Assert<
   WidgetConfigOf<"alarm">["options"] extends undefined ? true : false
 >;
 type ActionRejectsClimateOptions = Assert<DoesNotHave<ActionWidgetOptions, "switches">>;
+type MetricTileRejectsEnergyOptions = Assert<DoesNotHave<MetricTileWidgetOptions, "gridPower">>;
 type VacuumRejectsEnergyOptions = Assert<DoesNotHave<VacuumWidgetOptions, "gridPower">>;
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
@@ -145,6 +147,27 @@ const validTypedWidgetFixtures: WidgetConfig[] = [
     size: { compact: "1x1", medium: "1x1", wide: "2x1" },
     options: { service: "light.turn_off", target: { entity_id: "light.test" } },
   },
+  {
+    id: "typed-metric",
+    type: "metrictile",
+    entity: "sensor.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    options: { accent: "accent", format: "power", status: "gridDirection" },
+  },
+  {
+    id: "typed-group",
+    type: "group",
+    size: { compact: "4x2", medium: "4x2", wide: "4x2" },
+    options: {
+      variant: "tiles",
+      children: [{
+        id: "typed-group-light",
+        type: "light",
+        entity: "light.test",
+        size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+      }],
+    },
+  },
 ];
 
 const invalidTypedWidgetFixtures: WidgetConfig[] = [
@@ -174,78 +197,86 @@ const invalidTypedWidgetFixtures: WidgetConfig[] = [
     size: { compact: "1x1", medium: "1x1", wide: "1x1" },
     options: { hero: true },
   },
-  // @ts-expect-error Vacuum brand is deliberately restricted.
   {
     id: "invalid-vacuum",
     type: "vacuum",
     entity: "vacuum.test",
     size,
+    // @ts-expect-error Vacuum brand is deliberately restricted.
     options: {
       brand: "unknown",
     },
   },
-  // @ts-expect-error Media widgets do not accept an options bag.
   {
     id: "invalid-media",
     type: "media",
     entity: "media_player.test",
     size,
+    // @ts-expect-error Media widgets do not accept an options bag.
     options: { source: "TV" },
   },
-  // @ts-expect-error Sensor widgets do not accept an options bag.
   {
     id: "invalid-sensor",
     type: "sensor",
     entity: "sensor.test",
     size,
+    // @ts-expect-error Sensor widgets do not accept an options bag.
     options: { hours: 48 },
   },
-  // @ts-expect-error Weather widgets do not accept an options bag.
   {
     id: "invalid-weather",
     type: "weather",
     entity: "weather.test",
     size,
+    // @ts-expect-error Weather widgets do not accept an options bag.
     options: { forecast: "hourly" },
   },
-  // @ts-expect-error Binary-sensor widgets do not accept an options bag.
   {
     id: "invalid-binary-sensor",
     type: "binary_sensor",
     entity: "binary_sensor.test",
     size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    // @ts-expect-error Binary-sensor widgets do not accept an options bag.
     options: { activeLabel: "Open" },
   },
-  // @ts-expect-error Person widgets do not accept an options bag.
   {
     id: "invalid-person",
     type: "person",
     entity: "person.test",
     size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    // @ts-expect-error Person widgets do not accept an options bag.
     options: { showMap: true },
   },
-  // @ts-expect-error Camera widgets do not accept an options bag.
   {
     id: "invalid-camera",
     type: "camera",
     entity: "camera.test",
     size,
+    // @ts-expect-error Camera widgets do not accept an options bag.
     options: { refreshSeconds: 5 },
   },
-  // @ts-expect-error Scene widgets do not accept an options bag.
   {
     id: "invalid-scene",
     type: "scene",
     entity: "scene.test",
     size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    // @ts-expect-error Scene widgets do not accept an options bag.
     options: { transition: 3 },
   },
-  // @ts-expect-error Action widgets require a service.
   {
     id: "invalid-action",
     type: "action",
     size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    // @ts-expect-error Action widgets require a service.
     options: { target: { entity_id: "light.test" } },
+  },
+  {
+    id: "invalid-metric",
+    type: "metrictile",
+    entity: "sensor.test",
+    size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+    // @ts-expect-error Metric tiles reject Energy widget options.
+    options: { gridPower: "sensor.grid_power" },
   },
 ];
 
@@ -268,4 +299,5 @@ export type WidgetOptionContractAssertions =
   | ButtonRejectsAllOptions
   | AlarmRejectsAllOptions
   | ActionRejectsClimateOptions
+  | MetricTileRejectsEnergyOptions
   | VacuumRejectsEnergyOptions;

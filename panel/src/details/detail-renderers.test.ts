@@ -6,12 +6,7 @@ import type { ServiceCall } from "../home-assistant/service-calls.js";
 import type { HassEntity, HomeAssistant } from "../types/hass.js";
 import { renderClimateDetail } from "./climate-detail.js";
 import type { DetailContext } from "./detail-context.js";
-import { renderDetailBody } from "./controllers.js";
 import { renderDefinedDetail } from "./detail-registry.js";
-import {
-  renderPowerflowDetail,
-  renderSolarChargingDetail,
-} from "./energy-detail.js";
 import { renderLightDetail, rgbToHs } from "./light-detail.js";
 
 const size = { compact: "2x1", medium: "2x1", wide: "2x2" } as const;
@@ -125,7 +120,7 @@ describe("climate detail renderer", () => {
     document.body.append(registered, fallback);
 
     render(renderDefinedDetail("climate", ctx, state), registered);
-    render(renderDetailBody(ctx), fallback);
+    render(renderClimateDetail(ctx, state), fallback);
 
     expect(registered.querySelectorAll("hd-segmented")).toHaveLength(4);
     expect(registered.querySelectorAll("hd-icon-button")).toHaveLength(2);
@@ -321,7 +316,7 @@ describe("domain detail modules", () => {
     };
     const energyContext = context(grid, energyConfig);
     const energyContainer = document.createElement("div");
-    render(renderDetailBody(energyContext.ctx), energyContainer);
+    render(renderDefinedDetail("energy", energyContext.ctx), energyContainer);
     expect(energyContainer.textContent).toContain("GridPower");
 
     const flowConfig: WidgetConfig = {
@@ -332,7 +327,7 @@ describe("domain detail modules", () => {
     };
     const flowContext = context(grid, flowConfig);
     const flowContainer = document.createElement("div");
-    render(renderPowerflowDetail(flowContext.ctx), flowContainer);
+    render(renderDefinedDetail("powerflow", flowContext.ctx), flowContainer);
     expect(flowContainer.querySelector("hd-flow-diagram")).not.toBeNull();
 
     const master = entity("input_boolean.solar_charging", "on", {});
@@ -344,7 +339,7 @@ describe("domain detail modules", () => {
     };
     const solarContext = context(master, solarConfig);
     const solarContainer = document.createElement("div");
-    render(renderSolarChargingDetail(solarContext.ctx), solarContainer);
+    render(renderDefinedDetail("solarcharging", solarContext.ctx), solarContainer);
     solarContainer.querySelector("hd-toggle")!.dispatchEvent(new CustomEvent("hd-toggle"));
     expect(solarContext.call).toHaveBeenCalledWith({
       domain: "input_boolean",

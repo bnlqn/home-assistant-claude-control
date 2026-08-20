@@ -1,7 +1,7 @@
 import { css, html, nothing, type TemplateResult } from "lit";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
-import type { AccentToken } from "../home-assistant/entity-adapters/index.js";
+import type { MetricTileWidgetOptions } from "../config/widget-options.js";
 import { accentVars } from "../home-assistant/entity-adapters/index.js";
 import { FLOW_DEADBAND_W, isCarActive, isCarConnected, toWatts } from "../home-assistant/energy-flow.js";
 import { formatNumber, formatState } from "../home-assistant/state-formatting.js";
@@ -16,23 +16,10 @@ import "../primitives/entity-icon.js";
  * express. It still extends `EntityWidget` for state-gated re-renders and the
  * shared detail-open behavior, and reads every entity from its config/options.
  */
-export interface MetricTileOptions {
-  /** Glyph color token (accent = blue, light = yellow, alert = red, …). */
-  accent?: AccentToken;
-  /** How to format the primary entity's value. */
-  format?: "power" | "percent" | "state";
-  /** Secondary status line. */
-  status?: "gridDirection" | "carCharge" | "none";
-  /** carCharge: charger status enum (e.g. Tesla wall-connector status). */
-  chargeStatus?: string;
-  /** carCharge: binary_sensor for "plugged in". */
-  connected?: string;
-}
-
 @define("hd-widget-metrictile")
 export class MetricTileWidget extends EntityWidget {
-  private get _opts(): MetricTileOptions {
-    return (this.config.options ?? {}) as MetricTileOptions;
+  private get _opts(): MetricTileWidgetOptions {
+    return this.config.type === "metrictile" ? this.config.options ?? {} : {};
   }
 
   protected override relevantEntityIds(): string[] {

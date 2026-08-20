@@ -11,8 +11,7 @@ import { widgetDefinition } from "../widgets/widget-definition.js";
 import {
   detailNeedsForecast,
   detailNeedsHistory,
-  renderDetailBody,
-} from "./controllers.js";
+} from "./detail-data.js";
 import type { DetailContext } from "./detail-context.js";
 import { renderDefinedDetail } from "./detail-registry.js";
 import "../primitives/surface.js";
@@ -415,11 +414,9 @@ export class HdDetail extends LitElement {
           : vm.displayState;
     const definition = this.config ? widgetDefinition(this.config.type) : undefined;
     const state = this.hass.states[this.entityId];
-    const body = this.open && definition?.detailRenderer && state
+    const body = this.open && definition?.detailRenderer
       ? renderDefinedDetail(definition.detailRenderer, ctx, state)
-      : this.open
-        ? renderDetailBody(ctx)
-        : nothing;
+      : nothing;
     return html`
       <hd-surface
         variant="auto"

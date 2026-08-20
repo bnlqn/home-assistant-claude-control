@@ -66,7 +66,7 @@ export class HdGroup extends LitElement {
   `;
 
   private get _opts(): GroupOptions {
-    return (this.config?.options ?? {}) as GroupOptions;
+    return this.config.type === "group" ? this.config.options : {};
   }
 
   private get _children(): WidgetConfig[] {

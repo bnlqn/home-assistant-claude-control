@@ -87,22 +87,7 @@ export const SECTION_LABELS: Record<SectionKind, string> = {
 
 /** The section a widget type auto-collects into. */
 export function sectionForWidgetType(type: WidgetType): SectionKind {
-  const definition = widgetDefinition(type);
-  if (definition) return definition.section;
-
-  switch (type) {
-    case "media":
-      return "media";
-    case "energy":
-    case "powerflow":
-    case "solarcharging":
-    case "energychart":
-      return "energy";
-    default:
-      // Scene, script, button, action, alarm, and any future unclassified type
-      // remain actionable device tiles until they gain their own definition.
-      return "devices";
-  }
+  return widgetDefinition(type).section;
 }
 
 /** The tile layout the frame should use for a container of the given variant. */
@@ -148,7 +133,7 @@ function syntheticGroup(kind: SectionKind, children: WidgetConfig[]): WidgetConf
     id: `__section_${kind}`,
     type: "group",
     size: GROUP_SIZE,
-    options: options as unknown as Record<string, unknown>,
+    options,
   };
 }
 

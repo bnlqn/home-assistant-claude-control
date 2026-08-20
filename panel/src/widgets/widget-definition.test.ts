@@ -10,17 +10,24 @@ import {
   CAMERA_WIDGET_DEFINITION,
   CLIMATE_WIDGET_DEFINITION,
   COVER_WIDGET_DEFINITION,
+  ELECTRICITY_TOTAL_WIDGET_DEFINITION,
+  ENERGY_CHART_WIDGET_DEFINITION,
+  ENERGY_WIDGET_DEFINITION,
   FAN_WIDGET_DEFINITION,
   LIGHT_WIDGET_DEFINITION,
   LOCK_WIDGET_DEFINITION,
   MEDIA_WIDGET_DEFINITION,
+  METRIC_TILE_WIDGET_DEFINITION,
   PERSON_WIDGET_DEFINITION,
+  POWERFLOW_WIDGET_DEFINITION,
   SCENE_WIDGET_DEFINITION,
   SCRIPT_WIDGET_DEFINITION,
+  SOLAR_CHARGING_WIDGET_DEFINITION,
   SENSOR_WIDGET_DEFINITION,
   SWITCH_WIDGET_DEFINITION,
   VACUUM_WIDGET_DEFINITION,
   WEATHER_WIDGET_DEFINITION,
+  GROUP_WIDGET_DEFINITION,
   WIDGET_DEFINITIONS,
   widgetDefinition,
 } from "./widget-definition.js";
@@ -166,6 +173,57 @@ const actionConfig: WidgetConfig = {
   options: { service: "light.turn_off", target: { entity_id: "light.test" } },
 };
 
+const metricTileConfig: WidgetConfig = {
+  id: "metric-test",
+  type: "metrictile",
+  entity: "sensor.grid_power",
+  name: "Grid power",
+  size: sizes("1x1", "1x1", "2x1"),
+  options: { accent: "accent", format: "power", status: "gridDirection" },
+};
+
+const groupConfig: WidgetConfig = {
+  id: "group-test",
+  type: "group",
+  size: sizes("4x2", "4x2", "4x2"),
+  options: { label: "Metrics", variant: "tiles", children: [metricTileConfig] },
+};
+
+const energyConfig: WidgetConfig = {
+  id: "energy-test",
+  type: "energy",
+  size: sizes("2x1", "2x2", "2x2"),
+  options: { gridPower: "sensor.grid_power", solarPower: "sensor.solar_power" },
+};
+
+const powerflowConfig: WidgetConfig = {
+  id: "powerflow-test",
+  type: "powerflow",
+  size: sizes("2x2", "3x3", "3x3"),
+  options: { gridPower: "sensor.grid_power", solarPower: "sensor.solar_power" },
+};
+
+const solarChargingConfig: WidgetConfig = {
+  id: "solar-charging-test",
+  type: "solarcharging",
+  size: sizes("2x1", "2x2", "2x2"),
+  options: { master: "input_boolean.solar_charging", battery: "sensor.battery" },
+};
+
+const energyChartConfig: WidgetConfig = {
+  id: "energy-chart-test",
+  type: "energychart",
+  size: sizes("2x2", "4x2", "4x2"),
+  options: { gridImport: "sensor.grid_import", defaultPeriod: "day" },
+};
+
+const electricityTotalConfig: WidgetConfig = {
+  id: "electricity-total-test",
+  type: "electricitytotal",
+  size: sizes("2x2", "4x2", "4x2"),
+  options: { importEnergy: "sensor.grid_import", exportEnergy: "sensor.grid_export" },
+};
+
 function entity(entityId: string, state: string, attributes: Record<string, unknown>): HassEntity {
   return {
     entity_id: entityId,
@@ -232,6 +290,12 @@ function hass(): HomeAssistant {
     entity("script.test", "off", { friendly_name: "Test script" }),
     entity("button.test", "unknown", { friendly_name: "Test button" }),
     entity("alarm_control_panel.test", "disarmed", { friendly_name: "Test alarm" }),
+    entity("sensor.grid_power", "900", { friendly_name: "Grid power", unit_of_measurement: "W" }),
+    entity("sensor.solar_power", "2400", { friendly_name: "Solar power", unit_of_measurement: "W" }),
+    entity("input_boolean.solar_charging", "on", { friendly_name: "Solar charging" }),
+    entity("sensor.battery", "75", { friendly_name: "Battery", unit_of_measurement: "%" }),
+    entity("sensor.grid_import", "12.4", { friendly_name: "Grid import", unit_of_measurement: "kWh" }),
+    entity("sensor.grid_export", "3.2", { friendly_name: "Grid export", unit_of_measurement: "kWh" }),
   ];
   return {
     states: Object.fromEntries(states.map((state) => [state.entity_id, state])),
@@ -262,6 +326,13 @@ describe("widget definitions", () => {
       "button",
       "alarm",
       "action",
+      "group",
+      "energy",
+      "powerflow",
+      "solarcharging",
+      "energychart",
+      "metrictile",
+      "electricitytotal",
     ]);
     expect(widgetDefinition("light")).toBe(LIGHT_WIDGET_DEFINITION);
     expect(widgetDefinition("climate")).toBe(CLIMATE_WIDGET_DEFINITION);
@@ -273,7 +344,9 @@ describe("widget definitions", () => {
     expect(widgetDefinition("camera")).toBe(CAMERA_WIDGET_DEFINITION);
     expect(widgetDefinition("scene")).toBe(SCENE_WIDGET_DEFINITION);
     expect(widgetDefinition("action")).toBe(ACTION_WIDGET_DEFINITION);
-    expect(widgetDefinition("metrictile")).toBeUndefined();
+    expect(widgetDefinition("group")).toBe(GROUP_WIDGET_DEFINITION);
+    expect(widgetDefinition("metrictile")).toBe(METRIC_TILE_WIDGET_DEFINITION);
+    expect(widgetDefinition("electricitytotal")).toBe(ELECTRICITY_TOTAL_WIDGET_DEFINITION);
 
     for (const definition of [
       LIGHT_WIDGET_DEFINITION,
@@ -288,6 +361,7 @@ describe("widget definitions", () => {
       SCRIPT_WIDGET_DEFINITION,
       BUTTON_WIDGET_DEFINITION,
       ALARM_WIDGET_DEFINITION,
+      GROUP_WIDGET_DEFINITION,
     ]) {
       expect(definition.section).toBe("devices");
     }
@@ -307,6 +381,7 @@ describe("widget definitions", () => {
       PERSON_WIDGET_DEFINITION,
       CAMERA_WIDGET_DEFINITION,
       ALARM_WIDGET_DEFINITION,
+      METRIC_TILE_WIDGET_DEFINITION,
     ]) {
       expect(definition.icon).toMatch(/^mdi:/);
       expect(definition.requiresEntity).toBe(true);
@@ -337,6 +412,13 @@ describe("widget definitions", () => {
       button: undefined,
       alarm: "generic",
       action: undefined,
+      group: undefined,
+      energy: "energy",
+      powerflow: "powerflow",
+      solarcharging: "solarcharging",
+      energychart: undefined,
+      metrictile: "generic",
+      electricitytotal: undefined,
     });
     expect(MEDIA_WIDGET_DEFINITION.section).toBe("media");
     expect(SENSOR_WIDGET_DEFINITION.section).toBe("sensors");
@@ -348,11 +430,26 @@ describe("widget definitions", () => {
       SCRIPT_WIDGET_DEFINITION,
       BUTTON_WIDGET_DEFINITION,
       ACTION_WIDGET_DEFINITION,
+      GROUP_WIDGET_DEFINITION,
+      ENERGY_CHART_WIDGET_DEFINITION,
+      ELECTRICITY_TOTAL_WIDGET_DEFINITION,
     ]) {
       expect(definition.hasDetail).toBe(false);
+    }
+    for (const definition of [SCENE_WIDGET_DEFINITION, SCRIPT_WIDGET_DEFINITION, BUTTON_WIDGET_DEFINITION, ACTION_WIDGET_DEFINITION]) {
       expect(definition.quickAction).toBe("activate");
     }
     expect(ACTION_WIDGET_DEFINITION.requiresEntity).toBe(false);
+    for (const definition of [
+      ENERGY_WIDGET_DEFINITION,
+      POWERFLOW_WIDGET_DEFINITION,
+      SOLAR_CHARGING_WIDGET_DEFINITION,
+      ENERGY_CHART_WIDGET_DEFINITION,
+      METRIC_TILE_WIDGET_DEFINITION,
+      ELECTRICITY_TOTAL_WIDGET_DEFINITION,
+    ]) {
+      expect(definition.section).toBe("energy");
+    }
   });
 
   it("declares every entity dependency, including climate companion switches", () => {
@@ -378,6 +475,25 @@ describe("widget definitions", () => {
     expect(BUTTON_WIDGET_DEFINITION.dependencyIds(buttonConfig)).toEqual(["button.test"]);
     expect(ALARM_WIDGET_DEFINITION.dependencyIds(alarmConfig)).toEqual(["alarm_control_panel.test"]);
     expect(ACTION_WIDGET_DEFINITION.dependencyIds()).toEqual([]);
+    expect(GROUP_WIDGET_DEFINITION.dependencyIds(groupConfig)).toEqual(["sensor.grid_power"]);
+    expect(ENERGY_WIDGET_DEFINITION.dependencyIds(energyConfig)).toEqual([
+      "sensor.grid_power",
+      "sensor.solar_power",
+    ]);
+    expect(POWERFLOW_WIDGET_DEFINITION.dependencyIds(powerflowConfig)).toEqual([
+      "sensor.grid_power",
+      "sensor.solar_power",
+    ]);
+    expect(SOLAR_CHARGING_WIDGET_DEFINITION.dependencyIds(solarChargingConfig)).toEqual([
+      "input_boolean.solar_charging",
+      "sensor.battery",
+    ]);
+    expect(ENERGY_CHART_WIDGET_DEFINITION.dependencyIds(energyChartConfig)).toEqual(["sensor.grid_import"]);
+    expect(METRIC_TILE_WIDGET_DEFINITION.dependencyIds(metricTileConfig)).toEqual(["sensor.grid_power"]);
+    expect(ELECTRICITY_TOTAL_WIDGET_DEFINITION.dependencyIds(electricityTotalConfig)).toEqual([
+      "sensor.grid_import",
+      "sensor.grid_export",
+    ]);
   });
 
   it("keeps split device elements unloaded until their definition is requested", () => {
@@ -395,6 +511,13 @@ describe("widget definitions", () => {
     expect(customElements.get(BUTTON_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(ALARM_WIDGET_DEFINITION.tag)).toBeUndefined();
     expect(customElements.get(ACTION_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(GROUP_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(ENERGY_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(POWERFLOW_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(SOLAR_CHARGING_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(ENERGY_CHART_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(METRIC_TILE_WIDGET_DEFINITION.tag)).toBeUndefined();
+    expect(customElements.get(ELECTRICITY_TOTAL_WIDGET_DEFINITION.tag)).toBeUndefined();
   });
 
   it("validates climate-specific options at the definition boundary", () => {
@@ -434,6 +557,25 @@ describe("widget definitions", () => {
     ]);
   });
 
+  it("validates group and composite options at the definition boundary", () => {
+    expect(GROUP_WIDGET_DEFINITION.validateOptions?.(groupConfig.options)).toEqual([]);
+    expect(GROUP_WIDGET_DEFINITION.validateOptions?.({ variant: "unknown", children: [] })).toEqual([
+      { path: "variant", message: "Group `variant` must be one of: media, devices, sensors, energy, tiles." },
+      { path: "children", message: "Group `children` must be a non-empty array." },
+    ]);
+    expect(ENERGY_WIDGET_DEFINITION.validateOptions?.({ gridPower: "invalid" })).toEqual([
+      { path: "gridPower", message: "Energy `gridPower` must be a valid entity_id." },
+    ]);
+    expect(SOLAR_CHARGING_WIDGET_DEFINITION.validateOptions?.({ brand: "unknown", master: "invalid" })).toEqual([
+      { path: "master", message: "Solar charging `master` must be a valid entity_id." },
+      { path: "brand", message: "Solar charging `brand` must be `tesla`." },
+    ]);
+    expect(METRIC_TILE_WIDGET_DEFINITION.validateOptions?.({ accent: "pink", connected: "invalid" })).toEqual([
+      { path: "connected", message: "Metric tile `connected` must be a valid entity_id." },
+      { path: "accent", message: "Metric tile `accent` is not supported." },
+    ]);
+  });
+
   it("loads the registered element and renders every supported footprint", async () => {
     for (const [definition, config] of [
       [LIGHT_WIDGET_DEFINITION, lightConfig],
@@ -454,6 +596,13 @@ describe("widget definitions", () => {
       [BUTTON_WIDGET_DEFINITION, buttonConfig],
       [ALARM_WIDGET_DEFINITION, alarmConfig],
       [ACTION_WIDGET_DEFINITION, actionConfig],
+      [GROUP_WIDGET_DEFINITION, groupConfig],
+      [ENERGY_WIDGET_DEFINITION, energyConfig],
+      [POWERFLOW_WIDGET_DEFINITION, powerflowConfig],
+      [SOLAR_CHARGING_WIDGET_DEFINITION, solarChargingConfig],
+      [ENERGY_CHART_WIDGET_DEFINITION, energyChartConfig],
+      [METRIC_TILE_WIDGET_DEFINITION, metricTileConfig],
+      [ELECTRICITY_TOTAL_WIDGET_DEFINITION, electricityTotalConfig],
     ] as const) {
       expect(widgetTag(definition.type)).toBe(definition.tag);
       await definition.load();
@@ -471,7 +620,8 @@ describe("widget definitions", () => {
       for (const size of definition.supportedSizes) {
         element.currentSize = size;
         await element.updateComplete;
-        expect(element.shadowRoot?.querySelector("hd-widget-frame")).not.toBeNull();
+        const content = element.shadowRoot?.querySelector("hd-widget-frame, section, button.tile, .card");
+        expect(content).not.toBeNull();
       }
       element.remove();
     }

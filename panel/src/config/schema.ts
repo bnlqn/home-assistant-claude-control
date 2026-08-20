@@ -12,6 +12,7 @@ import type {
   ElectricityTotalWidgetOptions,
   EnergyChartWidgetOptions,
   EnergyWidgetOptions,
+  MetricTileWidgetOptions,
   PowerflowWidgetOptions,
   SolarChargingWidgetOptions,
   VacuumWidgetOptions,
@@ -26,6 +27,8 @@ export type {
   EnergyChartPeriod,
   EnergyChartWidgetOptions,
   EnergyWidgetOptions,
+  MetricTileAccent,
+  MetricTileWidgetOptions,
   PowerflowWidgetOptions,
   SolarChargingWidgetOptions,
   VacuumWidgetOptions,
@@ -36,7 +39,7 @@ export type {
  * "XL" footprint reserved for genuinely diagram-scale widgets (the power-flow
  * hero) whose contents are size-capped and only need more *whitespace* to
  * breathe. `4x2` is a wide banner for width-hungry widgets (the energy chart).
- * Not every widget may use these (see widget definitions and legacy sizes).
+ * Not every widget may use these (see `widget-definition.ts`).
  */
 export type WidgetSize = "1x1" | "2x1" | "1x2" | "2x2" | "3x3" | "4x2";
 
@@ -223,6 +226,14 @@ export interface ActionWidgetConfig extends WidgetConfigBase<"action"> {
   options: ActionWidgetOptions;
 }
 
+export interface GroupWidgetConfig extends WidgetConfigBase<"group"> {
+  options: GroupOptions;
+}
+
+export interface MetricTileWidgetConfig extends WidgetConfigBase<"metrictile"> {
+  options?: MetricTileWidgetOptions;
+}
+
 export interface EnergyWidgetConfig extends WidgetConfigBase<"energy"> {
   options?: EnergyWidgetOptions;
 }
@@ -243,47 +254,12 @@ export interface ElectricityTotalWidgetConfig extends WidgetConfigBase<"electric
   options?: ElectricityTotalWidgetOptions;
 }
 
-export type TypedOptionsWidgetType =
-  | "light"
-  | "climate"
-  | "switch"
-  | "fan"
-  | "cover"
-  | "lock"
-  | "vacuum"
-  | "media"
-  | "sensor"
-  | "weather"
-  | "binary_sensor"
-  | "person"
-  | "camera"
-  | "scene"
-  | "script"
-  | "button"
-  | "alarm"
-  | "action"
-  | "energy"
-  | "powerflow"
-  | "solarcharging"
-  | "energychart"
-  | "electricitytotal";
-
-export type LooseOptionsWidgetType = Exclude<WidgetType, TypedOptionsWidgetType>;
-
-/** One discriminated configuration variant per not-yet-migrated widget type. */
-export type LegacyWidgetConfig = {
-  [Type in LooseOptionsWidgetType]: WidgetConfigBase<Type> & {
-    /** Retained only until this widget type receives a typed option contract. */
-    options?: Record<string, unknown>;
-  };
-}[LooseOptionsWidgetType];
-
 /**
- * Widget configuration is discriminated by `type`. Migrated widgets reject
- * options belonging to another widget at compile time; the legacy branch is
- * deliberately restricted to widget types not yet migrated.
+ * Widget configuration is discriminated by `type`. Every widget rejects
+ * options belonging to another widget at compile time.
  */
 export type WidgetConfig =
+  | GroupWidgetConfig
   | LightWidgetConfig
   | ClimateWidgetConfig
   | SwitchWidgetConfig
@@ -302,12 +278,12 @@ export type WidgetConfig =
   | ButtonWidgetConfig
   | AlarmWidgetConfig
   | ActionWidgetConfig
+  | MetricTileWidgetConfig
   | EnergyWidgetConfig
   | PowerflowWidgetConfig
   | SolarChargingWidgetConfig
   | EnergyChartWidgetConfig
-  | ElectricityTotalWidgetConfig
-  | LegacyWidgetConfig;
+  | ElectricityTotalWidgetConfig;
 
 /** Retrieve the strongly typed configuration variant for a widget type. */
 export type WidgetConfigOf<Type extends WidgetType> = Extract<WidgetConfig, { type: Type }>;
@@ -362,58 +338,3 @@ export interface DashboardConfig {
   kiosk?: KioskConfig;
   views: ViewConfig[];
 }
-
-/**
- * Which sizes each widget type can render usefully. Config using a size not in
- * this set is rejected at startup with a clear message, rather than producing a
- * cramped or empty-looking widget.
- */
-export type LegacyWidgetType = Exclude<
-  WidgetType,
-  | "light"
-  | "climate"
-  | "switch"
-  | "fan"
-  | "cover"
-  | "lock"
-  | "vacuum"
-  | "media"
-  | "sensor"
-  | "weather"
-  | "binary_sensor"
-  | "person"
-  | "camera"
-  | "scene"
-  | "script"
-  | "button"
-  | "alarm"
-  | "action"
->;
-
-/**
- * Size constraints for widgets not yet migrated to `WidgetDefinition`.
- * Migrated widgets own this metadata beside their implementation instead.
- */
-export const LEGACY_SUPPORTED_SIZES: Record<LegacyWidgetType, readonly WidgetSize[]> = {
-  // A container is full-width and self-sizing; the grid ignores its footprint,
-  // so every size is permitted (synthetic groups carry a nominal one).
-  group: ALL_SIZES,
-  energy: ["2x1", "1x2", "2x2"],
-  powerflow: ["2x2", "3x3"],
-  solarcharging: ["2x1", "1x2", "2x2"],
-  energychart: ["2x2", "4x2"],
-  // Homey-style wide status tile (icon + name + "value • status"); one per grid cell.
-  metrictile: ["1x1", "2x1"],
-  // Full-width "Imported − Exported = Total" breakdown band.
-  electricitytotal: ["2x2", "4x2"],
-};
-
-/** A widget type must supply an `entity` unless it is one of these. */
-export const LEGACY_ENTITYLESS_TYPES: readonly LegacyWidgetType[] = [
-  "group",
-  "energy",
-  "powerflow",
-  "solarcharging",
-  "energychart",
-  "electricitytotal",
-];
