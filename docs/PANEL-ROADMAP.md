@@ -158,9 +158,12 @@ Progress — 2026-08-20:
 - added TypeScript/Lit correctness linting, a single local check command, Panel
   CI with deploy-mirror verification, and grouped Dependabot updates; live Home
   Assistant configuration validation remains an authenticated deployment gate;
+- moved media artwork derivation before rendering and deferred marquee
+  measurement outside Lit's completed-update lifecycle, eliminating the
+  browser's extra-update warning with a component regression test;
 - still to do in Phase 0: automate browser screenshots/accessibility checks,
-  resolve the media
-  widget's extra-update warning, and profile wall-tablet decoded image memory.
+  investigate the remaining development ResizeObserver loop notification, and
+  profile wall-tablet decoded image memory.
 
 ### Phase 1 — Unified widget contract
 
