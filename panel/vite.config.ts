@@ -19,11 +19,11 @@ export default defineConfig({
       formats: ["es"],
       fileName: () => "home-dashboard-panel.js",
     },
-    rollupOptions: {
+    rolldownOptions: {
       // Bundle everything — nothing is external. A wall-mounted tablet on the
       // local network must load the panel with zero outbound requests.
       output: {
-        inlineDynamicImports: true,
+        codeSplitting: false,
       },
     },
   },

@@ -148,13 +148,15 @@ Progress — 2026-08-20:
 - replaced Energy's four 113-frame preload trees and canvas loop with at most
   four keyed animated WebP layers, dedicated import/export direction, and
   reduced-motion stills; the source-to-packed conversion is reproducible;
-- reduced the production entry module from 505 kB raw / 204 kB gzip to 369 kB
-  raw / 96 kB gzip, the deploy directory from 3.2 MiB / 453 files to 1.9 MiB /
+- upgraded Vite 6 to Vite 8 and Vitest 2 to Vitest 4, migrating the single-file
+  build configuration from deprecated Rollup options to native Rolldown options;
+- reduced the production entry module from 505 kB raw / 204 kB gzip to 352 kB
+  raw / 93 kB gzip, the deploy directory from 3.2 MiB / 453 files to 1.9 MiB /
   14 files, and active Energy requests from as many as 452 to at most four;
 - verified the optimized Energy page at 320 and 390 px with no horizontal
   overflow, no missing flow assets, and no canvas animation path;
-- still to do in Phase 0: upgrade Vite/Vitest, add lint/dependency automation
-  and CI, automate browser screenshots/accessibility checks, resolve the media
+- still to do in Phase 0: add lint/dependency automation and CI, automate
+  browser screenshots/accessibility checks, resolve the media
   widget's extra-update warning, and profile wall-tablet decoded image memory.
 
 ### Phase 1 — Unified widget contract

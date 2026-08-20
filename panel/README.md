@@ -69,7 +69,7 @@ config/www/home-dashboard/home-dashboard-panel.js
 config/www/home-dashboard/assets/**/*.webp
 ```
 
-The optimized 2026-08-20 baseline is 369 kB JavaScript (96 kB gzip) and
+The optimized 2026-08-20 baseline is 352 kB JavaScript (93 kB gzip) and
 approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
 flows are five packed animated WebPs plus reduced-motion stills. See
 [Build baseline and budgets](#build-baseline-and-budgets).
@@ -292,8 +292,8 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-20 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 369 kB | 410 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 96 kB | 110 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 352 kB | 390 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 93 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
