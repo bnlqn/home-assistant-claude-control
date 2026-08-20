@@ -1,5 +1,4 @@
 import { css, html, nothing } from "lit";
-import { state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { fetchNumericHistory } from "../home-assistant/history.js";
@@ -7,6 +6,7 @@ import { formatNumber } from "../home-assistant/state-formatting.js";
 import type { EnergyWidgetOptions } from "../config/widget-options.js";
 import "./widget-frame.js";
 import "../primitives/misc.js";
+import { KeyedAsyncController } from "../controllers/keyed-async-controller.js";
 
 /**
  * Composite energy widget (entityless — reads sensors from `options`). Shows
@@ -15,8 +15,7 @@ import "../primitives/misc.js";
  */
 @define("hd-widget-energy")
 export class EnergyWidget extends EntityWidget {
-  @state() private _trend: number[] = [];
-  private _fetchedFor = "";
+  private readonly _trend = new KeyedAsyncController(this, () => [] as number[]);
 
   protected override hasDetail(): boolean {
     return true;
@@ -24,10 +23,6 @@ export class EnergyWidget extends EntityWidget {
 
   private get _opts(): EnergyWidgetOptions {
     return this.config.type === "energy" ? this.config.options ?? {} : {};
-  }
-
-  protected override relevantEntityIds(): string[] {
-    return Object.values(this._opts).filter((v): v is string => typeof v === "string");
   }
 
   static styles = css`
@@ -64,16 +59,13 @@ export class EnergyWidget extends EntityWidget {
 
   updated() {
     const gp = this._opts.gridPower;
-    if (this.currentSize === "2x2" && gp && this.hass?.connected && this._fetchedFor !== gp) {
-      this._fetchedFor = gp;
-      void this._loadTrend(gp);
+    if (this.currentSize === "2x2" && gp && this.hass?.connected) {
+      const hass = this.hass;
+      this._trend.load(gp, async () => {
+        const points = await fetchNumericHistory(hass, gp, 24);
+        return points.map((point) => point.value);
+      });
     }
-  }
-
-  private async _loadTrend(entityId: string) {
-    if (!this.hass) return;
-    const pts = await fetchNumericHistory(this.hass, entityId, 24);
-    this._trend = pts.map((p) => p.value);
   }
 
   private _num(entityId?: string): number | null {
@@ -139,9 +131,9 @@ export class EnergyWidget extends EntityWidget {
             : nothing}
         </div>
 
-        ${size === "2x2" && this._trend.length > 1
+        ${size === "2x2" && this._trend.value.length > 1
           ? html`<div class="trend">
-              <hd-trend .points=${this._trend} .color=${"var(--accent)"} .summary=${"24 hour grid power"}></hd-trend>
+              <hd-trend .points=${this._trend.value} .color=${"var(--accent)"} .summary=${"24 hour grid power"}></hd-trend>
             </div>`
           : nothing}
       </hd-widget-frame>

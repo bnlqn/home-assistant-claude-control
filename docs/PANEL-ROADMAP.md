@@ -161,8 +161,8 @@ Progress — 2026-08-20:
 - moved media artwork derivation before rendering and deferred marquee
   measurement outside Lit's completed-update lifecycle, eliminating the
   browser's extra-update warning with a component regression test;
-- introduced a reusable element-width reactive controller for the shell, page
-  grid, and section grids; frame-deferred delivery eliminates the development
+- introduced a reusable responsive-profile controller for the shell, page grid,
+  and section grids; frame-deferred delivery eliminates the development
   ResizeObserver loop while preserving 320/390 px reflow without overflow;
 - still to do in Phase 0: automate browser screenshots/accessibility checks and
   profile wall-tablet decoded image memory.
@@ -245,8 +245,11 @@ Progress — 2026-08-20:
   and electricity totals; removed the legacy config union, size/entity/tag and
   layout tables, registered entityless Energy details, and deleted the final
   compatibility detail switch, with the suite at 161 tests;
-- still to do in Phase 1: introduce the reusable HA/async/profile controllers
-  and finish unavailable/unknown/disconnected contract coverage.
+- added reusable HA-dependency, keyed-async, and responsive-profile Lit
+  controllers; widget render gating now derives from definition dependencies,
+  trend/forecast/statistics loaders reject stale or disconnected results, and
+  every definition renders under unavailable, unknown, and disconnected
+  scenarios, completing Phase 1 with 164 tests.
 
 ### Phase 2 — Shared responsive grid engine
 
@@ -368,12 +371,13 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Complete the Phase 1 contract before changing placement semantics:
+Begin the shared placement engine now that the Phase 1 contract is complete:
 
-1. introduce the reusable HA/async/profile controllers and finish contract
-   coverage for unavailable, unknown, and disconnected states;
-2. then begin the Phase 2 shared-grid slice, verifying the full viewport matrix
-   before removing the legacy section grids.
+1. introduce one placement resolver for phone, tablet portrait, tablet
+   landscape, desktop, and wall-display profiles;
+2. make section grouping structural within that shared grid while keeping the
+   Energy hero outside it;
+3. verify the full viewport matrix before removing the current section grids.
 
 This keeps the architecture boundary testable while avoiding a simultaneous
 config, detail, and layout rewrite.

@@ -1,11 +1,11 @@
 import { css, html, nothing } from "lit";
-import { state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { fetchNumericHistory } from "../home-assistant/history.js";
 import { accentVars } from "../home-assistant/entity-adapters/index.js";
 import "./widget-frame.js";
 import "../primitives/misc.js";
+import { KeyedAsyncController } from "../controllers/keyed-async-controller.js";
 
 /**
  * Sensor / numeric widget. The value is the hero; a lazy 24 h trend appears at
@@ -14,8 +14,7 @@ import "../primitives/misc.js";
  */
 @define("hd-widget-sensor")
 export class SensorWidget extends EntityWidget {
-  @state() private _trend: number[] = [];
-  private _fetchedFor = "";
+  private readonly _trend = new KeyedAsyncController(this, () => [] as number[]);
 
   static styles = css`
     .value {
@@ -57,21 +56,19 @@ export class SensorWidget extends EntityWidget {
 
   updated() {
     // Lazily load history only when a trend chart is visible.
-    if (this._isBig && this.entityId && this.hass?.connected && this._fetchedFor !== this.entityId) {
+    if (this._isBig && this.entityId && this.hass?.connected) {
       const s = this.hass.states[this.entityId];
       if (s && Number.isFinite(Number(s.state))) {
-        this._fetchedFor = this.entityId;
-        void this._loadTrend();
+        const hass = this.hass;
+        const entityId = this.entityId;
+        this._trend.load(entityId, async () => {
+          const points = await fetchNumericHistory(hass, entityId, 24);
+          return points.map((point) => point.value);
+        });
       }
     }
     if (this._isBig) this.setAttribute("data-big", "");
     else this.removeAttribute("data-big");
-  }
-
-  private async _loadTrend() {
-    if (!this.hass || !this.entityId) return;
-    const points = await fetchNumericHistory(this.hass, this.entityId, 24);
-    this._trend = points.map((p) => p.value);
   }
 
   renderContent() {
@@ -105,10 +102,10 @@ export class SensorWidget extends EntityWidget {
         @hd-activate=${() => this.openDetail()}
       >
         ${valueBlock}
-        ${this._isBig && isNumeric && this._trend.length > 1
+        ${this._isBig && isNumeric && this._trend.value.length > 1
           ? html`<div class="trend">
               <hd-trend
-                .points=${this._trend}
+                .points=${this._trend.value}
                 .color=${av.fg}
                 .summary=${`24 hour trend for ${vm.name}`}
               ></hd-trend>

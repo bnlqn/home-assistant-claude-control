@@ -701,3 +701,9 @@ export const WIDGET_DEFINITIONS: Readonly<WidgetDefinitionMap> = DEFINITIONS;
 export function widgetDefinition<Type extends WidgetType>(type: Type): WidgetDefinition<Type> {
   return WIDGET_DEFINITIONS[type];
 }
+
+/** Resolve a widget instance's declared Home Assistant dependencies. */
+export function widgetDependencies(config: WidgetConfig): string[] {
+  const definition = WIDGET_DEFINITIONS[config.type] as WidgetDefinition;
+  return definition.dependencyIds(config);
+}

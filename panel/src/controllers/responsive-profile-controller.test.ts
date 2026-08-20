@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReactiveController, ReactiveControllerHost } from "lit";
-import { ElementWidthController } from "./element-width-controller.js";
+import { ResponsiveProfileController } from "./responsive-profile-controller.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
-describe("ElementWidthController", () => {
-  it("defers responsive updates until the next animation frame", () => {
+describe("ResponsiveProfileController", () => {
+  it("defers width changes and resolves the corresponding profile", () => {
     let observerCallback: ResizeObserverCallback | undefined;
     let frameCallback: FrameRequestCallback | undefined;
     let registeredController: ReactiveController | undefined;
@@ -36,15 +36,17 @@ describe("ElementWidthController", () => {
       return 1;
     });
 
-    const controller = new ElementWidthController(host);
+    const controller = new ResponsiveProfileController(host, (width) => width < 600 ? "compact" : "expanded");
     expect(registeredController).toBe(controller);
     controller.hostConnected();
+    expect(controller.profile).toBe("compact");
     observerCallback?.([{ contentRect: { width: 768 } } as ResizeObserverEntry], {} as ResizeObserver);
 
     expect(controller.width).toBe(320);
     expect(requestUpdate).not.toHaveBeenCalled();
     frameCallback?.(0);
     expect(controller.width).toBe(768);
+    expect(controller.profile).toBe("expanded");
     expect(requestUpdate).toHaveBeenCalledOnce();
   });
 });

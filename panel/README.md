@@ -263,6 +263,7 @@ Composite widgets (`energy`, `action`) take their entities/service via
 ```
 panel/src/
   panel/            home-dashboard-panel.ts (root) · app-shell · view-grid · router · layout · assets
+  controllers/      HA dependency gating · keyed async lifecycle · responsive profiles
   config/           schema · widget-options · validation · dashboard.config.ts  ← entity bindings live here
   design-system/    tokens.ts (light/dark, type, motion) · mdi-paths.ts (tree-shaken icons)
   home-assistant/   capabilities · service-calls · state-formatting · history · entity-adapters/
@@ -293,10 +294,12 @@ Key ideas:
   including entityless Energy composites. History and forecast loading policy
   lives separately in `detail-data.ts`; there is no compatibility domain switch.
 - **Performance.** Each widget re-renders only when a **referenced** entity's
-  state object changes by reference (or connectivity/size changes) — the
-  frequently-changing full `hass` object doesn't re-render the whole grid.
-  History, forecasts, camera stills, and trend charts load lazily and only when
-  visible.
+  state object changes by reference (or connectivity/size changes), resolved
+  from its definition by the shared HA dependency controller. Keyed async
+  loaders deduplicate history/statistics/forecast requests and ignore stale or
+  disconnected results. Responsive containers share one width/profile
+  controller, so the frequently-changing full `hass` object and observer timing
+  do not cause dashboard-wide repaint churn.
 - **Icons** are bundled from `@mdi/js`, tree-shaken to just the ~170 glyphs used
   — no icon font, no CDN. Unknown icons fall back to HA's `<ha-icon>` when
   present, else a neutral dot.
@@ -325,7 +328,7 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 161 Vitest cases covering config validation, widget-size
+`npm test` runs 164 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,

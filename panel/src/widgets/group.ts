@@ -14,7 +14,7 @@ import {
   squareUnit,
 } from "../panel/layout.js";
 import { renderWidgetCell } from "../panel/widget-cell.js";
-import { ElementWidthController } from "../panel/element-width-controller.js";
+import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
 
 /**
  * A section container. Renders a heading plus its own internal responsive grid
@@ -35,7 +35,7 @@ export class HdGroup extends LitElement {
   @property({ type: String }) currentSize = "4x2";
   @property({ type: String }) layout: "row" | "tile" | "value" = "row";
 
-  private readonly _elementWidth = new ElementWidthController(this);
+  private readonly _responsive = new ResponsiveProfileController(this, gridMetricsForWidth);
 
   static styles = css`
     :host {
@@ -81,11 +81,11 @@ export class HdGroup extends LitElement {
     const children = this._children;
     if (!children.length) return nothing;
 
-    const width = this._elementWidth.width;
+    const width = this._responsive.width;
     const variant = this._variant;
     const cols = sectionColumns(variant, width);
     const gap = 12;
-    const bucket = gridMetricsForWidth(width).bucket;
+    const bucket = this._responsive.profile.bucket;
     const cellLayout = layoutForVariant(variant);
     const label = this._opts.label;
 

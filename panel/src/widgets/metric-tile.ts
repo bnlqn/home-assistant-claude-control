@@ -22,11 +22,6 @@ export class MetricTileWidget extends EntityWidget {
     return this.config.type === "metrictile" ? this.config.options ?? {} : {};
   }
 
-  protected override relevantEntityIds(): string[] {
-    const o = this._opts;
-    return [this.config.entity, o.chargeStatus, o.connected].filter((v): v is string => typeof v === "string");
-  }
-
   static styles = css`
     :host {
       display: block;

@@ -124,10 +124,6 @@ export class SolarChargingWidget extends EntityWidget {
     return o.brand === "tesla" || o.branded === true;
   }
 
-  protected override relevantEntityIds(): string[] {
-    return Object.values(this._opts).filter((v): v is string => typeof v === "string");
-  }
-
   protected override hasDetail(): boolean {
     return true;
   }

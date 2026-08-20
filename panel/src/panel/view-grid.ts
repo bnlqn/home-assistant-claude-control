@@ -6,7 +6,7 @@ import type { HomeAssistant } from "../types/hass.js";
 import type { ViewConfig } from "../config/schema.js";
 import { gridMetricsForWidth, resolveWidgetSize, sectioniseView } from "./layout.js";
 import { renderWidgetCell } from "./widget-cell.js";
-import { ElementWidthController } from "./element-width-controller.js";
+import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
 import "../primitives/entity-icon.js";
 import "../widgets/widget-frame.js";
 import "../widgets/group.js";
@@ -25,7 +25,7 @@ export class HdViewGrid extends LitElement {
   @property({ attribute: false }) hass?: HomeAssistant;
   @property({ attribute: false }) view?: ViewConfig;
 
-  private readonly _elementWidth = new ElementWidthController(this);
+  private readonly _responsive = new ResponsiveProfileController(this, gridMetricsForWidth);
 
   static styles = css`
     :host {
@@ -68,7 +68,7 @@ export class HdViewGrid extends LitElement {
 
   render() {
     const view = this.view;
-    const m = gridMetricsForWidth(this._elementWidth.width);
+    const m = this._responsive.profile;
     const stackStyle = `--pad:${m.pad}px`;
 
     // A page-level hero (the Energy house) renders full-bleed above the grid.

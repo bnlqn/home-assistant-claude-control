@@ -2,7 +2,7 @@ import { LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import type { ViewConfig } from "../config/schema.js";
-import { ElementWidthController } from "./element-width-controller.js";
+import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
 import "../primitives/entity-icon.js";
 import "../primitives/icon-button.js";
 import "../primitives/surface.js";
@@ -15,6 +15,9 @@ export interface NavView {
 }
 
 type ShellMode = "sidebar" | "rail" | "compact";
+
+const shellModeForWidth = (width: number): ShellMode =>
+  width >= 1000 ? "sidebar" : width >= 720 ? "rail" : "compact";
 
 /**
  * The application shell: navigation, the current view title, connectivity, and
@@ -35,7 +38,7 @@ export class HdAppShell extends LitElement {
   @property({ type: String }) appearance: "auto" | "light" | "dark" = "auto";
 
   @state() private _switcherOpen = false;
-  private readonly _elementWidth = new ElementWidthController(this);
+  private readonly _responsive = new ResponsiveProfileController(this, shellModeForWidth);
 
   static styles = css`
     :host {
@@ -296,8 +299,7 @@ export class HdAppShell extends LitElement {
   `;
 
   private get _mode(): ShellMode {
-    const width = this._elementWidth.width;
-    return width >= 1000 ? "sidebar" : width >= 720 ? "rail" : "compact";
+    return this._responsive.profile;
   }
 
   private _navigate(id: string) {

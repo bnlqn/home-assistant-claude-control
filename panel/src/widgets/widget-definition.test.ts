@@ -224,6 +224,34 @@ const electricityTotalConfig: WidgetConfig = {
   options: { importEnergy: "sensor.grid_import", exportEnergy: "sensor.grid_export" },
 };
 
+const definitionConfigs = [
+  [LIGHT_WIDGET_DEFINITION, lightConfig],
+  [CLIMATE_WIDGET_DEFINITION, climateConfig],
+  [SWITCH_WIDGET_DEFINITION, switchConfig],
+  [FAN_WIDGET_DEFINITION, fanConfig],
+  [COVER_WIDGET_DEFINITION, coverConfig],
+  [LOCK_WIDGET_DEFINITION, lockConfig],
+  [VACUUM_WIDGET_DEFINITION, vacuumConfig],
+  [MEDIA_WIDGET_DEFINITION, mediaConfig],
+  [SENSOR_WIDGET_DEFINITION, sensorConfig],
+  [WEATHER_WIDGET_DEFINITION, weatherConfig],
+  [BINARY_SENSOR_WIDGET_DEFINITION, binarySensorConfig],
+  [PERSON_WIDGET_DEFINITION, personConfig],
+  [CAMERA_WIDGET_DEFINITION, cameraConfig],
+  [SCENE_WIDGET_DEFINITION, sceneConfig],
+  [SCRIPT_WIDGET_DEFINITION, scriptConfig],
+  [BUTTON_WIDGET_DEFINITION, buttonConfig],
+  [ALARM_WIDGET_DEFINITION, alarmConfig],
+  [ACTION_WIDGET_DEFINITION, actionConfig],
+  [GROUP_WIDGET_DEFINITION, groupConfig],
+  [ENERGY_WIDGET_DEFINITION, energyConfig],
+  [POWERFLOW_WIDGET_DEFINITION, powerflowConfig],
+  [SOLAR_CHARGING_WIDGET_DEFINITION, solarChargingConfig],
+  [ENERGY_CHART_WIDGET_DEFINITION, energyChartConfig],
+  [METRIC_TILE_WIDGET_DEFINITION, metricTileConfig],
+  [ELECTRICITY_TOTAL_WIDGET_DEFINITION, electricityTotalConfig],
+] as const;
+
 function entity(entityId: string, state: string, attributes: Record<string, unknown>): HassEntity {
   return {
     entity_id: entityId,
@@ -577,33 +605,7 @@ describe("widget definitions", () => {
   });
 
   it("loads the registered element and renders every supported footprint", async () => {
-    for (const [definition, config] of [
-      [LIGHT_WIDGET_DEFINITION, lightConfig],
-      [CLIMATE_WIDGET_DEFINITION, climateConfig],
-      [SWITCH_WIDGET_DEFINITION, switchConfig],
-      [FAN_WIDGET_DEFINITION, fanConfig],
-      [COVER_WIDGET_DEFINITION, coverConfig],
-      [LOCK_WIDGET_DEFINITION, lockConfig],
-      [VACUUM_WIDGET_DEFINITION, vacuumConfig],
-      [MEDIA_WIDGET_DEFINITION, mediaConfig],
-      [SENSOR_WIDGET_DEFINITION, sensorConfig],
-      [WEATHER_WIDGET_DEFINITION, weatherConfig],
-      [BINARY_SENSOR_WIDGET_DEFINITION, binarySensorConfig],
-      [PERSON_WIDGET_DEFINITION, personConfig],
-      [CAMERA_WIDGET_DEFINITION, cameraConfig],
-      [SCENE_WIDGET_DEFINITION, sceneConfig],
-      [SCRIPT_WIDGET_DEFINITION, scriptConfig],
-      [BUTTON_WIDGET_DEFINITION, buttonConfig],
-      [ALARM_WIDGET_DEFINITION, alarmConfig],
-      [ACTION_WIDGET_DEFINITION, actionConfig],
-      [GROUP_WIDGET_DEFINITION, groupConfig],
-      [ENERGY_WIDGET_DEFINITION, energyConfig],
-      [POWERFLOW_WIDGET_DEFINITION, powerflowConfig],
-      [SOLAR_CHARGING_WIDGET_DEFINITION, solarChargingConfig],
-      [ENERGY_CHART_WIDGET_DEFINITION, energyChartConfig],
-      [METRIC_TILE_WIDGET_DEFINITION, metricTileConfig],
-      [ELECTRICITY_TOTAL_WIDGET_DEFINITION, electricityTotalConfig],
-    ] as const) {
+    for (const [definition, config] of definitionConfigs) {
       expect(widgetTag(definition.type)).toBe(definition.tag);
       await definition.load();
       expect(customElements.get(definition.tag)).toBeDefined();
@@ -624,6 +626,36 @@ describe("widget definitions", () => {
         expect(content).not.toBeNull();
       }
       element.remove();
+    }
+  });
+
+  it("renders every definition with unavailable, unknown, and disconnected dependencies", async () => {
+    for (const [definition, config] of definitionConfigs) {
+      await definition.load();
+      for (const scenario of ["unavailable", "unknown", "disconnected"] as const) {
+        const scenarioHass = hass();
+        if (scenario === "disconnected") {
+          scenarioHass.connected = false;
+        } else {
+          for (const entityId of definition.dependencyIds(config as never)) {
+            const current = scenarioHass.states[entityId];
+            if (current) scenarioHass.states[entityId] = { ...current, state: scenario };
+          }
+        }
+        const element = document.createElement(definition.tag) as LitElement & {
+          hass: HomeAssistant;
+          config: WidgetConfig;
+          currentSize: WidgetSize;
+        };
+        element.hass = scenarioHass;
+        element.config = config;
+        element.currentSize = definition.defaultSize.compact;
+        document.body.appendChild(element);
+        await element.updateComplete;
+
+        expect(element.shadowRoot?.childElementCount).toBeGreaterThan(0);
+        element.remove();
+      }
     }
   });
 

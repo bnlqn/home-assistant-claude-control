@@ -7,6 +7,8 @@ import { execute, type ServiceCall } from "../home-assistant/service-calls.js";
 import { normalizeEntity, type EntityViewModel } from "../home-assistant/entity-adapters/index.js";
 import { requestConfirm, toast } from "../primitives/feedback.js";
 import "./widget-frame.js";
+import { HassDependencyController } from "../controllers/hass-dependency-controller.js";
+import { widgetDependencies } from "./widget-definition.js";
 
 /**
  * Base class for every widget. Provides:
@@ -31,6 +33,7 @@ export abstract class EntityWidget extends LitElement {
 
   @state() protected actionState: ActionState = "idle";
   private _resetTimer = 0;
+  private readonly _hassDependencies = new HassDependencyController(this, () => this.relevantEntityIds());
 
   get entityId(): string | undefined {
     return this.config?.entity;
@@ -46,7 +49,7 @@ export abstract class EntityWidget extends LitElement {
 
   /** Entities whose changes should trigger a re-render (override for composites). */
   protected relevantEntityIds(): string[] {
-    return this.entityId ? [this.entityId] : [];
+    return this.config ? widgetDependencies(this.config) : [];
   }
 
   /** Whether this widget type offers a detail surface. */
@@ -58,10 +61,7 @@ export abstract class EntityWidget extends LitElement {
     // Any change other than a fresh hass object always renders.
     if (!(changed.size === 1 && changed.has("hass"))) return true;
     const prev = changed.get("hass") as HomeAssistant | undefined;
-    if (!prev || !this.hass) return true;
-    if (prev.connected !== this.hass.connected) return true;
-    // Only render if one of our entities' state objects changed by reference.
-    return this.relevantEntityIds().some((id) => prev.states[id] !== this.hass!.states[id]);
+    return this._hassDependencies.hasChanged(prev, this.hass);
   }
 
   /**

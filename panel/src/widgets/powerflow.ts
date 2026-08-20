@@ -449,10 +449,6 @@ export class PowerflowWidget extends EntityWidget {
     return this.config.type === "powerflow" ? this.config.options ?? {} : {};
   }
 
-  protected override relevantEntityIds(): string[] {
-    return Object.values(this._opts).filter((v): v is string => typeof v === "string");
-  }
-
   protected override hasDetail(): boolean {
     return true;
   }

@@ -14,6 +14,7 @@ import type { EnergyChartWidgetOptions } from "../config/widget-options.js";
 import "./widget-frame.js";
 import "../primitives/bar-chart.js";
 import "../primitives/segmented.js";
+import { KeyedAsyncController } from "../controllers/keyed-async-controller.js";
 
 /** Series definitions in draw order, mapped to option ids at render time. */
 const SERIES: Array<{ key: keyof EnergyChartWidgetOptions; label: string; color: string }> = [
@@ -35,9 +36,11 @@ const BUCKETS: Record<StatPeriod, number> = { day: 7, week: 8, month: 12 };
 @define("hd-widget-energychart")
 export class EnergyChartWidget extends EntityWidget {
   @state() private _period: StatPeriod = "day";
-  @state() private _data: Record<string, StatBucket[]> = {};
   @state() private _periodInit = false;
-  private _fetchKey = "";
+  private readonly _data = new KeyedAsyncController(
+    this,
+    () => ({} as Record<string, StatBucket[]>),
+  );
 
   private get _opts(): EnergyChartWidgetOptions {
     return this.config.type === "energychart" ? this.config.options ?? {} : {};
@@ -78,22 +81,24 @@ export class EnergyChartWidget extends EntityWidget {
         return; // the property change re-runs updated()
       }
     }
-    void this._maybeFetch();
+    this._maybeFetch();
   }
 
-  private async _maybeFetch() {
+  private _maybeFetch() {
     if (!this.hass?.connected) return;
     const ids = this._ids();
     if (!ids.length) return;
     const key = `${this._period}|${ids.join(",")}`;
-    if (key === this._fetchKey) return;
-    this._fetchKey = key;
-    try {
-      const start = statisticsRange(this._period, BUCKETS[this._period]);
-      this._data = await fetchStatistics(this.hass, ids, this._period, start);
-    } catch {
-      this._data = {};
-    }
+    const hass = this.hass;
+    const period = this._period;
+    this._data.load(key, async () => {
+      const start = statisticsRange(period, BUCKETS[period]);
+      try {
+        return await fetchStatistics(hass, ids, period, start);
+      } catch {
+        return {};
+      }
+    });
   }
 
   private _setPeriod(p: StatPeriod) {
@@ -106,12 +111,12 @@ export class EnergyChartWidget extends EntityWidget {
     const startSet = new Set<number>();
     for (const s of SERIES) {
       const id = this._opts[s.key];
-      if (id) for (const b of this._data[id] ?? []) startSet.add(b.start);
+      if (id) for (const b of this._data.value[id] ?? []) startSet.add(b.start);
     }
     const starts = [...startSet].sort((a, b) => a - b).slice(-n);
     const labels = starts.map((ms) => bucketLabel(ms, this._period));
     const series: BarSeries[] = SERIES.filter((s) => this._opts[s.key]).map((s) => {
-      const byStart = new Map((this._data[this._opts[s.key]!] ?? []).map((b) => [b.start, b.change]));
+      const byStart = new Map((this._data.value[this._opts[s.key]!] ?? []).map((b) => [b.start, b.change]));
       return {
         label: s.label,
         color: s.color,

@@ -1,11 +1,11 @@
 import { css, html, nothing } from "lit";
-import { state } from "lit/decorators.js";
 import { define } from "../primitives/registry.js";
 import { EntityWidget } from "./base-widget.js";
 import { weatherIcon } from "../home-assistant/entity-adapters/icons.js";
 import { titleCase, formatNumber } from "../home-assistant/state-formatting.js";
 import "./widget-frame.js";
 import "../primitives/entity-icon.js";
+import { KeyedAsyncController } from "../controllers/keyed-async-controller.js";
 
 interface ForecastEntry {
   datetime: string;
@@ -21,8 +21,7 @@ interface ForecastEntry {
  */
 @define("hd-widget-weather")
 export class WeatherWidget extends EntityWidget {
-  @state() private _forecast: ForecastEntry[] = [];
-  private _fetchedFor = "";
+  private readonly _forecast = new KeyedAsyncController(this, () => [] as ForecastEntry[]);
 
   protected override hasDetail(): boolean {
     return true;
@@ -79,34 +78,33 @@ export class WeatherWidget extends EntityWidget {
 
   updated() {
     const big = this.currentSize === "1x2" || this.currentSize === "2x2";
-    if (big && this.entityId && this.hass?.connected && this._fetchedFor !== this.entityId) {
-      this._fetchedFor = this.entityId;
-      void this._loadForecast();
+    if (big && this.entityId && this.hass?.connected) {
+      const entityId = this.entityId;
+      this._forecast.load(entityId, () => this._loadForecast(entityId));
     }
   }
 
-  private async _loadForecast() {
+  private async _loadForecast(entityId: string): Promise<ForecastEntry[]> {
     const vm = this.vm;
     // Legacy attribute fallback first (dev harness / old cores).
     const attrForecast = vm.stateObj?.attributes.forecast as ForecastEntry[] | undefined;
     if (attrForecast?.length) {
-      this._forecast = attrForecast.slice(0, 5);
-      return;
+      return attrForecast.slice(0, 5);
     }
-    if (!this.hass || !this.entityId) return;
+    if (!this.hass) return [];
     try {
       const res = await this.hass.callWS<{ response: Record<string, { forecast: ForecastEntry[] }> }>({
         type: "call_service",
         domain: "weather",
         service: "get_forecasts",
         service_data: { type: "daily" },
-        target: { entity_id: this.entityId },
+        target: { entity_id: entityId },
         return_response: true,
       });
-      const list = res?.response?.[this.entityId]?.forecast ?? [];
-      this._forecast = list.slice(0, 5);
+      const list = res?.response?.[entityId]?.forecast ?? [];
+      return list.slice(0, 5);
     } catch {
-      this._forecast = [];
+      return [];
     }
   }
 
@@ -124,9 +122,9 @@ export class WeatherWidget extends EntityWidget {
   }
 
   private _forecastStrip() {
-    if (!this._forecast.length) return nothing;
+    if (!this._forecast.value.length) return nothing;
     return html`<div class="forecast">
-      ${this._forecast.map((f) => {
+      ${this._forecast.value.map((f) => {
         const d = new Date(f.datetime);
         const dow = Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString(undefined, { weekday: "short" });
         return html`<div class="day">
