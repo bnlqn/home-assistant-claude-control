@@ -11,10 +11,10 @@ import { widgetDefinition } from "../widgets/widget-definition.js";
 import {
   detailNeedsForecast,
   detailNeedsHistory,
-  renderDefinedDetail,
   renderDetailBody,
-  type DetailCtx,
 } from "./controllers.js";
+import type { DetailContext } from "./detail-context.js";
+import { renderDefinedDetail } from "./detail-registry.js";
 import "../primitives/surface.js";
 import "../primitives/toggle.js";
 import "../primitives/slider.js";
@@ -37,7 +37,7 @@ export class HdDetail extends LitElement {
   @property({ attribute: false }) config?: WidgetConfig;
 
   @state() private _trend: number[] = [];
-  @state() private _forecast: DetailCtx["forecast"] = [];
+  @state() private _forecast: DetailContext["forecast"] = [];
   private _loadedKey = "";
 
   static styles = css`
@@ -353,13 +353,13 @@ export class HdDetail extends LitElement {
 
   private async _loadForecast() {
     if (!this.hass) return;
-    const attr = this.hass.states[this.entityId]?.attributes.forecast as DetailCtx["forecast"] | undefined;
+    const attr = this.hass.states[this.entityId]?.attributes.forecast as DetailContext["forecast"] | undefined;
     if (attr?.length) {
       this._forecast = attr.slice(0, 7);
       return;
     }
     try {
-      const res = await this.hass.callWS<{ response: Record<string, { forecast: DetailCtx["forecast"] }> }>({
+      const res = await this.hass.callWS<{ response: Record<string, { forecast: DetailContext["forecast"] }> }>({
         type: "call_service",
         domain: "weather",
         service: "get_forecasts",
@@ -398,7 +398,7 @@ export class HdDetail extends LitElement {
       return html`<hd-surface .open=${this.open} @hd-close=${() => this._close()}></hd-surface>`;
     }
     const vm = normalizeEntity(this.hass, this.entityId, this.config);
-    const ctx: DetailCtx = {
+    const ctx: DetailContext = {
       hass: this.hass,
       entityId: this.entityId,
       config: this.config,

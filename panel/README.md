@@ -267,7 +267,7 @@ panel/src/
   primitives/       icon · icon-button · toggle · slider · segmented · misc (progress/badge/skeleton/trend)
                     · surface (sheet/drawer/dialog) · confirm-dialog · toast · feedback bus · registry
   widgets/          widget-frame · base-widget · widget-definition · widget-registry · one module per domain
-  details/          detail-surface.ts · controllers.ts (per-domain detail bodies)
+  details/          detail-surface · detail-context · detail-registry · domain renderers · legacy controllers
   dev/              mock-hass.ts · main.ts (dev harness — never shipped)
   testing/          fixtures + Vitest setup
 ```
@@ -285,6 +285,10 @@ Key ideas:
   quick-action/detail metadata, and widget-specific option validation. Light
   and climate are the first definitions; legacy widgets retain their existing
   tables until each is migrated with contract coverage.
+- **Registered detail domains stay independent.** Light and climate details
+  implement the small `DetailContext` contract in separate modules and are
+  selected through a typed detail registry. `controllers.ts` remains the
+  fallback router only for widget domains that have not yet migrated.
 - **Performance.** Each widget re-renders only when a **referenced** entity's
   state object changes by reference (or connectivity/size changes) — the
   frequently-changing full `hass` object doesn't re-render the whole grid.
@@ -318,13 +322,14 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 138 Vitest cases covering config validation, widget-size
+`npm test` runs 144 Vitest cases covering config validation, widget-size
 validation, entity-adapter normalisation, capability detection, service-payload
 construction, missing/unavailable entities, responsive size selection, routing,
 the shipped config's validity, shell scroll ownership, slider keyboard semantics,
 Energy flow selection and asset paths, media update lifecycle, deferred
 responsive measurement, widget-definition dependencies and supported-footprint
-rendering, the quick-action vs. open-detail split, the
+rendering, independent light/climate detail routing and service payloads, the
+quick-action vs. open-detail split, the
 confirmation bus, and reduced-motion tokens.
 
 `npm run check` is the local pre-commit equivalent of Panel CI. CI installs the

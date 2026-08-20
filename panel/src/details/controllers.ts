@@ -1,22 +1,13 @@
 import { html, nothing, type TemplateResult } from "lit";
-import type { HomeAssistant, HassEntity } from "../types/hass.js";
+import type { HassEntity } from "../types/hass.js";
 import type { WidgetConfig } from "../config/schema.js";
-import type { WidgetDetailRenderer } from "../widgets/widget-definition.js";
-import type { ServiceCall } from "../home-assistant/service-calls.js";
 import { buildFlowModel } from "../widgets/powerflow.js";
 import { buildSolarChargingModel } from "../widgets/solarcharging.js";
 import {
-  buildClimateFanMode,
-  buildClimateHvacMode,
-  buildClimatePreset,
-  buildClimateSwing,
-  buildClimateTemperature,
   buildCoverClose,
   buildCoverOpen,
   buildCoverPosition,
   buildCoverStop,
-  buildLightBrightness,
-  buildLightTurnOn,
   buildLock,
   buildMediaMute,
   buildMediaNext,
@@ -38,256 +29,20 @@ import {
 } from "../home-assistant/service-calls.js";
 import { vacuumCompanions, CONSUMABLE_LOW_HOURS } from "../home-assistant/vacuum-companions.js";
 import {
-  climateCaps,
   coverCaps,
-  lightCaps,
   mediaCaps,
   vacuumCaps,
 } from "../home-assistant/capabilities.js";
 import { formatAttribute, formatState, formatNumber, relativeTime, titleCase } from "../home-assistant/state-formatting.js";
 import { appIcon, isAppLauncher, splitFeaturedApps } from "../home-assistant/media-apps.js";
 import { mediaProgress } from "../home-assistant/media-progress.js";
-import type { SegmentOption } from "../primitives/segmented.js";
 import { requestConfirm } from "../primitives/feedback.js";
-
-export interface DetailCtx {
-  hass: HomeAssistant;
-  entityId: string;
-  config?: WidgetConfig;
-  host: HTMLElement;
-  trend: number[];
-  forecast: Array<{ datetime: string; condition?: string; temperature?: number; templow?: number }>;
-  /** Execute a service call (with error feedback handled by the surface). */
-  call: (c: ServiceCall, verb?: string) => Promise<void>;
-}
-
-const COLOR_SWATCHES: Array<[string, [number, number, number]]> = [
-  ["Warm white", [255, 197, 143]],
-  ["Sun", [255, 233, 170]],
-  ["Red", [255, 74, 74]],
-  ["Orange", [255, 145, 48]],
-  ["Green", [86, 200, 90]],
-  ["Teal", [40, 200, 180]],
-  ["Blue", [70, 130, 255]],
-  ["Indigo", [120, 90, 240]],
-  ["Pink", [255, 92, 170]],
-];
-
-/** RGB (0..255) → [hue 0..360, saturation 0..100], for seeding the colour wheel. */
-function rgbToHs(rgb: [number, number, number]): [number, number] {
-  const [r, g, b] = rgb.map((v) => v / 255);
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const d = max - min;
-  let h = 0;
-  if (d !== 0) {
-    if (max === r) h = ((g - b) / d) % 6;
-    else if (max === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h = h * 60;
-    if (h < 0) h += 360;
-  }
-  const sat = max === 0 ? 0 : (d / max) * 100;
-  return [Math.round(h), Math.round(sat)];
-}
-
-// ---- Light ---------------------------------------------------------------
-function lightDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
-  const caps = lightCaps(s);
-  const on = s.state === "on";
-  const brightness = on ? Math.round(((s.attributes.brightness as number) ?? 255) / 2.55) : 0;
-  const min = (s.attributes.min_color_temp_kelvin as number) ?? 2200;
-  const max = (s.attributes.max_color_temp_kelvin as number) ?? 6500;
-  const curTemp = (s.attributes.color_temp_kelvin as number) ?? Math.round((min + max) / 2);
-  const effects = (s.attributes.effect_list as string[] | undefined)?.filter((e) => e && e !== "None") ?? [];
-  const hs = s.attributes.hs_color as [number, number] | undefined;
-  const rgbCur = s.attributes.rgb_color as [number, number, number] | undefined;
-  const [wheelHue, wheelSat] = hs ? [hs[0], hs[1]] : rgbCur ? rgbToHs(rgbCur) : [0, 0];
-
-  return html`
-    <div class="d-section d-row-between">
-      <span class="d-label">Power</span>
-      <hd-toggle
-        .checked=${on}
-        label="Toggle light"
-        @hd-toggle=${() => ctx.call(buildToggle(ctx.entityId), "toggle")}
-      ></hd-toggle>
-    </div>
-
-    ${caps.brightness
-      ? html`<div class="d-section">
-          <span class="d-label">Brightness</span>
-          <hd-slider
-            .value=${brightness}
-            .min=${1}
-            .max=${100}
-            .disabled=${!on}
-            .valueText=${on ? `${brightness}%` : "Off"}
-            .color=${"var(--state-light)"}
-            icon="mdi:brightness-6"
-            label="Brightness"
-            @hd-change=${(e: CustomEvent) => ctx.call(buildLightBrightness(ctx.entityId, e.detail.value), "dim")}
-          ></hd-slider>
-        </div>`
-      : nothing}
-
-    ${caps.colorTemp
-      ? html`<div class="d-section">
-          <span class="d-label">Color temperature</span>
-          <hd-slider
-            .value=${curTemp}
-            .min=${min}
-            .max=${max}
-            .step=${50}
-            .disabled=${!on}
-            .color=${"linear-gradient(90deg,#ffb85c,#fff5e8,#cfe0ff)"}
-            label="Color temperature"
-            @hd-change=${(e: CustomEvent) => ctx.call(buildLightTurnOn(ctx.entityId, { colorTempKelvin: e.detail.value }), "set color of")}
-          ></hd-slider>
-        </div>`
-      : nothing}
-
-    ${caps.color
-      ? html`<div class="d-section">
-          <span class="d-label">Color</span>
-          <div class="color-wheel-wrap">
-            <hd-color-wheel
-              .hue=${wheelHue}
-              .sat=${wheelSat}
-              .disabled=${!on}
-              @hd-color=${(e: CustomEvent) =>
-                ctx.call(buildLightTurnOn(ctx.entityId, { hsColor: [e.detail.hue, e.detail.sat] }), "set color of")}
-            ></hd-color-wheel>
-          </div>
-          <div class="swatches">
-            ${COLOR_SWATCHES.map(
-              ([name, rgb]) => html`<button
-                class="swatch"
-                style=${`background:rgb(${rgb[0]},${rgb[1]},${rgb[2]})`}
-                aria-label=${name}
-                ?disabled=${!on}
-                @click=${() => ctx.call(buildLightTurnOn(ctx.entityId, { rgbColor: rgb }), "set color of")}
-              ></button>`,
-            )}
-          </div>
-        </div>`
-      : nothing}
-
-    ${caps.effects && effects.length
-      ? html`<div class="d-section">
-          <span class="d-label">Effect</span>
-          <div class="chips">
-            ${effects.slice(0, 12).map(
-              (fx) => html`<button
-                class="chip ${s.attributes.effect === fx ? "active" : ""}"
-                ?disabled=${!on}
-                @click=${() => ctx.call(buildLightTurnOn(ctx.entityId, { effect: fx }), "set effect of")}
-              >
-                ${titleCase(fx)}
-              </button>`,
-            )}
-          </div>
-        </div>`
-      : nothing}
-  `;
-}
-
-// ---- Climate -------------------------------------------------------------
-function climateDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
-  const caps = climateCaps(s);
-  const off = s.state === "off";
-  const target = (s.attributes.temperature as number) ?? 20;
-  const cur = s.attributes.current_temperature as number | undefined;
-  const stepSize = (s.attributes.target_temp_step as number) ?? 0.5;
-  const modes = (s.attributes.hvac_modes as string[]) ?? [];
-  const fanModes = (s.attributes.fan_modes as string[]) ?? [];
-  const swingModes = (s.attributes.swing_modes as string[]) ?? [];
-  const presets = (s.attributes.preset_modes as string[]) ?? [];
-  // Extra device switches surfaced from config (e.g. the Airco's powerful /
-  // economy / quiet-fan / human-detection toggles), each a real switch entity.
-  const controls = (ctx.config?.type === "climate" ? ctx.config.options?.switches ?? [] : []).filter(
-    (c) => ctx.hass.states[c.entity],
-  );
-
-  const step = (d: number) => {
-    const minT = (s.attributes.min_temp as number) ?? 7;
-    const maxT = (s.attributes.max_temp as number) ?? 35;
-    const next = Math.min(maxT, Math.max(minT, target + d * stepSize));
-    void ctx.call(buildClimateTemperature(ctx.entityId, Number(next.toFixed(1))), "set temperature for");
-  };
-  const seg = (values: string[]): SegmentOption[] => values.map((v) => ({ value: v, label: titleCase(v) }));
-
-  return html`
-    ${caps.targetTemp
-      ? html`<div class="d-section climate-hero">
-          <hd-icon-button icon="mdi:minus" label="Lower" variant="soft" .disabled=${off} @click=${() => step(-1)}></hd-icon-button>
-          <div class="climate-target">
-            <span class="big">${off ? "—" : `${formatNumber(target)}°`}</span>
-            ${cur != null ? html`<span class="sub">Now ${formatNumber(cur)}°</span>` : nothing}
-          </div>
-          <hd-icon-button icon="mdi:plus" label="Raise" variant="soft" .disabled=${off} @click=${() => step(1)}></hd-icon-button>
-        </div>`
-      : nothing}
-
-    ${modes.length > 1
-      ? html`<div class="d-section">
-          <span class="d-label">Mode</span>
-          <hd-segmented .options=${seg(modes)} .value=${s.state} label="Mode"
-            @hd-select=${(e: CustomEvent) => ctx.call(buildClimateHvacMode(ctx.entityId, e.detail.value), "set mode for")}></hd-segmented>
-        </div>`
-      : nothing}
-    ${caps.fanMode && fanModes.length
-      ? html`<div class="d-section">
-          <span class="d-label">Fan</span>
-          <hd-segmented .options=${seg(fanModes)} .value=${(s.attributes.fan_mode as string) ?? ""} label="Fan mode"
-            @hd-select=${(e: CustomEvent) => ctx.call(buildClimateFanMode(ctx.entityId, e.detail.value), "set fan for")}></hd-segmented>
-        </div>`
-      : nothing}
-    ${caps.swingMode && swingModes.length
-      ? html`<div class="d-section">
-          <span class="d-label">Swing</span>
-          <hd-segmented .options=${seg(swingModes)} .value=${(s.attributes.swing_mode as string) ?? ""} label="Swing mode"
-            @hd-select=${(e: CustomEvent) => ctx.call(buildClimateSwing(ctx.entityId, e.detail.value), "set swing for")}></hd-segmented>
-        </div>`
-      : nothing}
-    ${caps.presetMode && presets.length
-      ? html`<div class="d-section">
-          <span class="d-label">Preset</span>
-          <hd-segmented .options=${seg(presets)} .value=${(s.attributes.preset_mode as string) ?? ""} label="Preset"
-            @hd-select=${(e: CustomEvent) => ctx.call(buildClimatePreset(ctx.entityId, e.detail.value), "set preset for")}></hd-segmented>
-        </div>`
-      : nothing}
-
-    ${controls.map((c) => {
-      const on = ctx.hass.states[c.entity]!.state === "on";
-      return html`<div class="d-section d-row-between">
-        <span class="d-label">${c.name}</span>
-        <hd-toggle
-          .checked=${on}
-          label=${c.name}
-          @hd-toggle=${() => ctx.call(buildToggle(c.entity), `toggle ${c.name.toLowerCase()}`)}
-        ></hd-toggle>
-      </div>`;
-    })}
-  `;
-}
-
-/** Resolve a renderer selected by a widget definition. */
-export function renderDefinedDetail(
-  renderer: WidgetDetailRenderer,
-  ctx: DetailCtx,
-  state: HassEntity,
-): TemplateResult {
-  switch (renderer) {
-    case "light":
-      return lightDetail(ctx, state);
-    case "climate":
-      return climateDetail(ctx, state);
-  }
-}
+import type { DetailContext } from "./detail-context.js";
+import { renderClimateDetail } from "./climate-detail.js";
+import { renderLightDetail } from "./light-detail.js";
 
 // ---- Media ---------------------------------------------------------------
-function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+function mediaDetail(ctx: DetailContext, s: HassEntity): TemplateResult {
   const caps = mediaCaps(s);
   const picture = s.attributes.entity_picture as string | undefined;
   const title = s.attributes.media_title as string | undefined;
@@ -396,7 +151,7 @@ function mediaDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 }
 
 // ---- Cover ---------------------------------------------------------------
-function coverDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+function coverDetail(ctx: DetailContext, s: HassEntity): TemplateResult {
   const caps = coverCaps(s);
   const pos = (s.attributes.current_position as number) ?? (s.state === "open" ? 100 : 0);
   return html`
@@ -416,7 +171,7 @@ function coverDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 }
 
 // ---- Lock ----------------------------------------------------------------
-function lockDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+function lockDetail(ctx: DetailContext, s: HassEntity): TemplateResult {
   const locked = s.state === "locked";
   const doUnlock = async () => {
     const ok = await requestConfirm(ctx.host, { title: `Unlock ${s.attributes.friendly_name ?? "lock"}?`, confirmLabel: "Unlock", destructive: true, icon: "mdi:lock-open-variant" });
@@ -436,7 +191,7 @@ function lockDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 }
 
 // ---- Vacuum --------------------------------------------------------------
-function vacuumDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+function vacuumDetail(ctx: DetailContext, s: HassEntity): TemplateResult {
   const caps = vacuumCaps(s);
   const speeds = ((s.attributes.fan_speed_list as string[]) ?? []).filter((x) => !["off", "custom"].includes(x));
   const co = vacuumCompanions(ctx.hass, ctx.entityId);
@@ -489,7 +244,7 @@ function vacuumDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 }
 
 // ---- Sensor --------------------------------------------------------------
-function sensorDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+function sensorDetail(ctx: DetailContext, s: HassEntity): TemplateResult {
   const num = Number(s.state);
   const isNumeric = Number.isFinite(num);
   const trend = ctx.trend;
@@ -511,7 +266,7 @@ function sensorDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 }
 
 // ---- Weather -------------------------------------------------------------
-function weatherDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+function weatherDetail(ctx: DetailContext, s: HassEntity): TemplateResult {
   const a = s.attributes;
   const metrics: Array<[string, string]> = [];
   if (a.temperature != null) metrics.push(["Temperature", `${formatNumber(a.temperature as number)}°`]);
@@ -541,7 +296,7 @@ function weatherDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
 }
 
 // ---- Energy --------------------------------------------------------------
-function energyDetail(ctx: DetailCtx): TemplateResult {
+function energyDetail(ctx: DetailContext): TemplateResult {
   const o = ctx.config?.type === "energy" ? ctx.config.options ?? {} : {};
   const val = (id?: string) => {
     if (!id) return null;
@@ -568,7 +323,7 @@ function energyDetail(ctx: DetailCtx): TemplateResult {
 }
 
 // ---- Power flow ----------------------------------------------------------
-function powerflowDetail(ctx: DetailCtx): TemplateResult {
+function powerflowDetail(ctx: DetailContext): TemplateResult {
   const o = ctx.config?.type === "powerflow" ? ctx.config.options ?? {} : {};
   const model = buildFlowModel(ctx.hass, o);
   const cell = (label: string, id?: string) => {
@@ -596,7 +351,7 @@ function powerflowDetail(ctx: DetailCtx): TemplateResult {
 }
 
 // ---- Solar charging ------------------------------------------------------
-function solarChargingDetail(ctx: DetailCtx): TemplateResult {
+function solarChargingDetail(ctx: DetailContext): TemplateResult {
   const o = ctx.config?.type === "solarcharging" ? ctx.config.options ?? {} : {};
   const m = buildSolarChargingModel(ctx.hass, o);
   const toneVar =
@@ -663,7 +418,7 @@ function solarChargingDetail(ctx: DetailCtx): TemplateResult {
 }
 
 // ---- Generic -------------------------------------------------------------
-function genericDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
+function genericDetail(ctx: DetailContext, s: HassEntity): TemplateResult {
   const domain = ctx.entityId.split(".")[0];
   const toggleable = ["switch", "input_boolean", "fan", "light", "humidifier", "siren"].includes(domain);
   return html`
@@ -678,7 +433,7 @@ function genericDetail(ctx: DetailCtx, s: HassEntity): TemplateResult {
   `;
 }
 
-function metaRows(ctx: DetailCtx, s: HassEntity): TemplateResult {
+function metaRows(ctx: DetailContext, s: HassEntity): TemplateResult {
   const keys = ["device_class", "state_class", "unit_of_measurement"].filter((k) => s.attributes[k] != null);
   return html`<div class="d-grid">
     ${keys.map(
@@ -705,7 +460,7 @@ function weatherIconName(condition: string): string {
 }
 
 /** Pick the right controller for an entity/config and render it. */
-export function renderDetailBody(ctx: DetailCtx): TemplateResult {
+export function renderDetailBody(ctx: DetailContext): TemplateResult {
   const s = ctx.hass.states[ctx.entityId];
   const type = ctx.config?.type;
   if (type === "energy") return energyDetail(ctx);
@@ -718,9 +473,9 @@ export function renderDetailBody(ctx: DetailCtx): TemplateResult {
   const domain = ctx.entityId.split(".")[0];
   switch (domain) {
     case "light":
-      return lightDetail(ctx, s);
+      return renderLightDetail(ctx, s);
     case "climate":
-      return climateDetail(ctx, s);
+      return renderClimateDetail(ctx, s);
     case "media_player":
       return mediaDetail(ctx, s);
     case "cover":
