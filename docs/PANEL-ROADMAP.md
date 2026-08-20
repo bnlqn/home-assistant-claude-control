@@ -420,10 +420,31 @@ Progress — foundation completed 2026-08-21:
   shared period/controller/adapter contract; the tighter 105 kB gzip warning
   ceiling remains unchanged.
 
-Still required before Phase 5 exit: Home Assistant-timezone and DST-aware
-boundaries, statistic metadata/unit normalization, reset and partial-coverage
-fixtures, native-dashboard parity checks, bounded multi-range caching, and the
-accessible previous/next/date-selection interface.
+Progress — historical correctness hardened 2026-08-21:
+
+- moved day, ISO-week, and month boundaries into Home Assistant's configured
+  IANA timezone, including 23-hour and 25-hour Brussels DST-day fixtures and
+  timezone-aware current-period rollover;
+- aligned expected recorder buckets to those calendar boundaries and treats
+  missing buckets as partial coverage, including the elapsed portion of the
+  current incomplete period;
+- requests recorder conversion to kWh, validates energy/sum metadata, discards
+  non-finite and negative-reset rows, and propagates ready, partial, or
+  unavailable coverage to the Energy page;
+- added visible Partial and Unavailable labels to recorder-backed historical
+  totals without obscuring the values that are present;
+- added a bounded eight-range LRU for immutable history while deliberately
+  bypassing the cache for the current period;
+- added representative day, week, and month import/export convention fixtures,
+  bringing the suite to 196 tests; an authenticated comparison against the
+  native dashboard remains an exit check rather than being inferred from mocks;
+- kept the production bundle within its 405 kB raw / 105 kB gzip warning
+  ceilings at 400.81 kB / 104.95 kB.
+
+Still required before Phase 5 exit: compare real recorder totals against Home
+Assistant's native Energy dashboard for representative day/week/month ranges,
+then add and visually verify the accessible previous/next/date-selection
+interface.
 
 ### Phase 6 — Hardening and release
 
@@ -450,15 +471,13 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Keep the Phase 4 editor and Energy navigation UI deferred. Harden historical
-correctness before exposing controls:
+Keep the Phase 4 editor deferred and complete the Energy time-travel experience:
 
-1. resolve range boundaries in Home Assistant's configured timezone and add DST
-   transition fixtures;
-2. normalize recorder metadata/units and detect resets or incomplete coverage;
-3. compare representative day, week, and month totals against Home Assistant's
-   native Energy dashboard;
-4. add a bounded multi-range cache with explicit ready/partial/unavailable
-   results, then build the accessible previous/next/date interface.
-
-This avoids presenting history controls until their numbers are trustworthy.
+1. compare representative real day, week, and month totals with Home Assistant's
+   native Energy dashboard and preserve the selected fixtures;
+2. add keyboard-accessible previous/next controls, today recovery, and a
+   day/week/month selector at the page level;
+3. add date selection with future-range prevention and an explicit current
+   incomplete-period state;
+4. visually verify current, loading, partial, unavailable, and historical states
+   at the full phone/tablet/desktop viewport matrix.

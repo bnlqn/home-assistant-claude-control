@@ -211,6 +211,19 @@ export class MockHassController {
     if (msg.type === "recorder/statistics_during_period") {
       return this.syntheticStatistics(msg) as unknown as T;
     }
+    if (msg.type === "recorder/get_statistics_metadata") {
+      const ids = (msg.statistic_ids as string[]) ?? [];
+      return ids.map((statisticId) => ({
+        statistic_id: statisticId,
+        source: "recorder",
+        name: null,
+        unit_class: "energy",
+        statistics_unit_of_measurement: "kWh",
+        display_unit_of_measurement: "kWh",
+        has_sum: true,
+        has_mean: false,
+      })) as unknown as T;
+    }
     return {} as T;
   };
 

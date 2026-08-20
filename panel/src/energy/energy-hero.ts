@@ -7,7 +7,11 @@ import type { EnergyHeroConfig } from "../config/schema.js";
 import { FLOW_DEADBAND_W, toWatts } from "../home-assistant/energy-flow.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
 import { panelAssetUrl } from "../panel/assets.js";
-import { sumStatistic, type EnergyPeriodContext } from "./energy-period.js";
+import {
+  energyStatisticsAvailability,
+  sumStatistic,
+  type EnergyPeriodContext,
+} from "./energy-period.js";
 import "../primitives/entity-icon.js";
 
 const HOUSE_IMAGE_WIDTH = 960;
@@ -141,6 +145,13 @@ export class EnergyHero extends LitElement {
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
     }
+    .availability {
+      padding: 3px 7px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.34);
+      font: var(--text-meta);
+      white-space: nowrap;
+    }
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -229,6 +240,7 @@ export class EnergyHero extends LitElement {
     );
     const flows = showLiveFlows ? activeEnergyFlows(this.hass, o) : [];
     const periodLabel = this.energyPeriod?.range.label ?? o?.label ?? "Today";
+    const availability = showLiveFlows ? null : energyStatisticsAvailability(this.energyPeriod);
 
     return html`
       <div class="hero">
@@ -236,6 +248,7 @@ export class EnergyHero extends LitElement {
           <div class="bar">
             <span class="pill">
               ${periodLabel}
+              ${availability ? html`<span class="availability">${availability}</span>` : ""}
               <hd-icon icon="mdi:calendar-blank" .size=${18}></hd-icon>
             </span>
           </div>

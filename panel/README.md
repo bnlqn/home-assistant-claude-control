@@ -73,7 +73,7 @@ config/www/home-dashboard/home-dashboard-panel.js
 config/www/home-dashboard/assets/**/*.webp
 ```
 
-The 2026-08-21 baseline is 395 kB JavaScript (103 kB gzip) and
+The 2026-08-21 baseline is 401 kB JavaScript (105 kB gzip) and
 approximately 1.9 MiB / 14 files for the complete deployable directory. Energy
 flows are five packed animated WebPs plus reduced-motion stills. See
 [Build baseline and budgets](#build-baseline-and-budgets).
@@ -304,7 +304,10 @@ Key ideas:
   selection and one end-bounded recorder request. The house hero and historical
   widgets consume that shared result; superseded requests cannot repaint the
   page, current-day live values stay fresh, and missing history renders as
-  unavailable rather than zero. Date navigation remains deliberately deferred.
+  unavailable rather than zero. Boundaries follow Home Assistant's timezone,
+  recorder energy is normalized to kWh, missing/reset buckets surface as
+  partial coverage, and immutable history uses a bounded cache. Date navigation
+  remains deliberately deferred.
 - **Detail domains stay independent.** Every detail body implements the small
   `DetailContext` contract in a focused domain module. Every registered widget
   detail selects its renderer through the typed definition registry,
@@ -331,8 +334,8 @@ ceilings, not performance targets to grow into.
 
 | Resource | 2026-08-21 baseline | Warning ceiling | Direction |
 | --- | ---: | ---: | --- |
-| Entry module, raw | 395 kB | 405 kB | Keep raster assets external and application growth bounded. |
-| Entry module, gzip | 103 kB | 105 kB | Keep framework/application growth bounded. |
+| Entry module, raw | 401 kB | 405 kB | Keep raster assets external and application growth bounded. |
+| Entry module, gzip | 105 kB | 105 kB | Keep framework/application growth bounded. |
 | Complete deploy directory | 1.9 MiB | 2.2 MiB | Keep packed animations and static art within budget. |
 | Default-route panel requests | 1 module | 4 | Keep initial rendering independent of Energy assets. |
 | Active Energy animation requests | Up to 4 | 4 | Mount only the live flow layers. |
@@ -345,7 +348,7 @@ Phase 0 follow-ups in the roadmap.
 
 ## Testing
 
-`npm test` runs 182 Vitest cases covering config validation, versioned dashboard
+`npm test` runs 196 Vitest cases covering config validation, versioned dashboard
 migration/import/export/fallback, all-profile document resolution, widget-size
 validation, Energy period/range/statistics behavior, stale async results,
 entity-adapter normalisation, capability detection, service-payload

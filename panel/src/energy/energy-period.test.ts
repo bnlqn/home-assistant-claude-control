@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   currentEnergyPeriodSelection,
+  energyExpectedBucketStarts,
   energyStatisticIds,
   resolveEnergyPeriod,
   shiftEnergyPeriod,
@@ -50,6 +51,57 @@ describe("Energy period selection", () => {
   it("falls back safely from an invalid anchor", () => {
     const range = resolveEnergyPeriod({ period: "day", anchor: "2026-02-31" }, now);
     expect(range.selection.anchor).toBe("2026-08-21");
+  });
+
+  it("uses Home Assistant's timezone instead of the browser calendar", () => {
+    const instant = new Date("2026-08-21T22:30:00.000Z");
+    expect(currentEnergyPeriodSelection(instant, "Europe/Brussels")).toEqual({
+      period: "day",
+      anchor: "2026-08-22",
+    });
+    expect(currentEnergyPeriodSelection(instant, "America/New_York")).toEqual({
+      period: "day",
+      anchor: "2026-08-21",
+    });
+  });
+
+  it("resolves 23-hour and 25-hour days across Brussels DST", () => {
+    const spring = resolveEnergyPeriod(
+      { period: "day", anchor: "2026-03-29" },
+      new Date("2026-03-29T12:00:00.000Z"),
+      "Europe/Brussels",
+    );
+    const autumn = resolveEnergyPeriod(
+      { period: "day", anchor: "2026-10-25" },
+      new Date("2026-10-25T12:00:00.000Z"),
+      "Europe/Brussels",
+    );
+
+    expect(spring.start.toISOString()).toBe("2026-03-28T23:00:00.000Z");
+    expect(spring.end.toISOString()).toBe("2026-03-29T22:00:00.000Z");
+    expect(spring.end.getTime() - spring.start.getTime()).toBe(23 * 60 * 60 * 1000);
+    expect(autumn.start.toISOString()).toBe("2026-10-24T22:00:00.000Z");
+    expect(autumn.end.toISOString()).toBe("2026-10-25T23:00:00.000Z");
+    expect(autumn.end.getTime() - autumn.start.getTime()).toBe(25 * 60 * 60 * 1000);
+    expect(energyExpectedBucketStarts(spring, spring.end)).toHaveLength(23);
+    expect(energyExpectedBucketStarts(autumn, autumn.end)).toHaveLength(25);
+  });
+
+  it("expects only elapsed buckets for an incomplete current period", () => {
+    const range = resolveEnergyPeriod(
+      { period: "day", anchor: "2026-08-21" },
+      new Date("2026-08-21T12:30:00.000Z"),
+      "Europe/Brussels",
+    );
+    expect(energyExpectedBucketStarts(range, new Date("2026-08-21T12:30:00.000Z"))).toHaveLength(15);
+  });
+
+  it("falls back safely when HA exposes an invalid timezone", () => {
+    expect(() => resolveEnergyPeriod(
+      { period: "day", anchor: "2026-08-21" },
+      now,
+      "Mars/Olympus_Mons",
+    )).not.toThrow();
   });
 
   it("distinguishes missing statistics from a real zero", () => {

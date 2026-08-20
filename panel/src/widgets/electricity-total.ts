@@ -5,7 +5,7 @@ import { EntityWidget } from "./base-widget.js";
 import { fetchStatistics, statisticsRange, type StatBucket } from "../home-assistant/statistics.js";
 import { formatNumber } from "../home-assistant/state-formatting.js";
 import type { ElectricityTotalWidgetOptions } from "../config/widget-options.js";
-import { sumStatistic } from "../energy/energy-period.js";
+import { energyStatisticsAvailability, sumStatistic } from "../energy/energy-period.js";
 
 /**
  * Homey-style `Imported − Exported = Total` breakdown for the Energy page's
@@ -72,11 +72,24 @@ export class ElectricityTotalWidget extends EntityWidget {
       display: block;
     }
     .title {
-      margin: 0 0 12px 2px;
+      margin: 0;
       font: var(--text-widget-title);
       font-weight: 700;
       font-size: 20px;
       color: var(--text-primary);
+    }
+    .heading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px 2px;
+    }
+    .coverage {
+      padding: 3px 7px;
+      border-radius: var(--radius-pill);
+      background: var(--surface-subtle);
+      color: var(--text-secondary);
+      font: var(--text-meta);
     }
     .card {
       background: var(--surface);
@@ -151,9 +164,13 @@ export class ElectricityTotalWidget extends EntityWidget {
         : hasConfiguredTotal ? 0 : null
       : this._ready ? this._export : null;
     const total = imported !== null && exported !== null ? imported - exported : null;
-    const dim = shared ? shared.status !== "ready" : !this._ready;
+    const dim = shared ? shared.status !== "ready" || shared.coverage !== "ready" : !this._ready;
+    const coverageLabel = energyStatisticsAvailability(shared);
     return html`
-      <h2 class="title">${this.config.name ?? "Electricity Total"}</h2>
+      <div class="heading">
+        <h2 class="title">${this.config.name ?? "Electricity Total"}</h2>
+        ${coverageLabel ? html`<span class="coverage">${coverageLabel}</span>` : nothing}
+      </div>
       <div class="card" style=${dim ? "opacity:0.6" : ""}>
         <span class="lead"><hd-icon icon="mdi:flash" .size=${26}></hd-icon></span>
         ${this._term(imported, "kWh", "Imported", "var(--accent)")}

@@ -7,12 +7,17 @@ import type { ViewConfig } from "../config/schema.js";
 import type { EnergyPeriodSelection } from "../energy/energy-period.js";
 import {
   currentEnergyPeriodSelection,
+  energyExpectedBucketStarts,
   energyStatisticIds,
   resolveEnergyPeriod,
   type EnergyPeriodContext,
   type EnergyPeriodRange,
 } from "../energy/energy-period.js";
-import { fetchStatistics, type StatBucket } from "../home-assistant/statistics.js";
+import {
+  emptyEnergyStatisticsData,
+  fetchEnergyStatistics,
+  StatisticsRangeCache,
+} from "../home-assistant/statistics.js";
 import {
   gridMetricsForProfile,
   packViewGrid,
@@ -41,8 +46,9 @@ export class HdViewGrid extends LitElement {
   private readonly _dimensions = new ResponsiveProfileController(this, (width) => width);
   private readonly _energyStatistics = new KeyedAsyncController(
     this,
-    () => ({} as Record<string, StatBucket[]>),
+    emptyEnergyStatisticsData,
   );
+  private readonly _energyStatisticsCache = new StatisticsRangeCache();
   private _energyRefreshTimer = 0;
 
   static styles = css`
@@ -115,20 +121,31 @@ export class HdViewGrid extends LitElement {
     const query = this._energyQuery();
     if (!query || !this.hass?.connected || query.ids.length === 0) return;
     const hass = this.hass;
-    this._energyStatistics.load(query.key, () => fetchStatistics(
-      hass,
-      query.ids,
-      query.range.statisticPeriod,
-      query.range.start,
-      query.range.end,
-    ), force);
+    this._energyStatistics.load(query.key, async () => {
+      const cached = !force && !query.range.isCurrent
+        ? this._energyStatisticsCache.get(query.key)
+        : undefined;
+      if (cached) return cached;
+      const result = await fetchEnergyStatistics(
+        hass,
+        query.ids,
+        query.range.statisticPeriod,
+        query.range.start,
+        query.range.end,
+        energyExpectedBucketStarts(query.range),
+      );
+      if (!query.range.isCurrent) this._energyStatisticsCache.set(query.key, result);
+      return result;
+    }, force);
   }
 
   private _energyQuery(): { key: string; ids: string[]; range: EnergyPeriodRange } | undefined {
     const view = this.view;
     if (view?.hero?.type !== "energy") return undefined;
     const range = resolveEnergyPeriod(
-      this.energySelection ?? currentEnergyPeriodSelection(),
+      this.energySelection ?? currentEnergyPeriodSelection(new Date(), this.hass?.config.time_zone),
+      new Date(),
+      this.hass?.config.time_zone,
     );
     const orderedIds = energyStatisticIds(view);
     return { range, ids: orderedIds, key: `${range.key}|${orderedIds.join(",")}` };
@@ -141,7 +158,10 @@ export class HdViewGrid extends LitElement {
     const matches = this._energyStatistics.currentKey === query.key;
     return {
       range: query.range,
-      statistics: matches ? this._energyStatistics.value : {},
+      statistics: matches ? this._energyStatistics.value.statistics : {},
+      metadata: matches ? this._energyStatistics.value.metadata : {},
+      coverage: matches ? this._energyStatistics.value.coverage : "unavailable",
+      coverageById: matches ? this._energyStatistics.value.coverageById : {},
       status: matches ? this._energyStatistics.status : "idle",
       ...(matches && this._energyStatistics.error !== undefined
         ? { error: this._energyStatistics.error }

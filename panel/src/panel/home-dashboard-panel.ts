@@ -149,7 +149,10 @@ export class HomeDashboardPanel extends LitElement {
 
   willUpdate(changed: Map<string, unknown>) {
     if (changed.has("route")) this._syncViewFromLocation();
-    if (changed.has("hass") && this._appearance === "auto") this._applyTheme();
+    if (changed.has("hass")) {
+      this._energyPeriod.setTimeZone(this.hass?.config.time_zone, false);
+      if (this._appearance === "auto") this._applyTheme();
+    }
   }
 
   // ---- Config ------------------------------------------------------------

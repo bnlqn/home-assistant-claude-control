@@ -46,4 +46,19 @@ describe("EnergyPeriodController", () => {
       vi.useRealTimers();
     }
   });
+
+  it("reanchors a followed selection when the HA timezone arrives", () => {
+    const host = {
+      addController() {},
+      requestUpdate: vi.fn(),
+    } as unknown as ReactiveControllerHost;
+    const controller = new EnergyPeriodController(
+      host,
+      () => new Date("2026-08-21T22:30:00.000Z"),
+    );
+
+    controller.setTimeZone("Europe/Brussels", false);
+
+    expect(controller.selection.anchor).toBe("2026-08-22");
+  });
 });

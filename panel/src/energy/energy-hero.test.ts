@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { EnergyHeroConfig } from "../config/schema.js";
 import type { HassEntity, HomeAssistant } from "../types/hass.js";
-import { resolveEnergyPeriod, type EnergyPeriodContext } from "./energy-period.js";
-import { activeEnergyFlows, energyHeroTotals } from "./energy-hero.js";
+import {
+  energyStatisticsAvailability,
+  resolveEnergyPeriod,
+  type EnergyPeriodContext,
+} from "./energy-period.js";
+import {
+  activeEnergyFlows,
+  energyHeroTotals,
+} from "./energy-hero.js";
 
 const options: EnergyHeroConfig = {
   type: "energy",
@@ -99,6 +106,9 @@ describe("energyHeroTotals", () => {
     const context: EnergyPeriodContext = {
       range,
       status: "ready",
+      metadata: {},
+      coverage: "ready",
+      coverageById: {},
       statistics: {
         "sensor.grid_import": [{ start: range.start.getTime(), change: 8 }],
         "sensor.grid_export": [{ start: range.start.getTime(), change: 3 }],
@@ -113,6 +123,39 @@ describe("energyHeroTotals", () => {
     });
   });
 
+  it.each([
+    ["day", "2026-08-20", [3, 5], [1, 2], [4, 3], { grid: 5, solar: 7, home: 12 }],
+    ["week", "2026-08-17", [22, 18], [4, 6], [25, 20], { grid: 30, solar: 45, home: 75 }],
+    ["month", "2026-07-01", [90, 75], [15, 10], [80, 70], { grid: 140, solar: 150, home: 290 }],
+  ] as const)(
+    "matches native Energy import/export conventions for a representative %s",
+    (period, anchor, imports, exports, solar, expected) => {
+      const range = resolveEnergyPeriod(
+        { period, anchor },
+        new Date("2026-08-21T12:00:00Z"),
+        "Europe/Brussels",
+      );
+      const buckets = (values: readonly number[]) => values.map((change, index) => ({
+        start: range.start.getTime() + index * 3_600_000,
+        change,
+      }));
+      const context: EnergyPeriodContext = {
+        range,
+        status: "ready",
+        metadata: {},
+        coverage: "ready",
+        coverageById: {},
+        statistics: {
+          "sensor.grid_import": buckets(imports),
+          "sensor.grid_export": buckets(exports),
+          "sensor.solar_total": buckets(solar),
+        },
+      };
+
+      expect(energyHeroTotals(hass({}), options, context)).toEqual(expected);
+    },
+  );
+
   it("keeps missing recorder data unavailable instead of fabricating zero", () => {
     const range = resolveEnergyPeriod(
       { period: "month", anchor: "2026-07-01" },
@@ -121,7 +164,31 @@ describe("energyHeroTotals", () => {
     expect(energyHeroTotals(hass({}), options, {
       range,
       status: "ready",
+      metadata: {},
+      coverage: "unavailable",
+      coverageById: {},
       statistics: {},
     })).toEqual({ grid: null, solar: null, home: null });
+  });
+});
+
+describe("energyStatisticsAvailability", () => {
+  const context = (coverage: EnergyPeriodContext["coverage"], status: EnergyPeriodContext["status"] = "ready") => {
+    const range = resolveEnergyPeriod(
+      { period: "day", anchor: "2026-08-20" },
+      new Date("2026-08-21T12:00:00Z"),
+      "Europe/Brussels",
+    );
+    return { range, status, statistics: {}, metadata: {}, coverage, coverageById: {} };
+  };
+
+  it("labels partial, unavailable, and loading history", () => {
+    expect(energyStatisticsAvailability(context("partial"))).toBe("Partial");
+    expect(energyStatisticsAvailability(context("unavailable"))).toBe("Unavailable");
+    expect(energyStatisticsAvailability(context("partial", "loading"))).toBe("Loading");
+  });
+
+  it("does not label complete historical data", () => {
+    expect(energyStatisticsAvailability(context("ready"))).toBeNull();
   });
 });
