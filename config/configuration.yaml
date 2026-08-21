@@ -26,7 +26,7 @@ panel_custom:
     sidebar_title: Home Panel
     sidebar_icon: mdi:view-dashboard-variant
     url_path: home-panel
-    module_url: /local/home-dashboard/home-dashboard-panel.js?v=95f6493a3944
+    module_url: /local/home-dashboard/home-dashboard-panel.js?v=6bf4969d817a
     embed_iframe: false
     # This panel applies env(safe-area-inset-*) in its own shell.
     handle_safe_area: true
