@@ -137,3 +137,299 @@ template:
           {% set i = states('sensor.electricity_import_offpeak_billing_year') | float(0) %}
           {% set e = states('sensor.electricity_export_offpeak_billing_year') | float(0) %}
           {{ [e - i, 0] | max | round(3) }}
+
+  # ---- Layer 4: cost templates (financial, ESTIMATE — Phase 2+3) ----
+  # Turns the ledger into € lines and a single estimated bill. Network
+  # (distribution/transport/rebate on gross, taxes on net billable) is exact
+  # and reproduces the invoice (§5: network €403.71 at G=3831). The ENGIE
+  # energy portion is a variable-price ESTIMATE, so the roll-up is named
+  # …_estimated_bill, never exact. Rates all live in Layer-3 input_number
+  # helpers below so tariffs change without editing these templates.
+  #   distribution = G × rate − rebate  (a rebate LINE, never min()/cap — a cap
+  #     has wrong marginal cost, §4.3). rebate + fixed fee are annual, prorated
+  #     by elapsed billing-year days so the running total is bill-to-date.
+  #   green is a SEPARATE line (§4.5); HP/HC prices are energy-only. The
+  #     input_boolean toggle folds it away (→ €0) if a future all-in ENGIE
+  #     price already includes it — no formula edit needed.
+  #   VAT is applied PER MARKER (§4.8): 6% on everything except redevance de
+  #     raccordement, which carried a distinct marker on the invoice (its rate
+  #     helper defaults to 0.06 = no-op until the exact marker is confirmed).
+  - sensor:
+      # Days since the current 1 Jul boundary — prorates the annual lines.
+      # now() makes this re-render on HA's time tick.
+      - name: Electricity Billing Year Elapsed Days
+        unique_id: electricity_billing_year_elapsed_days
+        unit_of_measurement: d
+        icon: mdi:calendar-range
+        state: >
+          {% set y = now().year if now().month >= 7 else now().year - 1 %}
+          {% set start = now().replace(year=y, month=7, day=1, hour=0,
+                                       minute=0, second=0, microsecond=0) %}
+          {{ (now() - start).days + 1 }}
+
+      # ENGIE energy commodity on NET billable (§4.6) — variable price ⇒ estimate
+      - name: Electricity Cost Supplier Energy
+        unique_id: electricity_cost_supplier_energy
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: total
+        icon: mdi:cash
+        availability: >
+          {{ states('sensor.electricity_billable_peak') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_billable_off_peak') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set bhp = states('sensor.electricity_billable_peak') | float(0) %}
+          {% set bhc = states('sensor.electricity_billable_off_peak') | float(0) %}
+          {% set php = states('input_number.electricity_price_engie_hp') | float(0) %}
+          {% set phc = states('input_number.electricity_price_engie_hc') | float(0) %}
+          {{ (bhp * php + bhc * phc) | round(2) }}
+
+      # Green energy — SEPARATE line on net billable; toggle off ⇒ €0 (§4.5)
+      - name: Electricity Cost Green
+        unique_id: electricity_cost_green
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: total
+        icon: mdi:leaf
+        availability: >
+          {{ states('sensor.electricity_billable_peak') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_billable_off_peak') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set billable = (states('sensor.electricity_billable_peak') | float(0))
+                          + (states('sensor.electricity_billable_off_peak') | float(0)) %}
+          {% set rate = states('input_number.electricity_price_green') | float(0) %}
+          {% if is_state('input_boolean.electricity_green_billed_separately', 'on') %}
+          {{ (billable * rate) | round(2) }}
+          {% else %}
+          0.0
+          {% endif %}
+
+      # Fixed supplier redevance, prorated by elapsed days (§4.7)
+      - name: Electricity Cost Supplier Fixed
+        unique_id: electricity_cost_supplier_fixed
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: total
+        icon: mdi:file-document-outline
+        availability: >
+          {{ states('sensor.electricity_billing_year_elapsed_days') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set annual = states('input_number.electricity_supplier_fixed_annual') | float(0) %}
+          {% set elapsed = states('sensor.electricity_billing_year_elapsed_days') | float(0) %}
+          {{ (annual * elapsed / 365) | round(2) }}
+
+      # ORES distribution on GROSS import − prosumer rebate line (§4.3)
+      - name: Electricity Cost Distribution
+        unique_id: electricity_cost_distribution
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: total
+        icon: mdi:transmission-tower
+        availability: >
+          {{ states('sensor.electricity_gross_import_billing_year') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_billing_year_elapsed_days') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set g = states('sensor.electricity_gross_import_billing_year') | float(0) %}
+          {% set rate = states('input_number.electricity_price_ores_distribution') | float(0) %}
+          {% set rebate = states('input_number.electricity_ores_prosumer_rebate_annual') | float(0) %}
+          {% set elapsed = states('sensor.electricity_billing_year_elapsed_days') | float(0) %}
+          {{ (g * rate - rebate * elapsed / 365) | round(2) }}
+
+      # ORES transport on GROSS import (§4.3)
+      - name: Electricity Cost Transport
+        unique_id: electricity_cost_transport
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: total
+        icon: mdi:transmission-tower-export
+        availability: >
+          {{ states('sensor.electricity_gross_import_billing_year') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set g = states('sensor.electricity_gross_import_billing_year') | float(0) %}
+          {% set rate = states('input_number.electricity_price_ores_transport') | float(0) %}
+          {{ (g * rate) | round(2) }}
+
+      # Network total = distribution + transport (the dominant slice)
+      - name: Electricity Cost Network
+        unique_id: electricity_cost_network
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: total
+        icon: mdi:transmission-tower-import
+        availability: >
+          {{ states('sensor.electricity_cost_distribution') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_cost_transport') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set d = states('sensor.electricity_cost_distribution') | float(0) %}
+          {% set t = states('sensor.electricity_cost_transport') | float(0) %}
+          {{ (d + t) | round(2) }}
+
+      # Levies/taxes on NET billable (§4.4) — ex-VAT display total
+      - name: Electricity Cost Taxes
+        unique_id: electricity_cost_taxes
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: total
+        icon: mdi:scale-balance
+        availability: >
+          {{ states('sensor.electricity_billable_peak') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_billable_off_peak') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set billable = (states('sensor.electricity_billable_peak') | float(0))
+                          + (states('sensor.electricity_billable_off_peak') | float(0)) %}
+          {% set cot = states('input_number.electricity_levy_cotisation') | float(0) %}
+          {% set acc = states('input_number.electricity_levy_accise') | float(0) %}
+          {% set racc = states('input_number.electricity_levy_raccordement') | float(0) %}
+          {{ (billable * (cot + acc + racc)) | round(2) }}
+
+      # Estimated bill — VAT per marker (§4.8), raccordement split out
+      - name: Electricity Estimated Bill
+        unique_id: electricity_estimated_bill
+        unit_of_measurement: "€"
+        device_class: monetary
+        state_class: total
+        icon: mdi:receipt-text
+        availability: >
+          {{ states('sensor.electricity_cost_supplier_energy') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_cost_distribution') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_cost_transport') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set energy = states('sensor.electricity_cost_supplier_energy') | float(0) %}
+          {% set green = states('sensor.electricity_cost_green') | float(0) %}
+          {% set fixed = states('sensor.electricity_cost_supplier_fixed') | float(0) %}
+          {% set dist = states('sensor.electricity_cost_distribution') | float(0) %}
+          {% set trans = states('sensor.electricity_cost_transport') | float(0) %}
+          {% set billable = (states('sensor.electricity_billable_peak') | float(0))
+                          + (states('sensor.electricity_billable_off_peak') | float(0)) %}
+          {% set cot = states('input_number.electricity_levy_cotisation') | float(0) %}
+          {% set acc = states('input_number.electricity_levy_accise') | float(0) %}
+          {% set racc_rate = states('input_number.electricity_levy_raccordement') | float(0) %}
+          {% set vat = states('input_number.electricity_vat_rate') | float(0) %}
+          {% set vat_racc = states('input_number.electricity_vat_rate_raccordement') | float(0) %}
+          {% set std = energy + green + fixed + dist + trans + billable * (cot + acc) %}
+          {% set racc = billable * racc_rate %}
+          {{ (std * (1 + vat) + racc * (1 + vat_racc)) | round(2) }}
+
+# =====================================================================
+#  Layer 3 — tariff helpers. Every rate that can move is an editable
+#  input_number so tariffs update without touching templates (blueprint §9).
+#  €/kWh ex-VAT unless the comment says €/yr. Seed values from model §7.
+# =====================================================================
+input_number:
+  # -- ENGIE energy (variable, effective-average for the billing period) --
+  electricity_price_engie_hp:
+    name: Electricity Price ENGIE Peak
+    icon: mdi:currency-eur
+    min: 0
+    max: 1
+    step: 0.000001
+    initial: 0.202
+    mode: box
+    unit_of_measurement: "€/kWh"
+  electricity_price_engie_hc:
+    name: Electricity Price ENGIE Off-Peak
+    icon: mdi:currency-eur
+    min: 0
+    max: 1
+    step: 0.000001
+    initial: 0.164
+    mode: box
+    unit_of_measurement: "€/kWh"
+  electricity_price_green:
+    name: Electricity Price Green Energy
+    icon: mdi:leaf
+    min: 0
+    max: 1
+    step: 0.000001
+    initial: 0.0292
+    mode: box
+    unit_of_measurement: "€/kWh"
+  # -- ORES network --
+  electricity_price_ores_distribution:
+    name: Electricity Price ORES Distribution
+    icon: mdi:transmission-tower
+    min: 0
+    max: 1
+    step: 0.000001
+    initial: 0.08852
+    mode: box
+    unit_of_measurement: "€/kWh"
+  electricity_price_ores_transport:
+    name: Electricity Price ORES Transport
+    icon: mdi:transmission-tower-export
+    min: 0
+    max: 1
+    step: 0.000001
+    initial: 0.0269642
+    mode: box
+    unit_of_measurement: "€/kWh"
+  electricity_ores_prosumer_rebate_annual:
+    name: Electricity ORES Prosumer Rebate
+    icon: mdi:solar-power-variant
+    min: 0
+    max: 500
+    step: 0.01
+    initial: 38.71
+    mode: box
+    unit_of_measurement: "€/yr"
+  # -- Levies on net billable --
+  electricity_levy_cotisation:
+    name: Electricity Levy Cotisation Energie
+    icon: mdi:scale-balance
+    min: 0
+    max: 1
+    step: 0.000001
+    initial: 0.0019261
+    mode: box
+    unit_of_measurement: "€/kWh"
+  electricity_levy_accise:
+    name: Electricity Levy Accise Speciale
+    icon: mdi:scale-balance
+    min: 0
+    max: 1
+    step: 0.000001
+    initial: 0.0474806
+    mode: box
+    unit_of_measurement: "€/kWh"
+  electricity_levy_raccordement:
+    name: Electricity Levy Redevance Raccordement
+    icon: mdi:scale-balance
+    min: 0
+    max: 1
+    step: 0.000001
+    initial: 0.00075
+    mode: box
+    unit_of_measurement: "€/kWh"
+  # -- Supplier fixed fee --
+  electricity_supplier_fixed_annual:
+    name: Electricity Supplier Fixed Fee
+    icon: mdi:file-document-outline
+    min: 0
+    max: 500
+    step: 0.01
+    initial: 28.30
+    mode: box
+    unit_of_measurement: "€/yr"
+  # -- VAT (raccordement carries a distinct marker, §4.8/§12.6) --
+  electricity_vat_rate:
+    name: Electricity VAT Rate
+    icon: mdi:percent-outline
+    min: 0
+    max: 1
+    step: 0.0001
+    initial: 0.06
+    mode: box
+  electricity_vat_rate_raccordement:
+    name: Electricity VAT Rate Raccordement
+    icon: mdi:percent-outline
+    min: 0
+    max: 1
+    step: 0.0001
+    initial: 0.06
+    mode: box
+
+input_boolean:
+  # Green as its own line (on) vs folded into the energy price (off, → €0).
+  electricity_green_billed_separately:
+    name: Electricity Green Billed Separately
+    icon: mdi:leaf

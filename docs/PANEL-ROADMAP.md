@@ -610,9 +610,39 @@ Progress — Phase 1 (physical ledger) shipped 2026-08-21:
   `sensor.electricity_off_peak_compensation_reserve` (the meters and
   `billable_peak`/`gross_import_billing_year` match their unique_ids).
 
-Still open before Phase 2–3 (cost templates), needs owner input (model §12):
-prosumer-rebate basis, green in/out of the displayed ENGIE price, and whether
-net surplus is truly unpaid on this contract.
+Progress — Phase 2+3 (cost layer → estimated bill) shipped 2026-08-21:
+
+- extended the same engine file `config/packages/energy_billing.yaml` — model §9
+  Layers 3–4, the financial layer (owner chose the full estimated bill, not
+  ORES-only);
+- Layer 3: 12 editable `input_number` tariff helpers (ENGIE HP/HC, green, ORES
+  distribution/transport, prosumer rebate, cotisation/accise/raccordement, fixed
+  fee, VAT ×2) + `input_boolean.electricity_green_billed_separately` — so rates
+  change without editing templates;
+- Layer 4: 9 `device_class: monetary` sensors — supplier energy, green, fixed,
+  distribution (`G × rate − rebate`, a rebate **line, never a cap**), transport,
+  network, taxes, and `sensor.electricity_estimated_bill`, plus an elapsed-days
+  helper that prorates the two annual lines;
+- **owner decisions:** rebate = flat €38.71/yr editable + prorated (basis
+  unconfirmed pending a 2nd bill); green = **separate** line (0.0292 €/kWh),
+  HP/HC prices energy-only, toggle folds it away if a future all-in price bundles
+  it; VAT applied **per marker** (6% except raccordement, §4.8);
+- reconciled network to the invoice fixture via `/api/template` at G=3831,
+  billable=516: distribution €300.41 + transport €103.30 = **€403.71** ✓ (matches
+  §5); full closed-year estimate €591.04 at ref prices;
+- deployed with a pre-deploy backup; **no Core restart** — `input_number`,
+  `input_boolean`, and `template` all reload live (unlike Phase 1's
+  `utility_meter`). Verified `RUNNING`, all 22 entities live, no log errors;
+- live check (52 days into the summer year, billable energy fully
+  solar-compensated → 0): estimated bill **€23.48** = pure network €18.12 + fixed
+  €4.03 — exactly the expected shape for a solar prosumer in summer.
+
+Still open after this slice (non-blocking, model §12): automate the monthly
+ENGIE effective-average helper (§12.5, blueprint Phase 4) so history isn't
+retrospectively repriced; confirm the rebate basis with a 2nd bill (§12.2); pin
+the exact raccordement VAT marker from the invoice (§12.6 — helper defaults to
+0.06 = no-op until then). Next presentation slice: the panel
+`Coûts & autoconsommation` widget (§11), which reads these entities.
 
 ## Work deliberately deferred
 
