@@ -583,6 +583,37 @@ tariff-1=HP by night sample, prosumer-rebate basis, green in/out of displayed
 price, and ENGIE monthly settlement allocation (model doc §12). Implementation to
 follow.
 
+Progress — Phase 1 (physical ledger) shipped 2026-08-21:
+
+- built `config/packages/energy_billing.yaml` — model §9 Layers 1–2, the exact
+  physical ledger with no € (cost templates are Phase 2–3);
+- **resolved the register mapping live** (model §12.1): `sensor.p1_meter_tariff`
+  flips to `2` at 22:00 CEST (the Walloon bihoraire boundary), confirming
+  **tariff 1 = HP, tariff 2 = HC** — no HP/HC swap;
+- Layer 1: four annual `utility_meter`s on the P1 registers, `cron: "0 0 1 7 *"`,
+  `periodically_resetting: false` (lifetime-cumulative sources);
+- Layer 2: five template sensors — register-specific billable
+  `max(0, import − export)` for HP and HC, gross import (network base), and the
+  two compensation-reserve sensors;
+- reconciled to the prior annual bill fixture: billable HP `0`, billable HC
+  `516`, gross `3831`, HP reserve `226` — all match ENGIE (register-specific
+  `516`, not total-net `290`);
+- deployed with a pre-deploy backup and a Core restart (`utility_meter` exposes
+  no reload service, so new YAML meters instantiate only at startup), verified
+  `RUNNING` with all nine entities live and no billing-related log errors;
+- seeded the current billing year via `utility_meter.calibrate` from the 15 Jul
+  recorder baseline (HA long-term stats reach back only to 15 Jul 2026; 1–14 Jul
+  is unrecoverable) — first fully-clean July→June year begins at the next reset;
+- note for Phase 2: HA slugifies the display names, so entity_ids are
+  `sensor.electricity_billable_off_peak`,
+  `sensor.electricity_peak_compensation_reserve`, and
+  `sensor.electricity_off_peak_compensation_reserve` (the meters and
+  `billable_peak`/`gross_import_billing_year` match their unique_ids).
+
+Still open before Phase 2–3 (cost templates), needs owner input (model §12):
+prosumer-rebate basis, green in/out of the displayed ENGIE price, and whether
+net surplus is truly unpaid on this contract.
+
 ## Work deliberately deferred
 
 - No framework rewrite.

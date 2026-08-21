@@ -1,0 +1,139 @@
+# =====================================================================
+#  Walloon electricity billing engine — Phase 1: physical ledger
+#  See docs/energy-cost-model.md (blueprint §4 / §9, Layers 1–2).
+#
+#  What this file builds (exact, no € — that is Phase 2–3):
+#    Layer 1 — four annual utility_meters on the P1 tariff registers,
+#      reset at the July→June billing-year boundary (cron 00:00 on 1 Jul).
+#      periodically_resetting: false because the sources are lifetime-
+#      cumulative counters (total_increasing), not per-period meters.
+#    Layer 2 — ledger + reserve template sensors:
+#      register-specific billable = max(0, import − export) per register
+#      (energy is netted PER tariff register over the year, capped at
+#      zero — HP surplus does NOT offset HC consumption), gross import
+#      (network base), and the two compensation-reserve sensors that make
+#      the invisible annual mechanism legible.
+#
+#  Register mapping (confirmed live 2026-08-21, blueprint §8/§12.1):
+#    tariff 1 = HP (heures pleines / peak, daytime)
+#    tariff 2 = HC (heures creuses / off-peak, night; sensor.p1_meter_tariff
+#      flips to 2 at 22:00 CEST — the Walloon bihoraire boundary).
+#
+#  Historical bill reconciliation (year ending 30 Jun 2026, model §2/§5):
+#    Billable Peak    = max(0, 1432 − 1658) = 0     (bill: 0)
+#    Billable Off-Peak= max(0, 2399 − 1883) = 516   (bill: 516 kWh) ✓
+#    Gross Import     = 1432 + 2399        = 3831   (network base)  ✓
+#    Reserve Peak     = max(0, 1658 − 1432) = 226   (HP reserve)    ✓
+#    Reserve Off-Peak = max(0, 1883 − 2399) = 0                     ✓
+#    → register-specific compensation (516), NOT total-net (290).
+#
+#  Seeding: utility_meters read 0 at creation. After deploy, calibrate each
+#    to (current register − its 15 Jul reading) — HA long-term stats reach
+#    back only to 15 Jul 2026 (1–14 Jul unrecoverable). See the plan / doc.
+#
+#  Loaded via configuration.yaml:
+#      homeassistant:
+#        packages: !include_dir_named packages
+# =====================================================================
+
+utility_meter:
+  # ---- Layer 1: annual billing-year meters (reset 00:00 on 1 July) ----
+  electricity_import_peak_billing_year:
+    source: sensor.p1_meter_energy_import_tariff_1
+    cron: "0 0 1 7 *"
+    periodically_resetting: false
+  electricity_import_offpeak_billing_year:
+    source: sensor.p1_meter_energy_import_tariff_2
+    cron: "0 0 1 7 *"
+    periodically_resetting: false
+  electricity_export_peak_billing_year:
+    source: sensor.p1_meter_energy_export_tariff_1
+    cron: "0 0 1 7 *"
+    periodically_resetting: false
+  electricity_export_offpeak_billing_year:
+    source: sensor.p1_meter_energy_export_tariff_2
+    cron: "0 0 1 7 *"
+    periodically_resetting: false
+
+template:
+  # ---- Layer 2: ledger (physical, exact) ----
+  # Net values move up and down within the year and reset 1 Jul, so
+  # state_class is `total`, not `total_increasing`. Each sensor reads the
+  # Layer-1 billing-year meters (not the raw registers) so the ledger is
+  # billing-year-scoped and resets with them. Guarded so an exact ledger
+  # reports unavailable rather than a misleading 0 when a meter is missing.
+  - sensor:
+      # billable_HP = max(0, import_HP − export_HP)   (= 0 for 2025-26)
+      - name: Electricity Billable Peak
+        unique_id: electricity_billable_peak
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total
+        icon: mdi:transmission-tower-import
+        availability: >
+          {{ states('sensor.electricity_import_peak_billing_year') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_export_peak_billing_year') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set i = states('sensor.electricity_import_peak_billing_year') | float(0) %}
+          {% set e = states('sensor.electricity_export_peak_billing_year') | float(0) %}
+          {{ [i - e, 0] | max | round(3) }}
+
+      # billable_HC = max(0, import_HC − export_HC)   (= 516 for 2025-26)
+      - name: Electricity Billable Off-Peak
+        unique_id: electricity_billable_offpeak
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total
+        icon: mdi:transmission-tower-import
+        availability: >
+          {{ states('sensor.electricity_import_offpeak_billing_year') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_export_offpeak_billing_year') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set i = states('sensor.electricity_import_offpeak_billing_year') | float(0) %}
+          {% set e = states('sensor.electricity_export_offpeak_billing_year') | float(0) %}
+          {{ [i - e, 0] | max | round(3) }}
+
+      # Gross import G = import_HP + import_HC   (network charge base; = 3831)
+      - name: Electricity Gross Import Billing Year
+        unique_id: electricity_gross_import_billing_year
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total
+        icon: mdi:transmission-tower
+        availability: >
+          {{ states('sensor.electricity_import_peak_billing_year') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_import_offpeak_billing_year') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set hp = states('sensor.electricity_import_peak_billing_year') | float(0) %}
+          {% set hc = states('sensor.electricity_import_offpeak_billing_year') | float(0) %}
+          {{ (hp + hc) | round(3) }}
+
+      # reserve_HP = max(0, export_HP − import_HP)   (use-it-or-lose-it; = 226)
+      - name: Electricity Peak Compensation Reserve
+        unique_id: electricity_compensation_reserve_peak
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total
+        icon: mdi:battery-charging-outline
+        availability: >
+          {{ states('sensor.electricity_import_peak_billing_year') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_export_peak_billing_year') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set i = states('sensor.electricity_import_peak_billing_year') | float(0) %}
+          {% set e = states('sensor.electricity_export_peak_billing_year') | float(0) %}
+          {{ [e - i, 0] | max | round(3) }}
+
+      # reserve_HC = max(0, export_HC − import_HC)   (= 0 for 2025-26)
+      - name: Electricity Off-Peak Compensation Reserve
+        unique_id: electricity_compensation_reserve_offpeak
+        unit_of_measurement: kWh
+        device_class: energy
+        state_class: total
+        icon: mdi:battery-charging-outline
+        availability: >
+          {{ states('sensor.electricity_import_offpeak_billing_year') not in ['unknown', 'unavailable']
+             and states('sensor.electricity_export_offpeak_billing_year') not in ['unknown', 'unavailable'] }}
+        state: >
+          {% set i = states('sensor.electricity_import_offpeak_billing_year') | float(0) %}
+          {% set e = states('sensor.electricity_export_offpeak_billing_year') | float(0) %}
+          {{ [e - i, 0] | max | round(3) }}
