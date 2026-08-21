@@ -69,7 +69,9 @@ export class ElectricityTotalWidget extends EntityWidget {
 
   static styles = css`
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
     .title {
       margin: 0;
@@ -92,12 +94,14 @@ export class ElectricityTotalWidget extends EntityWidget {
       font: var(--text-meta);
     }
     .card {
+      flex: 1;
       background: var(--surface);
       border-radius: var(--radius-widget);
       box-shadow: var(--shadow-widget);
       padding: 20px 22px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
       overflow-x: auto;
     }
@@ -140,6 +144,37 @@ export class ElectricityTotalWidget extends EntityWidget {
       color: var(--text-tertiary);
       padding: 0 6px 14px;
       align-self: center;
+    }
+    /* On narrow phones three big numbers can't sit side by side without
+       clipping/scrolling; stack them into a legible list that fills the tall
+       cell, dropping the −/= glyphs (the labels already read as a breakdown). */
+    @media (max-width: 480px) {
+      .card {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: space-evenly;
+        overflow-x: hidden;
+        padding: 16px 20px;
+      }
+      .lead {
+        display: none;
+      }
+      .op {
+        display: none;
+      }
+      .term {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        width: 100%;
+      }
+      .term .lbl {
+        order: -1;
+      }
+      .num b {
+        font-size: 26px;
+      }
     }
   `;
 

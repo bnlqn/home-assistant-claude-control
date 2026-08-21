@@ -514,16 +514,19 @@ export const dashboardConfig: DashboardConfig = {
         },
       },
       widgets: [
-        // Three Homey-style status tiles. They are regular widgets in the
-        // shared Energy grid; no synthetic container owns their placement.
-        // (No home battery in this install, so a fourth tile is omitted.)
+        // Homey-style status tiles. They are regular widgets in the shared
+        // Energy grid; no synthetic container owns their placement. On the
+        // `wide` bucket (tablet-landscape / desktop / wall) the grid runs 6–10
+        // columns, so a 1×1 cell is only ~106px — too narrow for the tile's
+        // "name + value • status" line. They span 2×1 there and stay 1×1 on the
+        // roomier phone/tablet-portrait units. Four tiles fill a desktop row.
         {
           id: "en-t-electricity",
           type: "metrictile",
           entity: "sensor.p1_meter_power",
           name: "Electricity",
           icon: "mdi:flash",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+          size: { compact: "1x1", medium: "1x1", wide: "2x1" },
           options: { accent: "accent", format: "power", status: "gridDirection" },
         },
         {
@@ -532,7 +535,7 @@ export const dashboardConfig: DashboardConfig = {
           entity: "sensor.goodwe_pv_power",
           name: "Solar",
           icon: "mdi:weather-sunny",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+          size: { compact: "1x1", medium: "1x1", wide: "2x1" },
           options: { accent: "light", format: "power", status: "none" },
         },
         {
@@ -541,7 +544,7 @@ export const dashboardConfig: DashboardConfig = {
           entity: "sensor.other_tesla_model_3_battery_level",
           name: "Electric Vehicle",
           icon: "mdi:car-electric",
-          size: { compact: "1x1", medium: "1x1", wide: "1x1" },
+          size: { compact: "1x1", medium: "1x1", wide: "2x1" },
           options: {
             accent: "alert",
             format: "percent",
@@ -550,14 +553,28 @@ export const dashboardConfig: DashboardConfig = {
             connected: "binary_sensor.tesla_wall_connector_vehicle_connected",
           },
         },
+        // Fourth tile completes the desktop row of four and previews the day's
+        // solar: the learned end-of-day production forecast (kWh).
+        {
+          id: "en-t-forecast",
+          type: "metrictile",
+          entity: "sensor.energy_forecast_end_of_day",
+          name: "Solar Forecast",
+          icon: "mdi:solar-power-variant",
+          size: { compact: "1x1", medium: "1x1", wide: "2x1" },
+          options: { accent: "eco", status: "none" },
+        },
         // Bespoke: the solar-only EV-charging control system, as a branded Tesla
         // hero (Model 3 product shot on the official red) — master arm, live
         // charge status, and the grid-power start/stop thresholds in its detail.
+        // A wide 4×2 banner on desktop: the landscape car shot fills the right,
+        // the status/battery/controls the left, and it pairs cleanly with the
+        // 4×2 Electricity Total beside it.
         {
           id: "en-solar-charging",
           type: "solarcharging",
           name: "Solar charging",
-          size: { compact: "2x2", medium: "2x2", wide: "2x2" },
+          size: { compact: "2x2", medium: "2x2", wide: "4x2" },
           options: {
             brand: "tesla",
             master: "input_boolean.tesla_solar_charging_active",
@@ -585,6 +602,37 @@ export const dashboardConfig: DashboardConfig = {
           options: {
             importEnergy: "sensor.p1_meter_energy_import",
             exportEnergy: "sensor.p1_meter_energy_export",
+          },
+        },
+        // Long-range grouped bars (solar / import / export / car) in kWh from
+        // the Statistics API. On the Energy page it follows the shared page
+        // period instead of showing its own Day/Week/Month selector.
+        {
+          id: "en-chart",
+          type: "energychart",
+          name: "Energy history",
+          size: { compact: "2x2", medium: "4x2", wide: "4x2" },
+          options: {
+            solar: "sensor.goodwe_total_pv_generation",
+            gridImport: "sensor.p1_meter_energy_import",
+            gridExport: "sensor.p1_meter_energy_export",
+            car: "sensor.tesla_wall_connector_session_energy",
+          },
+        },
+        // Today's expected solar curve (from the Helios forecast attribute)
+        // overlaid with actual PV production traced to now, plus produced /
+        // still-to-come headline. Pairs 4×2 with the history chart on desktop.
+        {
+          id: "en-forecast",
+          type: "solarforecast",
+          name: "Solar forecast",
+          size: { compact: "2x2", medium: "4x2", wide: "4x2" },
+          options: {
+            forecastPower: "sensor.helios_forecast_power_now",
+            actualPower: "sensor.goodwe_pv_power",
+            producedToday: "sensor.goodwe_today_s_pv_generation",
+            forecastTotal: "sensor.energy_forecast_end_of_day",
+            remaining: "sensor.helios_forecast_energy_today_remaining",
           },
         },
       ],

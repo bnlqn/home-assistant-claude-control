@@ -76,6 +76,25 @@ controller.setEntity("sensor.tesla_wall_connector_session_energy", "4.6", KWH);
 controller.setEntity("sensor.p1_meter_energy_import", "9.8", KWH);
 controller.setEntity("sensor.p1_meter_energy_export", "3.2", KWH);
 
+// Solar-forecast widget baseline (dev-only): a bell-shaped quarter-hourly
+// `forecast` attribute for today so the expected curve renders, plus the
+// produced / remaining / end-of-day headline sensors.
+const dayStart = new Date();
+dayStart.setHours(0, 0, 0, 0);
+const forecastCurve = Array.from({ length: 96 }, (_, i) => {
+  const t = dayStart.getTime() + i * 15 * 60 * 1000;
+  const hour = i / 4; // 0..24
+  // Gaussian around solar noon (13:00) with a ~5h spread, peaking ~4.2 kW.
+  const watts = Math.max(0, 4200 * Math.exp(-((hour - 13) ** 2) / (2 * 3.1 ** 2)));
+  return { datetime: new Date(t).toISOString(), watts: Math.round(watts) };
+});
+controller.setEntity("sensor.helios_forecast_power_now", "2416", {
+  unit_of_measurement: "W",
+  forecast: forecastCurve,
+});
+controller.setEntity("sensor.energy_forecast_end_of_day", "18.4", KWH);
+controller.setEntity("sensor.helios_forecast_energy_today_remaining", "6.4", KWH);
+
 scenario("export"); // lively default so the Energy view looks alive on load
 
 // Tiny dev toolbar (dev-only; never shipped).

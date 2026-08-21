@@ -178,7 +178,9 @@ export class SolarChargingWidget extends EntityWidget {
     /* ---- Tesla branded hero (dark premium) ------------------------------ */
     .hero {
       position: relative;
-      min-height: 300px;
+      /* Fill the grid cell (2×2 ≈ 240px, 4×2 wide banner) rather than forcing a
+         taller box that overflows the cell and misaligns with its row partner. */
+      min-height: 200px;
       height: 100%;
       width: 100%;
       overflow: hidden;
@@ -445,7 +447,7 @@ export class SolarChargingWidget extends EntityWidget {
     const m = buildSolarChargingModel(this.hass, this._opts);
     const size = this.currentSize;
 
-    if (this._branded && size === "2x2") return this._renderHero(m);
+    if (this._branded && (size === "2x2" || size === "4x2")) return this._renderHero(m);
     const soc = m.batteryPct;
     const limit = m.limitPct;
     const fillColor =

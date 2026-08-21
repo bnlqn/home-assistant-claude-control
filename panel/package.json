@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@mdi/js": "^7.4.47",
+    "echarts": "^6.1.0",
     "lit": "^3.2.1"
   },
   "devDependencies": {

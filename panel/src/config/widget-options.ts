@@ -91,6 +91,23 @@ export interface ElectricityTotalWidgetOptions {
   exportEnergy?: string;
 }
 
+export interface SolarForecastWidgetOptions {
+  /**
+   * Sensor whose `forecast` attribute is an hourly/quarter-hourly
+   * `[{ datetime, watts }]` series (e.g. a Solcast/Forecast.Solar style helper).
+   * Filtered to the local day to draw the expected-production curve.
+   */
+  forecastPower?: string;
+  /** Live PV power sensor (W) whose history draws the actual curve to `now`. */
+  actualPower?: string;
+  /** kWh already produced today (headline "so far"). */
+  producedToday?: string;
+  /** Predicted end-of-day production (kWh). */
+  forecastTotal?: string;
+  /** Forecast kWh still to come today (headline "to go"). */
+  remaining?: string;
+}
+
 export type MetricTileAccent =
   | "idle"
   | "unavailable"

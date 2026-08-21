@@ -263,6 +263,31 @@ export class MockHassController {
     return 3 * wobble;
   }
 
+  /**
+   * Hourly kWh shaped by time-of-day, so the dev energy chart is exercised with
+   * REALISTIC varying data (a solar bell, night-time import, midday export, the
+   * odd evening car charge) instead of near-flat bars that make a broken or
+   * non-interactive chart look "fine". A deliberate dev-time guard.
+   */
+  private hourlyEnergy(id: string, t: number): number {
+    const d = new Date(t);
+    const hour = d.getHours() + d.getMinutes() / 60;
+    const day = d.getDay();
+    // Bell centred on ~13:00, zero before ~6:00 and after ~20:00.
+    const sun = Math.max(0, Math.sin(((hour - 6) / 14) * Math.PI));
+    const jitter = 0.85 + 0.3 * Math.abs(Math.sin(t / 5.4e6));
+    if (id.includes("pv") || id.includes("solar")) return +(4.2 * sun * jitter).toFixed(2);
+    if (id.includes("export")) return +(Math.max(0, 4.2 * sun - 1.1) * 0.75 * jitter).toFixed(2);
+    if (id.includes("import")) {
+      const baseLoad = hour >= 17 && hour < 23 ? 1.1 : hour < 6 ? 0.45 : 0.3;
+      return +Math.max(0.03, (baseLoad - 3 * sun) * jitter).toFixed(2);
+    }
+    if (id.includes("wall_connector") || id.includes("car")) {
+      return day % 2 === 0 && hour >= 22 ? +(3.1 * jitter).toFixed(2) : 0;
+    }
+    return +(0.4 * jitter).toFixed(2);
+  }
+
   private syntheticStatistics(msg: Record<string, unknown>) {
     const ids = (msg.statistic_ids as string[]) ?? [];
     const period = (msg.period as string) ?? "day";
@@ -278,7 +303,9 @@ export class MockHassController {
       const rows: Array<{ start: number; end: number; change: number; sum: number }> = [];
       let sum = 0;
       for (let t = startMs; t < endMs; t += stepMs) {
-        const change = Number((this.syntheticEnergy(id, t) * scale).toFixed(2));
+        const change = period === "hour"
+          ? this.hourlyEnergy(id, t)
+          : Number((this.syntheticEnergy(id, t) * scale).toFixed(2));
         sum = Number((sum + change).toFixed(2));
         rows.push({ start: t, end: t + stepMs, change, sum });
       }

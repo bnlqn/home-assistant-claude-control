@@ -348,6 +348,7 @@ describe("widget definitions", () => {
       "energy",
       "powerflow",
       "solarcharging",
+      "solarforecast",
       "energychart",
       "metrictile",
       "electricitytotal",

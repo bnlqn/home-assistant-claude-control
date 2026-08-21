@@ -15,6 +15,7 @@ import type {
   MetricTileWidgetOptions,
   PowerflowWidgetOptions,
   SolarChargingWidgetOptions,
+  SolarForecastWidgetOptions,
   VacuumWidgetOptions,
 } from "./widget-options.js";
 
@@ -31,6 +32,7 @@ export type {
   MetricTileWidgetOptions,
   PowerflowWidgetOptions,
   SolarChargingWidgetOptions,
+  SolarForecastWidgetOptions,
   VacuumWidgetOptions,
 } from "./widget-options.js";
 
@@ -99,6 +101,7 @@ export type WidgetType =
   | "energy"
   | "powerflow"
   | "solarcharging"
+  | "solarforecast"
   | "energychart"
   | "metrictile"
   | "electricitytotal"
@@ -125,6 +128,7 @@ export const ALL_WIDGET_TYPES: readonly WidgetType[] = [
   "energy",
   "powerflow",
   "solarcharging",
+  "solarforecast",
   "energychart",
   "metrictile",
   "electricitytotal",
@@ -245,6 +249,10 @@ export interface SolarChargingWidgetConfig extends WidgetConfigBase<"solarchargi
   options?: SolarChargingWidgetOptions;
 }
 
+export interface SolarForecastWidgetConfig extends WidgetConfigBase<"solarforecast"> {
+  options?: SolarForecastWidgetOptions;
+}
+
 export interface EnergyChartWidgetConfig extends WidgetConfigBase<"energychart"> {
   options?: EnergyChartWidgetOptions;
 }
@@ -280,6 +288,7 @@ export type WidgetConfig =
   | EnergyWidgetConfig
   | PowerflowWidgetConfig
   | SolarChargingWidgetConfig
+  | SolarForecastWidgetConfig
   | EnergyChartWidgetConfig
   | ElectricityTotalWidgetConfig;
 

@@ -569,8 +569,8 @@ export const SOLAR_CHARGING_WIDGET_DEFINITION = {
   label: "Solar charging",
   icon: "mdi:car-electric",
   load: () => import("./solarcharging.js"),
-  supportedSizes: ["2x1", "1x2", "2x2"],
-  defaultSize: { compact: "2x1", medium: "2x2", wide: "2x2" },
+  supportedSizes: ["2x1", "1x2", "2x2", "4x2"],
+  defaultSize: { compact: "2x1", medium: "2x2", wide: "4x2" },
   requiresEntity: false,
   section: "energy",
   quickAction: "toggle",
@@ -579,6 +579,24 @@ export const SOLAR_CHARGING_WIDGET_DEFINITION = {
   validateOptions: validateSolarChargingOptions,
   detailRenderer: "solarcharging",
 } satisfies WidgetDefinition<"solarcharging">;
+
+export const SOLAR_FORECAST_WIDGET_DEFINITION = {
+  type: "solarforecast",
+  tag: "hd-widget-solarforecast",
+  label: "Solar forecast",
+  icon: "mdi:weather-sunny",
+  load: () => import("./solarforecast.js"),
+  supportedSizes: ["2x2", "4x2"],
+  defaultSize: { compact: "2x2", medium: "4x2", wide: "4x2" },
+  requiresEntity: false,
+  section: "energy",
+  quickAction: "none",
+  hasDetail: false,
+  dependencyIds: (config) => widgetDependencyIds(config),
+  validateOptions: (options) => validateEntityOptions(options, "Solar forecast", [
+    "forecastPower", "actualPower", "producedToday", "forecastTotal", "remaining",
+  ]),
+} satisfies WidgetDefinition<"solarforecast">;
 
 export const ENERGY_CHART_WIDGET_DEFINITION = {
   type: "energychart",
@@ -656,6 +674,7 @@ const DEFINITIONS = {
   energy: ENERGY_WIDGET_DEFINITION,
   powerflow: POWERFLOW_WIDGET_DEFINITION,
   solarcharging: SOLAR_CHARGING_WIDGET_DEFINITION,
+  solarforecast: SOLAR_FORECAST_WIDGET_DEFINITION,
   energychart: ENERGY_CHART_WIDGET_DEFINITION,
   metrictile: METRIC_TILE_WIDGET_DEFINITION,
   electricitytotal: ELECTRICITY_TOTAL_WIDGET_DEFINITION,

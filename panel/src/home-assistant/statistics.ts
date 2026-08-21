@@ -94,7 +94,7 @@ export function statisticsRange(period: StatPeriod, buckets: number, now = new D
 export function bucketLabel(startMs: number, period: StatPeriod): string {
   const d = new Date(startMs);
   if (Number.isNaN(d.getTime())) return "";
-  if (period === "hour") return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  if (period === "hour") return d.toLocaleTimeString(undefined, { hour: "numeric" });
   if (period === "day") return d.toLocaleDateString(undefined, { weekday: "short" });
   if (period === "week") return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
   return d.toLocaleDateString(undefined, { month: "short" });
