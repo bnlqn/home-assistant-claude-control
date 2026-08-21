@@ -494,9 +494,18 @@ Progress — live totals verified against native dashboard 2026-08-21:
 Phase 5 exit criteria met: totals match the native Energy dashboard for
 representative day/week/month ranges, navigating history never touches live
 controls (the controls emit intents the period controller applies, feeding a
-new range down), and missing recorder data yields an honest partial state. The
-only remaining polish is optionally re-confirming partial/unavailable states
-visually against the deployed instance, which needs a `/ha-deploy` first.
+new range down), and missing recorder data yields an honest partial state.
+
+Shipped 2026-08-21:
+
+- built and stamped the bundle (`?v=6bf4969d817a`, 406.46 kB) so browsers pull
+  the new period-navigation UI, took a named `Claude pre-deploy` backup (slug
+  `11e65c26`), deployed the tracked config, and restarted Core to re-register
+  the panel (`module_url` in `configuration.yaml` changed);
+- verified Core came back `RUNNING` with the API online and no panel or
+  registration errors in the post-restart logs;
+- landed on `feat/homey-style-custom-panel` as `032946e` (Phase 5 UI) and
+  `f318438` (cache-busting stamp bump). **Phase 5 is shipped.**
 
 ### Phase 6 — Hardening and release
 
@@ -523,13 +532,15 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Phase 5 is functionally complete: the Energy time-travel UI is in place
-(page-level day/week/month selector, previous/next, date selection with
-future-range prevention, and current-period recovery), and its totals have been
-verified equal to Home Assistant's native Energy dashboard for representative
-day/week/month ranges with honest partial handling.
+Phase 5 is shipped: the Energy time-travel UI is live (page-level day/week/month
+selector, previous/next, date selection with future-range prevention, and
+current-period recovery), its totals are verified equal to Home Assistant's
+native Energy dashboard for representative day/week/month ranges with honest
+partial handling, and it has been built, stamped, deployed, and confirmed
+running on the real instance.
 
-Recommended next: either close out Phase 5 by deploying (`./bin/ha panel-build
---stamp` then `/ha-deploy`) and re-confirming partial/unavailable states
-visually on the real instance, or begin Phase 4 (dashboard customization),
-which has been deferred until now.
+Recommended next: begin Phase 4 (dashboard customization), which was deferred
+until now. Optional Phase 5 polish that remains: re-confirm partial/unavailable
+states visually on the deployed instance (behind HA auth), and consider Phase 6
+hardening items (browser-based component tests, screenshot regression) as the
+panel surface grows.
