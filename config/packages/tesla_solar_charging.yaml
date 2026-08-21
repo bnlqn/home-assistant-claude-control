@@ -46,6 +46,38 @@ input_number:
     step: 50
     initial: 200
     unit_of_measurement: W
+  tesla_solar_ridethrough_minutes:
+    name: Tesla Solar Cloud Ride-Through
+    icon: mdi:weather-partly-cloudy
+    min: 0
+    max: 60
+    step: 5
+    initial: 20
+    unit_of_measurement: min
+  tesla_solar_peak_stop_minutes:
+    name: Tesla Solar Peak Stop Delay
+    icon: mdi:timer-off-outline
+    min: 0
+    max: 30
+    step: 1
+    initial: 5
+    unit_of_measurement: min
+  tesla_solar_cooldown_minutes:
+    name: Tesla Solar Restart Cooldown
+    icon: mdi:timer-sand
+    min: 0
+    max: 60
+    step: 5
+    initial: 15
+    unit_of_measurement: min
+  tesla_solar_peak_start_hour:
+    name: Tesla Solar Peak Start Hour
+    icon: mdi:clock-alert-outline
+    min: 12
+    max: 23
+    step: 1
+    initial: 17
+    unit_of_measurement: h
 
 input_boolean:
   tesla_solar_charging_active:
@@ -76,6 +108,11 @@ automation:
     check level-triggered: every 5 minutes it re-evaluates and, if
     everything else still qualifies, actively wakes the car instead of
     just checking whether it happened to already be awake.
+
+    A cooldown condition (tesla_solar_cooldown_minutes) blocks a restart
+    within N minutes of the last stop, so a brief sun-peek between clouds
+    can't bounce the session straight back on - the anti-short-cycle
+    partner to the ride-through guard on the stop automation.
   triggers:
     - trigger: numeric_state
       entity_id: sensor.p1_meter_power
@@ -105,6 +142,14 @@ automation:
     - condition: numeric_state
       entity_id: sensor.p1_meter_power
       below: input_number.tesla_solar_grid_start_threshold_w
+    # Anti-short-cycle cooldown: don't restart within N minutes of the last
+    # charge-switch change. Because the switch is off here (checked above),
+    # last_changed marks when we last stopped. This stops a brief sun-peek
+    # from bouncing the session straight back on after a cloud-driven stop.
+    - condition: template
+      value_template: >-
+        {{ (now() - states.switch.other_tesla_model_3_charge.last_changed).total_seconds()
+           >= states('input_number.tesla_solar_cooldown_minutes') | float(15) * 60 }}
   actions:
     - action: button.press
       target:
@@ -150,12 +195,38 @@ automation:
     charge switch off but leaves the mode switch itself untouched, so the
     next plug-in still starts under solar control without the user
     having to re-enable anything.
+
+    Cloud ride-through lives in the surplus-drop trigger's dwell time,
+    not in a start-of-session timer, so it protects the whole session
+    equally - a cloud passing over a 5-minute-old session and one passing
+    over a 3-hour-old session are treated identically. The surplus-drop
+    trigger only fires after grid import has stayed above the stop
+    threshold *continuously* for the ride-through window; any moment the
+    sun peeks back and net power dips below the threshold resets that
+    timer. A typical cumulus cloud shades for a few minutes, well under
+    the window, so it never fires - the adjust loop has already dropped
+    the car to its 5A floor and it simply rides through (tolerating a
+    little grid import) until the sun returns. Only a genuinely sustained
+    deficit - the sun actually gone - runs the timer out and stops.
+
+    The window is time-of-day dependent: tesla_solar_ridethrough_minutes
+    during the cheap-transport daytime window (Wallonia smart meter),
+    dropping to the much shorter tesla_solar_peak_stop_minutes from
+    tesla_solar_peak_start_hour onward, when importing gets expensive and
+    we'd rather stop promptly than ride through on peak-priced grid power.
+    A vehicle-reported stop (complete/disconnected/no_power) is always
+    immediate and ignores the window entirely, as is a locally-detected
+    stop from the wall connector's contactor opening (a LAN-local backstop
+    for when the car's Fleet telemetry is asleep or stale).
   triggers:
     - trigger: numeric_state
       entity_id: sensor.p1_meter_power
       above: input_number.tesla_solar_grid_stop_threshold_w
       for:
-        minutes: 10
+        minutes: >-
+          {{ states('input_number.tesla_solar_ridethrough_minutes') | int(20)
+             if now().hour < (states('input_number.tesla_solar_peak_start_hour') | int(17))
+             else states('input_number.tesla_solar_peak_stop_minutes') | int(5) }}
       id: no_surplus
     - trigger: state
       entity_id: sensor.other_tesla_model_3_charging
@@ -164,9 +235,28 @@ automation:
         - disconnected
         - no_power
       id: vehicle_state
+    # Local safety net: the wall connector's contactor opens the moment a
+    # session physically ends (car full, unplugged, or the car stopped
+    # accepting), reported over the LAN with no dependence on the car's
+    # Fleet telemetry - which can sit stale for many minutes while asleep.
+    # The 60s "for" lets our own switch.turn_off settle first: when *we*
+    # stop, the Fleet switch reads "off" well within a minute, so the
+    # switch=="on" condition below filters this self-induced re-fire out
+    # and only a genuine external stop (switch still on) gets through.
+    - trigger: state
+      entity_id: binary_sensor.tesla_wall_connector_contactor_closed
+      to: "off"
+      for:
+        seconds: 60
+      id: connector_stopped
   conditions:
     - condition: state
       entity_id: input_boolean.tesla_solar_charging_active
+      state: "on"
+    # Nothing to stop if the charge switch is already off - this also
+    # suppresses the contactor re-fire after any self-induced stop.
+    - condition: state
+      entity_id: switch.other_tesla_model_3_charge
       state: "on"
   actions:
     - action: switch.turn_off
@@ -179,8 +269,17 @@ automation:
         title: "Tesla: Solar charging stopped"
         message: >-
           {% if trigger.id == 'no_surplus' -%}
-          Stopped charging - not enough solar surplus to sustain the
-          minimum charge current for the last 10 minutes.
+          {% set peak_hour = states('input_number.tesla_solar_peak_start_hour') | int(17) %}
+          {% set window = states('input_number.tesla_solar_ridethrough_minutes') | int(20)
+                          if now().hour < peak_hour
+                          else states('input_number.tesla_solar_peak_stop_minutes') | int(5) %}
+          Stopped charging - grid import stayed above the stop threshold
+          for {{ window }} min straight (sun genuinely gone, not just a
+          passing cloud).
+          {%- elif trigger.id == 'connector_stopped' -%}
+          Stopped charging - the wall connector reports the session ended
+          (contactor open), detected locally. Car full or unplugged
+          (battery at {{ states('sensor.other_tesla_model_3_battery_level') }}%).
           {%- else -%}
           Stopped charging - vehicle reports
           "{{ states('sensor.other_tesla_model_3_charging') }}"
@@ -198,18 +297,26 @@ automation:
     deadband, to stay well under Tesla's cloud API rate limits and avoid
     keeping a sleeping car awake.
 
-    Assumes the car is drawing power proportional to the last commanded
-    setpoint (number.other_tesla_model_3_charge_current) rather than
-    reading sensor.other_tesla_model_3_charger_power. That telemetry
-    sensor lags the vehicle's actual draw by much more than the 5-minute
-    cycle (observed frozen at a single value for 20+ minutes while real
-    draw swung between the 5A and 14A it was set to), which turned this
-    into a bang-bang oscillator: each tick alternately way over- and
-    under-estimated headroom and slammed the setpoint between the 5A
-    floor and whatever ceiling the export supported. The setpoint we
-    ourselves last commanded is accurate in real time, so basing the
-    estimate on it instead keeps the control loop fed only with
-    fresh signals.
+    Headroom is estimated from the Tesla Wall Connector's locally-polled
+    telemetry (sensor.tesla_wall_connector_total_power and
+    sensor.tesla_wall_connector_phase_a_voltage), NOT the vehicle's Fleet
+    cloud telemetry. The connector is read over the LAN and stays fresh
+    (~30s) even while the car's cloud telemetry is asleep, and its power
+    reading has fine resolution. This matters because the *vehicle's* own
+    sensor.other_tesla_model_3_charger_power was observed frozen at a
+    single value for 20+ minutes while real draw swung between the 5A and
+    14A it was set to (and it reports only whole-kW resolution), which
+    once turned this loop into a bang-bang oscillator. Using the
+    connector's *measured* draw (rather than a value assumed from the
+    commanded setpoint) also tracks reality when the car tapers near its
+    charge limit or caps below the setpoint, so the loop stops chasing a
+    current the car won't actually take.
+
+    Fallback: if the connector reading is missing/non-numeric or it isn't
+    reporting "charging", the loop reverts to the earlier self-referential
+    estimate - draw assumed as commanded setpoint x measured voltage -
+    which is inherently stable because it never depends on a lagging
+    external signal.
   triggers:
     - trigger: time_pattern
       minutes: "/5"
@@ -226,13 +333,19 @@ automation:
   actions:
     - variables:
         grid_power_w: "{{ states('sensor.p1_meter_power') | float(0) }}"
-        charger_voltage: "{{ states('sensor.other_tesla_model_3_charger_voltage') | float(0) }}"
-        effective_voltage: "{{ charger_voltage if charger_voltage > 50 else 230 }}"
         min_amps: "{{ states('input_number.tesla_solar_min_charge_current') | float(5) }}"
         max_amps: 32
         current_amps: "{{ states('number.other_tesla_model_3_charge_current') | float(0) }}"
-        assumed_car_power_w: "{{ current_amps * effective_voltage }}"
-        ideal_power_w: "{{ assumed_car_power_w - grid_power_w }}"
+        # Real voltage measured at the connector (single-phase / phase A),
+        # falling back to 230V nominal if the reading is missing.
+        wc_voltage: "{{ states('sensor.tesla_wall_connector_phase_a_voltage') | float(0) }}"
+        effective_voltage: "{{ wc_voltage if wc_voltage > 50 else 230 }}"
+        # Prefer the connector's measured draw; only trust it when the
+        # connector says it's charging and reports a meaningful power.
+        wc_power_kw: "{{ states('sensor.tesla_wall_connector_total_power') | float(-1) }}"
+        wc_ok: "{{ is_state('sensor.tesla_wall_connector_status', 'charging') and wc_power_kw > 0.1 }}"
+        car_power_w: "{{ (wc_power_kw * 1000) if wc_ok else (current_amps * effective_voltage) }}"
+        ideal_power_w: "{{ car_power_w - grid_power_w }}"
         ideal_amps_raw: "{{ (ideal_power_w / effective_voltage) | round(0) }}"
         target_amps: "{{ [[ideal_amps_raw | float, min_amps] | max, max_amps] | min }}"
         deadband: "{{ states('input_number.tesla_solar_deadband_current_a') | float(1) }}"
