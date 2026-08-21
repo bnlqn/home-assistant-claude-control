@@ -1,7 +1,40 @@
-import { LitElement, css, html, svg, nothing } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { property } from "lit/decorators.js";
 import { define } from "./registry.js";
+import { graphic, type EChartsOption } from "./echart.js";
+import { resolveChartTheme, tooltipHtml, tooltipStyle } from "../energy/chart-style.js";
+import "./echart.js";
 import "./entity-icon.js";
+
+/** Resolve a color expression (`var(--x)` or a literal) against a host element. */
+function resolveColor(host: Element, value: string): string {
+  const v = value.trim();
+  if (v.startsWith("var(")) {
+    const name = v.slice(4, v.lastIndexOf(")")).split(",")[0].trim();
+    return getComputedStyle(host).getPropertyValue(name).trim() || "#3b82f6";
+  }
+  return v || "#3b82f6";
+}
+
+/** Turn a hex or rgb color into an `rgba()` string at the given alpha. */
+function withAlpha(color: string, alpha: number): string {
+  const c = color.trim();
+  if (c.startsWith("#")) {
+    const h = c.slice(1);
+    const to = (s: string): number => parseInt(s, 16);
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    if (h.length === 3) {
+      [r, g, b] = [to(h[0] + h[0]), to(h[1] + h[1]), to(h[2] + h[2])];
+    } else if (h.length >= 6) {
+      [r, g, b] = [to(h.slice(0, 2)), to(h.slice(2, 4)), to(h.slice(4, 6))];
+    }
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  const m = c.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+  return m ? `rgba(${m[1]},${m[2]},${m[3]},${alpha})` : c;
+}
 
 /** Thin progress/level bar (cover position, volume readout, battery). */
 @define("hd-progress")
@@ -133,63 +166,186 @@ export class HdSkeleton extends LitElement {
   }
 }
 
+/** Format a value with up to a couple of decimals plus an optional unit. */
+function fmtValue(v: number, unit: string): string {
+  const abs = Math.abs(v);
+  const digits = abs >= 100 ? 0 : abs >= 10 ? 1 : 2;
+  let s: string;
+  try {
+    s = new Intl.NumberFormat(undefined, { maximumFractionDigits: digits }).format(v);
+  } catch {
+    s = v.toFixed(digits);
+  }
+  return unit ? `${s} ${unit}` : s;
+}
+
+/** Short local clock label (e.g. "14:30") for a trend's time axis / tooltip. */
+function fmtTime(ms: number): string {
+  return new Date(ms).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+}
+
 /**
- * Tiny sparkline/area trend chart used in sensor & energy details. Renders an
- * SVG polyline; carries a textual summary in aria-label for screen readers.
+ * Trend chart used in sensor & energy widgets and detail dialogs. Renders an
+ * ECharts canvas (same engine as the panel's full charts) so every graph shares
+ * one rendering path and visual language.
+ *
+ * Two densities from one component:
+ *  - **compact** (default) — a bare sparkline for tiny widget tiles: a smooth
+ *    line over a soft gradient, no axes, meant as a glanceable shape beside the
+ *    tile's big current value.
+ *  - **`detailed`** — a readable chart for the detail dialog: a value axis with
+ *    the unit, a time axis, gridlines, and a hover tooltip showing the exact
+ *    value at a point in time. Pass `times` (epoch-ms per point) and `unit`.
+ *
+ * `summary` is exposed to assistive tech via the host's `aria-label`.
  */
 @define("hd-trend")
 export class HdTrend extends LitElement {
   @property({ attribute: false }) points: number[] = [];
+  /** Optional epoch-ms timestamp per point; enables a real time axis + tooltip. */
+  @property({ attribute: false }) times: number[] = [];
   @property({ type: String }) color = "var(--accent)";
   @property({ type: Boolean }) area = true;
+  /** Render axes + hover tooltip (detail dialog) instead of a bare sparkline. */
+  @property({ type: Boolean }) detailed = false;
+  @property({ type: String }) unit = "";
   @property({ type: String }) summary = "";
   static styles = css`
     :host {
       display: block;
       width: 100%;
+      height: 100%;
     }
-    svg {
-      display: block;
+    hd-echart {
       width: 100%;
       height: 100%;
-      overflow: visible;
     }
-    .line {
-      fill: none;
-      stroke: var(--trend-color, var(--accent));
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      vector-effect: non-scaling-stroke;
-    }
-    .fill {
-      fill: var(--trend-color, var(--accent));
-      opacity: 0.14;
+    .empty {
+      width: 100%;
+      height: 100%;
     }
   `;
-  render() {
-    const pts = this.points.filter((n) => Number.isFinite(n));
-    if (pts.length < 2) {
-      return html`<svg viewBox="0 0 100 32" preserveAspectRatio="none" aria-label=${this.summary}></svg>`;
-    }
+
+  private _areaStyle(color: string): object {
+    return {
+      color: new graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: withAlpha(color, this.detailed ? 0.32 : 0.28) },
+        { offset: 1, color: withAlpha(color, 0.02) },
+      ]) as unknown as string,
+    };
+  }
+
+  /** Bare sparkline for tiny tiles — no axes, no interaction. */
+  private _compactOption(pts: number[], color: string): EChartsOption {
     const min = Math.min(...pts);
     const max = Math.max(...pts);
-    const span = max - min || 1;
-    const W = 100;
-    const H = 32;
-    const step = W / (pts.length - 1);
-    const coords = pts.map((v, i) => {
-      const x = i * step;
-      const y = H - ((v - min) / span) * (H - 4) - 2;
-      return [x, y] as const;
-    });
-    const line = coords.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
-    const areaPath = `${line} L${W},${H} L0,${H} Z`;
-    return html`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label=${this.summary}
-      style=${`--trend-color:${this.color}`}
-      >${this.area ? svg`<path class="fill" d=${areaPath}></path>` : nothing}
-      ${svg`<path class="line" d=${line}></path>`}</svg
-    >`;
+    const pad = (max - min) * 0.12 || 1;
+    return {
+      animationDuration: 500,
+      animationEasing: "cubicOut",
+      grid: { left: 1, right: 1, top: 4, bottom: 3 },
+      xAxis: { type: "category", show: false, boundaryGap: false, data: pts.map((_, i) => i) },
+      yAxis: { type: "value", show: false, min: min - pad, max: max + pad },
+      series: [
+        {
+          type: "line",
+          data: pts,
+          smooth: 0.35,
+          showSymbol: false,
+          silent: true,
+          lineStyle: { color, width: 2.5, cap: "round", join: "round" },
+          ...(this.area ? { areaStyle: this._areaStyle(color) } : {}),
+          z: 2,
+        },
+      ],
+    } as EChartsOption;
+  }
+
+  /** Readable, axed chart with a hover tooltip for the detail dialog. */
+  private _detailedOption(pts: number[], color: string): EChartsOption {
+    const theme = resolveChartTheme(this);
+    const hasTimes = this.times.length === pts.length && pts.length > 1;
+    const data: Array<[number, number] | number> = hasTimes
+      ? pts.map((v, i) => [this.times[i], v] as [number, number])
+      : pts;
+    return {
+      animationDuration: 600,
+      animationEasing: "cubicOut",
+      textStyle: { fontFamily: theme.font },
+      grid: { left: 4, right: 12, top: 12, bottom: 4, containLabel: true },
+      tooltip: {
+        trigger: "axis",
+        axisPointer: { type: "line", lineStyle: { color: theme.grid, width: 1 } },
+        ...tooltipStyle(theme),
+        formatter: (params: unknown) => {
+          const arr = params as Array<{ value: [number, number] | number; axisValue: number }>;
+          const p = arr[0];
+          const val = Array.isArray(p?.value) ? p.value[1] : (p?.value as number);
+          const header = hasTimes ? fmtTime(Array.isArray(p.value) ? p.value[0] : p.axisValue) : "";
+          return tooltipHtml(theme, header, [
+            { color, label: "", value: fmtValue(val ?? 0, this.unit) },
+          ]);
+        },
+      },
+      xAxis: {
+        type: hasTimes ? "time" : "category",
+        boundaryGap: false,
+        axisTick: { show: false },
+        axisLine: { show: false },
+        splitLine: { show: false },
+        axisLabel: {
+          color: theme.dim,
+          fontFamily: theme.font,
+          fontSize: 11,
+          hideOverlap: true,
+          formatter: hasTimes ? (v: number) => fmtTime(v) : undefined,
+        },
+        ...(hasTimes ? {} : { data: pts.map((_, i) => i), show: false }),
+      },
+      yAxis: {
+        type: "value",
+        scale: true,
+        splitNumber: 3,
+        splitLine: { lineStyle: { color: theme.grid } },
+        // Unit is carried by the tooltip + the dialog's meta row, so the axis
+        // stays clutter-free with bare numbers (no overlapping unit label).
+        axisLabel: {
+          color: theme.dim,
+          fontFamily: theme.font,
+          fontSize: 11,
+          formatter: (v: number) => fmtValue(v, ""),
+        },
+      },
+      series: [
+        {
+          type: "line",
+          data,
+          smooth: 0.3,
+          showSymbol: false,
+          lineStyle: { color, width: 2.5, cap: "round", join: "round" },
+          itemStyle: { color },
+          ...(this.area ? { areaStyle: this._areaStyle(color) } : {}),
+          z: 2,
+        },
+      ],
+    } as EChartsOption;
+  }
+
+  private _option(): EChartsOption {
+    const pts = this.points.filter((n) => Number.isFinite(n));
+    const color = resolveColor(this, this.color);
+    return this.detailed ? this._detailedOption(pts, color) : this._compactOption(pts, color);
+  }
+
+  updated(): void {
+    this.setAttribute("role", "img");
+    if (this.summary) this.setAttribute("aria-label", this.summary);
+  }
+
+  render() {
+    const pts = this.points.filter((n) => Number.isFinite(n));
+    if (pts.length < 2) return html`<div class="empty"></div>`;
+    return html`<hd-echart .option=${this._option()}></hd-echart>`;
   }
 }
 

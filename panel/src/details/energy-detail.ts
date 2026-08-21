@@ -34,7 +34,13 @@ export function renderEnergyDetail(ctx: DetailContext): TemplateResult {
       ? html`<div class="d-section">
           <span class="d-label">Grid power — last 24 hours</span>
           <div class="detail-trend">
-            <hd-trend .points=${ctx.trend} .summary=${"24 hour grid power"}></hd-trend>
+            <hd-trend
+              detailed
+              .points=${ctx.trend}
+              .times=${ctx.trendPoints.map((p) => p.t)}
+              .unit=${ctx.trendUnit}
+              .summary=${"24 hour grid power"}
+            ></hd-trend>
           </div>
         </div>`
       : nothing}
@@ -68,7 +74,13 @@ export function renderPowerflowDetail(ctx: DetailContext): TemplateResult {
       ? html`<div class="d-section">
           <span class="d-label">Grid power — last 24 hours</span>
           <div class="detail-trend">
-            <hd-trend .points=${ctx.trend} .summary=${"24 hour grid power"}></hd-trend>
+            <hd-trend
+              detailed
+              .points=${ctx.trend}
+              .times=${ctx.trendPoints.map((p) => p.t)}
+              .unit=${ctx.trendUnit}
+              .summary=${"24 hour grid power"}
+            ></hd-trend>
           </div>
         </div>`
       : nothing}

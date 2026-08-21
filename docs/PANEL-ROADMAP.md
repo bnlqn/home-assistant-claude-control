@@ -522,6 +522,67 @@ Goal: make the dashboard dependable as an always-on home interface.
   first-load requests on the wall tablet.
 - Document the widget authoring contract and dashboard schema migrations.
 
+### Phase 7 — Energy cost & self-consumption (Walloon tariff)
+
+Goal: turn the kWh-only Energy page into a cost- and behaviour-aware one, using
+the real Walloon/ORES tariff structure — see
+[`docs/energy-cost-model.md`](energy-cost-model.md) for the full model,
+derivation, and entity mapping.
+
+Context that shapes the whole phase (details in the model doc):
+
+- The house is on **ORES (Wallonia)**, not Fluvius. Distribution is **per-kWh on
+  GROSS import** with a bidirectional smart meter — not a monthly demand peak.
+  A `capaciteitstarief`-style demand gauge (a Flanders idea) does **not** apply
+  and is explicitly out of scope for this site.
+- Existing-prosumer regime: **energy is netted per tariff register** (until
+  2030), but **network + taxes ride on gross import** and injection recovers
+  none of it. Network is ~73% of the electricity bill.
+- Consequence: **self-consumption is worth ~5–7× an exported kWh.** That ratio,
+  not a bare import−export total, is the metric the page should teach.
+
+Architecture (decided 2026-08-21): the billing engine lives **in Home Assistant
+config** as `utility_meter` + template + `input_number` entities, not in panel
+TypeScript. The July→June billing year needs `utility_meter` cron resets that the
+panel's calendar-period Statistics model can't express, and real HA entities are
+inspectable and reusable in native dashboards/automations. The panel widget is a
+**presentation layer** over those computed sensors.
+
+Deliverables:
+
+- HA-side billing engine (blueprint in the model doc §9): four annual
+  `utility_meter`s on the P1 registers (reset 1 Jul), ledger templates
+  (register-specific `max(0, import−export)` billable + gross-import + reserve
+  sensors), `input_number` tariff helpers, and monetary cost templates.
+- A `Coûts & autoconsommation` widget (`4×2`) reading those entities, with a
+  segmented **Économies / Facture** toggle:
+  - *Économies* (default hero): self-consumption savings with the honest
+    per-register framing (≈0.12–0.30 €/kWh saved; exported surplus earns ≈€0 on
+    this contract).
+  - *Facture*: billing-year settlement estimate — billable HP/HC, gross import,
+    reserve, network (dist/transport/rebate), ENGIE HP/HC, and `estimated_bill`,
+    split Énergie (net) / Réseau ORES (brut) / Taxes-TVA.
+- Native Energy dashboard and the panel's time-travel widgets are left unchanged
+  (physical flows); the engine is additive. No new integration — all four
+  smart-meter registers are already live entities.
+
+Exit criteria:
+
+- ledger + network reconcile to the prior annual bill fixture (516 kWh billable;
+  ≈€403.71 network) to within rounding;
+- distribution modelled as `gross × rate − rebate` (never a cap), so marginal
+  import cost never drops to zero;
+- Économies never implies exported surplus is worth more than self-consumption;
+- the financial output is named `…_estimated_bill`, never exact.
+
+Status — blueprint complete 2026-08-21: full model + HA-side architecture in
+[`docs/energy-cost-model.md`](energy-cost-model.md), reviewed with the owner and
+corrected (rebate-not-cap; no injection credit on this contract; green-cert
+double-count guard; raccordement VAT exception). Open items before build: confirm
+tariff-1=HP by night sample, prosumer-rebate basis, green in/out of displayed
+price, and ENGIE monthly settlement allocation (model doc §12). Implementation to
+follow.
+
 ## Work deliberately deferred
 
 - No framework rewrite.
@@ -529,6 +590,9 @@ Goal: make the dashboard dependable as an always-on home interface.
 - No direct writes to Home Assistant `.storage`.
 - No device-specific CSS based on phone or tablet model names.
 - No attempt to force the Energy house diagram into the reusable widget model.
+- No `capaciteitstarief` / monthly demand-peak gauge — the site is ORES
+  (Wallonia), billed per gross kWh, so a Flanders-style peak gauge is wrong here
+  (see Phase 7 and [`docs/energy-cost-model.md`](energy-cost-model.md)).
 
 ## Recommended next slice
 
@@ -539,8 +603,10 @@ native Energy dashboard for representative day/week/month ranges with honest
 partial handling, and it has been built, stamped, deployed, and confirmed
 running on the real instance.
 
-Recommended next: begin Phase 4 (dashboard customization), which was deferred
-until now. Optional Phase 5 polish that remains: re-confirm partial/unavailable
-states visually on the deployed instance (behind HA auth), and consider Phase 6
-hardening items (browser-based component tests, screenshot regression) as the
-panel surface grows.
+Recommended next: either Phase 4 (dashboard customization), deferred until now,
+or **Phase 7 (Energy cost & self-consumption)** — the latter is spec-complete
+with a reviewed mockup and runs entirely against already-live entities, so it is
+a well-scoped implementation slice. Optional Phase 5 polish that remains:
+re-confirm partial/unavailable states visually on the deployed instance (behind
+HA auth), and consider Phase 6 hardening items (browser-based component tests,
+screenshot regression) as the panel surface grows.

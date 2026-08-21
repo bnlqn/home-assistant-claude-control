@@ -1,4 +1,5 @@
 import type { WidgetConfig } from "../config/schema.js";
+import type { HistoryPoint } from "../home-assistant/history.js";
 import type { ServiceCall } from "../home-assistant/service-calls.js";
 import type { HomeAssistant } from "../types/hass.js";
 
@@ -8,7 +9,12 @@ export interface DetailContext {
   entityId: string;
   config?: WidgetConfig;
   host: HTMLElement;
+  /** 24 h numeric history values (for min/max summaries and compact trends). */
   trend: number[];
+  /** The same history with timestamps, for a full axed chart in the dialog. */
+  trendPoints: HistoryPoint[];
+  /** Unit of the trended entity (e.g. "°C", "W"), for the chart's value axis. */
+  trendUnit: string;
   forecast: Array<{
     datetime: string;
     condition?: string;

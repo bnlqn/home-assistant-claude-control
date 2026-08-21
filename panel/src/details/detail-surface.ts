@@ -5,7 +5,7 @@ import type { HomeAssistant } from "../types/hass.js";
 import type { WidgetConfig } from "../config/schema.js";
 import { execute, type ServiceCall } from "../home-assistant/service-calls.js";
 import { normalizeEntity } from "../home-assistant/entity-adapters/index.js";
-import { fetchNumericHistory } from "../home-assistant/history.js";
+import { fetchNumericHistory, type HistoryPoint } from "../home-assistant/history.js";
 import { toast } from "../primitives/feedback.js";
 import { widgetDefinition } from "../widgets/widget-definition.js";
 import {
@@ -35,7 +35,8 @@ export class HdDetail extends LitElement {
   @property({ type: String }) entityId = "";
   @property({ attribute: false }) config?: WidgetConfig;
 
-  @state() private _trend: number[] = [];
+  @state() private _trend: HistoryPoint[] = [];
+  @state() private _trendUnit = "";
   @state() private _forecast: DetailContext["forecast"] = [];
   private _loadedKey = "";
 
@@ -343,7 +344,9 @@ export class HdDetail extends LitElement {
     const histId = detailNeedsHistory(this.entityId, this.config);
     if (histId && this.hass.connected) {
       const pts = await fetchNumericHistory(this.hass, histId, 24);
-      this._trend = pts.map((p) => p.value);
+      this._trend = pts;
+      this._trendUnit =
+        (this.hass.states[histId]?.attributes.unit_of_measurement as string | undefined) ?? "";
     }
     if (this.entityId && detailNeedsForecast(this.entityId) && this.hass.connected) {
       await this._loadForecast();
@@ -402,7 +405,9 @@ export class HdDetail extends LitElement {
       entityId: this.entityId,
       config: this.config,
       host: this,
-      trend: this._trend,
+      trend: this._trend.map((p) => p.value),
+      trendPoints: this._trend,
+      trendUnit: this._trendUnit,
       forecast: this._forecast,
       call: this._call,
     };

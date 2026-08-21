@@ -20,7 +20,13 @@ export function renderSensorDetail(ctx: DetailContext, state: HassEntity): Templ
       ? html`<div class="d-section">
           <span class="d-label">Last 24 hours</span>
           <div class="detail-trend">
-            <hd-trend .points=${trend} .summary=${summary}></hd-trend>
+            <hd-trend
+              detailed
+              .points=${trend}
+              .times=${ctx.trendPoints.map((p) => p.t)}
+              .unit=${ctx.trendUnit}
+              .summary=${summary}
+            ></hd-trend>
           </div>
           <div class="d-meta">${summary}</div>
         </div>`

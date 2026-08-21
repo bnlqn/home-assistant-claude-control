@@ -41,6 +41,8 @@ function context(
       config,
       host: document.createElement("div"),
       trend: [],
+      trendPoints: [],
+      trendUnit: "",
       forecast: [],
       call,
     },
