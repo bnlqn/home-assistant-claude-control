@@ -27,6 +27,7 @@ import type { HdConfirm } from "../primitives/confirm-dialog.js";
 import type { HdToasts } from "../primitives/toast.js";
 import { ResponsiveProfileController } from "../controllers/responsive-profile-controller.js";
 import { EnergyPeriodController } from "../controllers/energy-period-controller.js";
+import type { EnergyNavDetail } from "../energy/energy-period-controls.js";
 import { resolveDisplayProfile } from "./layout.js";
 
 type Appearance = "auto" | "light" | "dark";
@@ -264,6 +265,25 @@ export class HomeDashboardPanel extends LitElement {
     e.stopPropagation();
     this._toasts?.show(e.detail);
   }
+  private _onEnergyNav(e: CustomEvent<EnergyNavDetail>) {
+    e.stopPropagation();
+    const detail = e.detail;
+    switch (detail.action) {
+      case "shift":
+        this._energyPeriod.shift(detail.offset);
+        break;
+      case "today":
+        this._energyPeriod.showCurrent();
+        break;
+      case "period":
+        // Keep the current anchor so switching granularity stays in context.
+        this._energyPeriod.select({ period: detail.period, anchor: this._energyPeriod.selection.anchor });
+        break;
+      case "date":
+        this._energyPeriod.select({ period: this._energyPeriod.selection.period, anchor: detail.anchor });
+        break;
+    }
+  }
 
   render() {
     if (!this.hass) {
@@ -286,6 +306,7 @@ export class HomeDashboardPanel extends LitElement {
         @hd-open-detail=${(e: CustomEvent) => this._onOpenDetail(e)}
         @hd-confirm=${(e: CustomEvent) => this._onConfirm(e as CustomEvent)}
         @hd-toast=${(e: CustomEvent) => this._onToast(e as CustomEvent)}
+        @hd-energy-nav=${(e: CustomEvent) => this._onEnergyNav(e as CustomEvent<EnergyNavDetail>)}
       >
         ${errors.length
           ? html`<div class="cfg-errors" role="alert">

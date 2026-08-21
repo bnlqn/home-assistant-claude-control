@@ -13,6 +13,7 @@ import {
   type EnergyPeriodContext,
 } from "./energy-period.js";
 import "../primitives/entity-icon.js";
+import "./energy-period-controls.js";
 
 const HOUSE_IMAGE_WIDTH = 960;
 const HOUSE_IMAGE_HEIGHT = 720;
@@ -132,26 +133,6 @@ export class EnergyHero extends LitElement {
       justify-content: flex-end;
       margin-bottom: 6px;
     }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: var(--radius-pill);
-      background: rgba(255, 255, 255, 0.22);
-      color: #fff;
-      font: var(--text-widget-title);
-      font-weight: 600;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    .availability {
-      padding: 3px 7px;
-      border-radius: var(--radius-pill);
-      background: rgba(15, 23, 42, 0.34);
-      font: var(--text-meta);
-      white-space: nowrap;
-    }
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -239,18 +220,17 @@ export class EnergyHero extends LitElement {
       this.energyPeriod.range.selection.period === "day" && this.energyPeriod.range.isCurrent
     );
     const flows = showLiveFlows ? activeEnergyFlows(this.hass, o) : [];
-    const periodLabel = this.energyPeriod?.range.label ?? o?.label ?? "Today";
     const availability = showLiveFlows ? null : energyStatisticsAvailability(this.energyPeriod);
 
     return html`
       <div class="hero">
         <div class="inner">
           <div class="bar">
-            <span class="pill">
-              ${periodLabel}
-              ${availability ? html`<span class="availability">${availability}</span>` : ""}
-              <hd-icon icon="mdi:calendar-blank" .size=${18}></hd-icon>
-            </span>
+            <hd-energy-period-controls
+              .range=${this.energyPeriod?.range}
+              .availability=${availability}
+              .timeZone=${this.hass?.config.time_zone}
+            ></hd-energy-period-controls>
           </div>
           <div class="stats">
             ${this._stat(totals.grid, "Grid")} ${this._stat(totals.solar, "Solar Panels")}

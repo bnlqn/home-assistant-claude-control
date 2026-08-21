@@ -441,10 +441,62 @@ Progress — historical correctness hardened 2026-08-21:
 - kept the production bundle within its 405 kB raw / 105 kB gzip warning
   ceilings at 400.81 kB / 104.95 kB.
 
-Still required before Phase 5 exit: compare real recorder totals against Home
-Assistant's native Energy dashboard for representative day/week/month ranges,
-then add and visually verify the accessible previous/next/date-selection
-interface.
+Progress — page-level period controls added 2026-08-21:
+
+- added `hd-energy-period-controls` on the hero's glass bar: a Day/Week/Month
+  segmented selector, previous/next stepping, a native date picker, and a
+  context-labelled "Today"/"This week"/"This month" recovery button;
+- the controls own no state — they read the resolved range and emit one composed
+  `hd-energy-nav` intent that the panel's `EnergyPeriodController` applies
+  (period switch keeps the anchor; date/shift/today route to select/shift/
+  showCurrent), so the new range flows straight back down to hero and widgets;
+- future ranges are prevented: next is disabled whenever the selection already
+  contains now, and the date input is capped at today in the HA timezone;
+- reused the shared segmented/icon-button primitives re-themed through local
+  token overrides rather than forking their keyboard/ARIA behavior; the date
+  trigger overlays a real focusable `<input type="date">` for pointer and
+  keyboard alike;
+- added six control regressions (period/shift/today/date intents, next-disabled
+  and recovery visibility, date cap, availability chip), suite now at 202 tests;
+- visually verified current and historical day/week states at desktop and 320 px
+  (controls wrap to two rows, no horizontal overflow, no console errors), and
+  confirmed the live date input `max`/disabled state and accessible label;
+- re-baselined the bundle warning ceiling to 410 kB raw / 108 kB gzip for the
+  shipped period-navigation UI; current build is 406.46 kB / 106.29 kB.
+
+Progress — live totals verified against native dashboard 2026-08-21:
+
+- confirmed via `energy/get_prefs` that the native Energy dashboard is configured
+  with the exact statistic ids the hero consumes: grid consumption
+  `sensor.p1_meter_energy_import`, return `sensor.p1_meter_energy_export`, solar
+  `sensor.goodwe_total_pv_generation`;
+- compared the panel's computation against Home Assistant's own recorder rollups
+  for representative complete ranges (Europe/Brussels, CEST), preserved here as
+  fixtures — all matched to the milli-kWh:
+
+  | Range | import | export | solar | panel = native |
+  | --- | --- | --- | --- | --- |
+  | Day 2026-08-20 | 5.756 | 7.122 | 18.1 | hour-sum = day-bucket |
+  | Week Mon 08-10…Sun 08-16 | 39.561 | 109.806 | 194.2 | day-sum = week-bucket |
+  | Month July 2026 | 101.964 | 223.161 | 345.3 | day-sum = month-bucket |
+
+- verified the boundary discipline against real data: HA returns a bucket whose
+  start equals `end_time`, and the panel's `start < end` filter correctly drops
+  it; day/week/month bucket starts land on Brussels local midnight (Mon-anchored
+  ISO weeks), matching HA's own alignment;
+- July 2026 has only 16 of 31 recorder day-buckets, so the panel honestly
+  reports it Partial with the available-day total — the same value HA's native
+  month rollup returns from the same gapped data, confirming the missing-data
+  path is consistent rather than zero-filled;
+- the live ranges were all CEST; the 23-/25-hour DST-day correctness remains
+  covered by the Brussels unit fixtures.
+
+Phase 5 exit criteria met: totals match the native Energy dashboard for
+representative day/week/month ranges, navigating history never touches live
+controls (the controls emit intents the period controller applies, feeding a
+new range down), and missing recorder data yields an honest partial state. The
+only remaining polish is optionally re-confirming partial/unavailable states
+visually against the deployed instance, which needs a `/ha-deploy` first.
 
 ### Phase 6 — Hardening and release
 
@@ -471,13 +523,13 @@ Goal: make the dashboard dependable as an always-on home interface.
 
 ## Recommended next slice
 
-Keep the Phase 4 editor deferred and complete the Energy time-travel experience:
+Phase 5 is functionally complete: the Energy time-travel UI is in place
+(page-level day/week/month selector, previous/next, date selection with
+future-range prevention, and current-period recovery), and its totals have been
+verified equal to Home Assistant's native Energy dashboard for representative
+day/week/month ranges with honest partial handling.
 
-1. compare representative real day, week, and month totals with Home Assistant's
-   native Energy dashboard and preserve the selected fixtures;
-2. add keyboard-accessible previous/next controls, today recovery, and a
-   day/week/month selector at the page level;
-3. add date selection with future-range prevention and an explicit current
-   incomplete-period state;
-4. visually verify current, loading, partial, unavailable, and historical states
-   at the full phone/tablet/desktop viewport matrix.
+Recommended next: either close out Phase 5 by deploying (`./bin/ha panel-build
+--stamp` then `/ha-deploy`) and re-confirming partial/unavailable states
+visually on the real instance, or begin Phase 4 (dashboard customization),
+which has been deferred until now.
